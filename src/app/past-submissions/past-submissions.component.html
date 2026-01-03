@@ -1,0 +1,32 @@
+<div class="modal-backdrop" (click)="onClose()"></div>
+
+<div class="modal-panel" role="dialog" aria-modal="true" aria-label="Past submissions">
+  <header class="modal-header">
+    <div class="title">Past submissions</div>
+    <div class="meta">
+      <span class="count">{{ submissions.length ? (currentIndex + 1) : 0 }} / {{ submissions.length }}</span>
+      <button class="close-btn" aria-label="Close" (click)="onClose()">✕</button>
+    </div>
+  </header>
+
+  <main class="modal-body">
+    <div class="submission-wrapper" *ngIf="currentSubmission; else empty">
+      <!-- pass the game's letters into the triangle so blanks show that game's letters -->
+      <app-triangle
+        [displayOnly]="true"
+        [displayValues]="currentSubmission"
+        [letters]="letters"
+      ></app-triangle>
+    </div>
+
+    <ng-template #empty>
+      <div class="empty">No submissions yet.</div>
+    </ng-template>
+  </main>
+
+  <footer class="modal-footer">
+    <button class="nav-btn" (click)="prev()" [disabled]="!submissions.length" aria-label="Previous submission">← Prev</button>
+    <div class="spacer"></div>
+    <button class="nav-btn primary" (click)="next()" [disabled]="!submissions.length" aria-label="Next submission">Next →</button>
+  </footer>
+</div>

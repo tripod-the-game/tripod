@@ -1,0 +1,95 @@
+:host { display: block; }
+
+/* backdrop */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(2,6,23,0.45);
+  backdrop-filter: blur(4px);
+  z-index: 1200;
+}
+
+/* centered panel */
+.modal-panel {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1201;
+  width: min(92vw, 740px);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 20px 50px rgba(2,6,23,0.3);
+  overflow: hidden;
+  border: 1px solid rgba(2,6,23,0.06);
+}
+
+/* header */
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(2,6,23,0.04);
+  background: linear-gradient(90deg, rgba(6,182,212,0.02), rgba(6,182,212,0.00));
+}
+.modal-header .title { font-weight: 700; color: #04202a; }
+.modal-header .meta { display: flex; align-items: center; gap: 12px; }
+.close-btn {
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 6px;
+}
+
+/* body */
+.modal-body {
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  flex: 1 1 auto;
+}
+.submission-wrapper { display: flex; align-items: center; justify-content: center; width: 100%; }
+
+/* small empty state */
+.empty {
+  color: #6b7280;
+  padding: 32px;
+  text-align: center;
+}
+
+/* footer / nav */
+.modal-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-top: 1px solid rgba(2,6,23,0.04);
+}
+.nav-btn {
+  min-width: 120px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(2,6,23,0.06);
+  background: transparent;
+  cursor: pointer;
+  font-weight: 700;
+}
+.nav-btn.primary {
+  background: linear-gradient(90deg,#06b6d4,#06b6d4cc);
+  color: #04202a;
+  border: none;
+}
+.spacer { flex: 1 1 auto; }
+
+/* responsive */
+@media (max-width: 520px) {
+  .modal-panel { width: 96vw; height: 88vh; max-height: 88vh; }
+  .nav-btn { min-width: 88px; }
+}

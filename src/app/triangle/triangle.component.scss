@@ -1,0 +1,209 @@
+.triangle-container {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* Maximum of 5 columns */
+  gap: 0px; /* Space between circles */
+  justify-items: center; /* Center items in each grid cell */
+  width: 250px;
+}
+
+.circle-input {
+  width: 50px; /* Adjust size as needed */
+  height: 50px; /* Same as width for a perfect circle */
+  border-radius: 50%; /* Makes it circular */
+  overflow: hidden; /* Ensures the input is clipped to the circle */
+  background-color: #ffffff;
+  border: 2px solid #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0px; /* Space between circles */
+}
+
+/* show whole circle as correct (green background) */
+.circle-input.correct {
+  background-color: #4caf50;
+  border-color: #357a38;
+}
+
+.circle-input.correct input {
+  color: #fff;
+  font-weight: 700;
+  background: transparent;
+}
+
+/* always render entered letter as UPPERCASE visually */
+.circle-input input {
+  border: none;
+  outline: none;
+  width: 100%;
+  height: 100%;
+  text-align: center; /* Center the text */
+  font-size: 32px; /* Adjust font size as needed */
+  background: transparent; /* let wrapper color show */
+  text-transform: uppercase;
+}
+
+.right-shift-0 {
+  grid-column: span 2; /* Span across 2 columns */
+  position: relative;
+  margin-left: calc(61.9%); /* Shift right half the width for overlap */
+}
+
+.right-shift-1 {
+  grid-column: span 2; /* Span across 2 columns */
+  position: relative;
+  margin-left: calc(146.45%); /* Shift right half the width for overlap */
+}
+
+.right-shift-2 {
+  grid-column: span 2; /* Span across 2 columns */
+  position: relative;
+  margin-left: calc(177.35%); /* Shift right half the width for overlap */
+}
+
+.right-shift-3 {
+  grid-column: span 2; /* Span across 2 columns */
+  position: relative;
+  margin-left: calc(30.95%); /* Shift right half the width for overlap */
+}
+
+.right-shift-4 {
+  grid-column: span 2; /* Span across 2 columns */
+  position: relative;
+  margin-left: calc(92.85%); /* Shift right half the width for overlap */
+}
+
+.right-shift-5 {
+  grid-column: span 2; /* Span across 2 columns */
+  position: relative;
+  margin-left: calc(115.5%); /* Shift right half the width for overlap */
+}
+
+.right-shift-6 {
+  grid-column: span 2; /* Span across 2 columns */
+  position: relative;
+  margin-left: calc(8.25%); /* Shift right half the width for overlap */
+}
+
+.right-shift-8 {
+  grid-column: span 2; /* Span across 2 columns */
+  position: relative;
+  margin-left: calc(30.95%); /* Shift right half the width for overlap */
+}
+
+.right-shift-9 {
+  grid-column: span 2; /* Span across 2 columns */
+  position: relative;
+  margin-left: calc(61.9%); /* Shift right half the width for overlap */
+}
+
+.right-shift-10 {
+  grid-column: span 2; /* Span across 2 columns */
+  position: relative;
+  margin-left: calc(92.85%); /* Shift right half the width for overlap */
+}
+
+.right-shift-11 {
+  grid-column: span 2; /* Span across 2 columns */
+  position: relative;
+  margin-left: calc(123.75%); /* Shift right half the width for overlap */
+}
+
+/* Specific styles to position the circles correctly in a triangle */
+.circle-input:nth-child(1) {
+  grid-column: 3;
+} /* Top */
+.circle-input:nth-child(2) {
+  grid-column: 2;
+}
+.circle-input:nth-child(3) {
+  grid-column: 3;
+}
+.circle-input:nth-child(4) {
+  grid-column: 2;
+} /* 2nd row */
+.circle-input:nth-child(5) {
+  grid-column: 4;
+}
+.circle-input:nth-child(6) {
+  grid-column: 1;
+}
+.circle-input:nth-child(7) {
+  grid-column: 5;
+}
+.circle-input:nth-child(8) {
+  grid-column: 1;
+}
+.circle-input:nth-child(9) {
+  grid-column: 2;
+}
+.circle-input:nth-child(10) {
+  grid-column: 3;
+}
+.circle-input:nth-child(11) {
+  grid-column: 4;
+}
+.circle-input:nth-child(12) {
+  grid-column: 5;
+}
+
+.category-banner,
+.banner-with-triangle {
+  background: #fff;
+  border: 1.5px solid #222;
+  color: #111;
+  font-family: 'Baloo 2', 'Fredoka', 'Luckiest Guy', cursive, sans-serif;
+  box-shadow: 0 6px 14px rgba(17,17,17,0.06);
+  border-radius: 14px;
+  padding: 12px 18px 10px 18px; /* 10px bottom padding for banner itself */
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* Add spacing below the banner when the triangle is outside the banner */
+.category-banner:not(.banner-with-triangle) {
+  margin-bottom: 10px;
+}
+
+/* If your triangle is inside the banner (banner-with-triangle), 
+   add spacing between the banner content and the triangle container */
+.banner-with-triangle .banner-triangle {
+  margin-left: 10px;
+}
+
+.banner-label {
+  font-family: 'Baloo 2', 'Fredoka', 'Luckiest Guy', cursive, sans-serif;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #222;
+  opacity: 0.85;
+}
+
+.banner-text {
+  font-family: 'Baloo 2', 'Fredoka', 'Luckiest Guy', cursive, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: 0.04em;
+}
+
+/* mobile adjustments */
+@media (max-width: 480px) {
+  .category-banner,
+  .banner-with-triangle {
+    padding: 10px;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .banner-with-triangle .banner-triangle {
+    margin-left: 0;
+    margin-top: 10px;
+  }
+  .banner-text {
+    font-size: 16px;
+  }
+}

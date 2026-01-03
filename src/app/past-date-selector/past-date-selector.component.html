@@ -1,0 +1,13 @@
+<mat-form-field appearance="outline" class="date-field">
+  <mat-label>Pick a past game</mat-label>
+  <input
+    matInput
+    [matDatepicker]="picker"
+    [(ngModel)]="selectedDate"
+    (dateChange)="onDateChange($event.value)"
+    [matDatepickerFilter]="dateFilter"
+    placeholder="MM/DD/YYYY"
+  >
+  <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+  <mat-datepicker #picker></mat-datepicker>
+</mat-form-field>

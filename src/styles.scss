@@ -1,4 +1,17 @@
 /* You can add global styles to this file, and also import other style files */
 
 html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background: #ffffff;
+  color: #222;
+}
+
+/* simple primary utility (no cream variables) */
+.btn-primary {
+  background: linear-gradient(90deg,#06b6d4,#06b6d4cc);
+  color: #ffffff;
+  border: none;
+}

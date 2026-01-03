@@ -1,0 +1,169 @@
+:host {
+  display: block;
+  min-height: calc(100vh - 48px);
+  box-sizing: border-box;
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 40%);
+  padding: 28px 16px;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  color: #0f172a;
+}
+
+/* main container centering */
+.controls-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* center the triangle and constrain width */
+app-triangle {
+  display: block;
+  width: 100%;
+  max-width: 520px;
+  margin: 8px auto 18px auto;
+  border-radius: 14px;
+  padding: 12px;
+  background: linear-gradient(180deg, rgba(6,40,50,0.02), rgba(6,40,50,0.00));
+  box-shadow: 0 10px 30px rgba(2,6,23,0.06);
+}
+
+/* Modern, mobile-friendly action buttons */
+.submit-btn,
+.reset-btn {
+  width: 100%;
+  max-width: 320px;
+  margin: 10px auto 0 auto;
+  display: block;
+  padding: 15px 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  border-radius: 14px;
+  border: none;
+  box-shadow: 0 4px 18px rgba(6,182,212,0.10);
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s, transform 0.12s;
+  letter-spacing: 0.02em;
+}
+
+/* primary action */
+.submit-btn {
+  background: #111;
+  color: #fff;
+  border: none;
+}
+
+.submit-btn:active {
+  background: #222;
+  color: #fff;
+}
+
+/* secondary / neutral */
+.reset-btn {
+  background: #fff;
+  color: #111;
+  border: 1.5px solid #111;
+}
+
+.reset-btn:active {
+  background: #f3f4f6;
+  color: #111;
+}
+
+/* Modern, mobile-friendly secondary button */
+.show-past-btn {
+  background: #fff;
+  color: #111;
+  border: 1.5px solid #111;
+  border-radius: 10px;
+  font-weight: 700;
+  padding: 12px 18px;
+  font-size: 1rem;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s, transform 0.12s;
+  box-shadow: 0 2px 8px rgba(17,17,17,0.06);
+  cursor: pointer;
+}
+
+.show-past-btn:active {
+  background: #f3f4f6;
+  color: #111;
+  transform: translateY(1px) scale(0.98);
+}
+
+/* Style the date picker field */
+.date-field {
+  background: #f3f4f6;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(17,17,17,0.06);
+  margin: 0;
+}
+
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+/* Past submissions panel */
+app-past-submissions,
+.past-submissions {
+  max-width: 760px;
+  width: 100%;
+  margin: 18px auto 0 auto;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 10px 30px rgba(2,6,23,0.06);
+  border: 1px solid rgba(2,6,23,0.03);
+}
+
+/* submission items inside the list */
+.past-submissions .submission-item {
+  border-top: 1px solid rgba(2,6,23,0.04);
+  padding: 12px 0;
+}
+.past-submissions .submission-item:first-child { border-top: none; }
+
+/* Responsive: stack controls and make buttons full width on small screens */
+@media (max-width: 760px) {
+  .controls-row { gap: 10px; padding: 0 8px; }
+  .submit-btn, .reset-btn, button.load-btn {
+    width: 100%;
+    min-width: 0;
+  }
+  app-triangle { max-width: 360px; }
+}
+
+/* Responsive: stack and fill width on mobile */
+@media (max-width: 520px) {
+  .submit-btn,
+  .reset-btn {
+    max-width: 100%;
+    font-size: 1rem;
+    padding: 16px 0;
+  }
+  .controls-row {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+    max-width: 100%;
+    padding: 0 4vw;
+  }
+  .date-field,
+  .show-past-btn {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    font-size: 1.05rem;
+  }
+}
+
+button,
+.submit-btn,
+.reset-btn,
+.show-past-btn {
+  font-family: 'Baloo 2', 'Fredoka', 'Luckiest Guy', cursive, sans-serif;
+}

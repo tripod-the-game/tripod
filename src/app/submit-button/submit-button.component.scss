@@ -1,0 +1,34 @@
+button,
+.submit-btn {
+  width: 100%;
+  max-width: 320px;
+  margin: 10px auto 0 auto;
+  display: block;
+  padding: 15px 0;
+  font-size: 1.15rem;
+  font-family: 'Baloo 2', 'Fredoka', 'Luckiest Guy', cursive, sans-serif;
+  font-weight: 700;
+  border-radius: 14px;
+  border: none;
+  box-shadow: 0 4px 18px rgba(17,17,17,0.10);
+  letter-spacing: 0.04em;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s, transform 0.12s;
+  background: #111;
+  color: #fff;
+}
+
+button:active,
+.submit-btn:active {
+  background: #222;
+  color: #fff;
+  transform: translateY(1px) scale(0.98);
+}
+
+@media (max-width: 520px) {
+  button,
+  .submit-btn {
+    max-width: 100%;
+    font-size: 1rem;
+    padding: 16px 0;
+  }
+}

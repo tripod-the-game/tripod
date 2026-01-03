@@ -29,6 +29,11 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "**/*",
+                "input": "games",
+                "output": "games"
               }
             ],
             "styles": [
@@ -100,5 +105,8 @@
         }
       }
     }
+  },
+  "cli": {
+    "analytics": false
   }
 }

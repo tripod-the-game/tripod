@@ -1,0 +1,34 @@
+button,
+.reset-btn {
+  width: 100%;
+  max-width: 320px;
+  margin: 10px auto 0 auto;
+  display: block;
+  padding: 15px 0;
+  font-size: 1.15rem;
+  font-family: 'Baloo 2', 'Fredoka', 'Luckiest Guy', cursive, sans-serif;
+  font-weight: 700;
+  border-radius: 14px;
+  border: 1.5px solid #111;
+  box-shadow: 0 4px 18px rgba(17,17,17,0.10);
+  letter-spacing: 0.04em;
+  background: #fff;
+  color: #111;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s, transform 0.12s;
+}
+
+button:active,
+.reset-btn:active {
+  background: #f3f4f6;
+  color: #111;
+  transform: translateY(1px) scale(0.98);
+}
+
+@media (max-width: 520px) {
+  button,
+  .reset-btn {
+    max-width: 100%;
+    font-size: 1rem;
+    padding: 16px 0;
+  }
+}

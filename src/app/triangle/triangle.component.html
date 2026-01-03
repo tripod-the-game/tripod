@@ -1,0 +1,41 @@
+<div class="triangle-wrapper">
+  <!-- new category banner -->
+  <div class="category-banner" *ngIf="category && category.length">
+    <span class="banner-label">Category</span>
+    <div class="banner-text">{{ category }}</div>
+  </div>
+
+  <div class="triangle-container">
+    <div
+      *ngFor="let circle of circles; let i = index"
+      class="circle-input"
+      [ngClass]="{
+        'right-shift-0': i === 0,
+        'right-shift-1': i === 1,
+        'right-shift-2': i === 2,
+        'right-shift-3': i === 3,
+        'right-shift-4': i === 4,
+        'right-shift-5': i === 5,
+        'right-shift-6': i === 6,
+        'right-shift-8': i === 8,
+        'right-shift-9': i === 9,
+        'right-shift-10': i === 10,
+        'right-shift-11': i === 11
+      }"
+      [class.correct]="isCorrect(circle, i)"
+    >
+      <input
+        type="text"
+        maxlength="1"
+        inputmode="text"
+        autocomplete="off"
+        autocapitalize="characters"
+        [(ngModel)]="inputValues[circle]"
+        (ngModelChange)="onModelChange($event, circle)"
+        [disabled]="submitted || displayOnly"
+      />
+    </div>
+  </div>
+</div>
+
+        <!-- [placeholder]="letterValues[i]" -->
