@@ -23,32 +23,33 @@
 }
 
 /* center the triangle and constrain width */
-app-triangle {
-  display: block;
-  width: 100%;
-  max-width: 520px;
-  margin: 8px auto 18px auto;
-  border-radius: 14px;
-  padding: 12px;
-  background: linear-gradient(180deg, rgba(6,40,50,0.02), rgba(6,40,50,0.00));
-  box-shadow: 0 10px 30px rgba(2,6,23,0.06);
-}
+// app-triangle {
+//   display: block;
+//   width: 100%;
+//   max-width: 400px;
+//   margin: 8px auto 18px auto;
+//   border-radius: 14px;
+//   padding: 12px;
+//   background: linear-gradient(180deg, rgba(6,40,50,0.02), rgba(6,40,50,0.00));
+//   box-shadow: 0 10px 30px rgba(2,6,23,0.06);
+// }
 
 /* Modern, mobile-friendly action buttons */
 .submit-btn,
 .reset-btn {
   width: 100%;
-  max-width: 320px;
-  margin: 10px auto 0 auto;
+  max-width: none; /* <-- Remove previous max-width */
+  margin: 10px 0 0 0; /* <-- Remove auto margin */
   display: block;
   padding: 15px 0;
-  font-size: 1.15rem;
+  font-size: 1.1rem;
+  font-family: 'Baloo 2', 'Fredoka', 'Luckiest Guy', cursive, sans-serif;
   font-weight: 700;
-  border-radius: 14px;
+  border-radius: 12px;
   border: none;
-  box-shadow: 0 4px 18px rgba(6,182,212,0.10);
+  box-shadow: 0 4px 18px rgba(17,17,17,0.10);
+  letter-spacing: 0.04em;
   transition: background 0.18s, color 0.18s, box-shadow 0.18s, transform 0.12s;
-  letter-spacing: 0.02em;
 }
 
 /* primary action */
@@ -134,14 +135,12 @@ app-past-submissions,
     width: 100%;
     min-width: 0;
   }
-  app-triangle { max-width: 360px; }
 }
 
 /* Responsive: stack and fill width on mobile */
 @media (max-width: 520px) {
   .submit-btn,
   .reset-btn {
-    max-width: 100%;
     font-size: 1rem;
     padding: 16px 0;
   }
@@ -150,7 +149,7 @@ app-past-submissions,
     gap: 10px;
     align-items: stretch;
     max-width: 100%;
-    padding: 0 4vw;
+    padding: 0;
   }
   .date-field,
   .show-past-btn {
@@ -166,4 +165,72 @@ button,
 .reset-btn,
 .show-past-btn {
   font-family: 'Baloo 2', 'Fredoka', 'Luckiest Guy', cursive, sans-serif;
+}
+
+.game-hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  padding: 32px 8px 0 8px;
+  background: #fff;
+}
+
+.game-card {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(17,17,17,0.10);
+  padding: 28px 18px 22px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch; /* <-- Make children fill card width */
+}
+
+@media (min-width: 600px) {
+  .game-card {
+    max-width: 520px;
+    padding: 38px 32px 28px 32px;
+  }
+}
+
+/* Congrats modal styles */
+.congrats-modal {
+  position: fixed;
+  z-index: 2000;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.congrats-content {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(17,17,17,0.18);
+  padding: 32px 24px 24px 24px;
+  text-align: center;
+  max-width: 90vw;
+  min-width: 260px;
+}
+
+.congrats-content h2 {
+  margin-top: 0;
+  font-size: 2rem;
+  font-family: 'Baloo 2', 'Fredoka', 'Luckiest Guy', cursive, sans-serif;
+}
+
+.congrats-content button.primary {
+  margin-top: 18px;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Baloo 2', 'Fredoka', 'Luckiest Guy', cursive, sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding: 12px 32px;
+  cursor: pointer;
 }

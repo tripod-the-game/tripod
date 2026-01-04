@@ -28,12 +28,16 @@ export class GameComponent implements OnInit {
   submissions: Array<{ date?: string; values: Record<number, string> }> = [];
   resetCounter = 0;
   showPast = false;
+  congratsOpen = false;
 
   // letters & category loaded for current game (today by default)
   currentLetters?: string[];
   currentCategory?: string;
   // track current game id (MMDDYY) so we can associate submissions
   currentGameDate?: string;
+
+  // added property to store triangle input values
+  triangleInputValues: Record<number, string> = {};
 
   constructor(private gameService: GameService) {}
 
@@ -50,10 +54,21 @@ export class GameComponent implements OnInit {
   onSubmit(): void { this.submitted = true; }
 
   onValuesSubmitted(values: Record<number, string>): void {
-    // attach currentGameDate so past submissions are scoped to the game they were made for
-    console.log('Submission recorded for game', this.currentGameDate, values);
+    this.triangleInputValues = { ...values };
     this.submissions.push({ date: this.currentGameDate, values: { ...values } });
-    console.log('All submissions:', this.submissions);
+
+    // Check for all correct here
+    const isAllCorrect =
+      this.currentLetters &&
+      Object.values(values).length === 12 &&
+      Object.entries(values).every(
+        ([key, value], idx) =>
+          value?.trim().toUpperCase() === this.currentLetters?.[idx]?.toUpperCase()
+      );
+
+    if (isAllCorrect) {
+      this.congratsOpen = true;
+    }
   }
 
   onReset(): void {

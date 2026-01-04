@@ -26,7 +26,7 @@
   padding: 28px 18px 22px 18px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
 }
 
 .brand h1 {
@@ -50,28 +50,6 @@
   margin-bottom: 10px;
   font-weight: 500;
   letter-spacing: 0.04em;
-}
-
-.preview {
-  width: 100%;
-  margin: 0 auto 12px auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.triangle-preview-wrapper {
-  width: 100%;
-  max-width: 220px;
-  margin: 0 auto;
-}
-
-.preview-caption {
-  font-size: 0.95rem;
-  color: #06b6d4;
-  margin-top: 6px;
-  text-align: center;
-  opacity: 0.85;
 }
 
 .lead {

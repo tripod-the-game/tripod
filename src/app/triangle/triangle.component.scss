@@ -1,14 +1,14 @@
 .triangle-container {
   display: grid;
-  grid-template-columns: repeat(5, 1fr); /* Maximum of 5 columns */
+  grid-template-columns: repeat(6, 1fr); /* Maximum of 5 columns */
   gap: 0px; /* Space between circles */
   justify-items: center; /* Center items in each grid cell */
-  width: 250px;
+  width: 300px;
 }
 
 .circle-input {
-  width: 50px; /* Adjust size as needed */
-  height: 50px; /* Same as width for a perfect circle */
+  width: 46px; /* Adjust size as needed */
+  height: 46px; /* Same as width for a perfect circle */
   border-radius: 50%; /* Makes it circular */
   overflow: hidden; /* Ensures the input is clipped to the circle */
   background-color: #ffffff;
@@ -46,67 +46,61 @@
 .right-shift-0 {
   grid-column: span 2; /* Span across 2 columns */
   position: relative;
-  margin-left: calc(61.9%); /* Shift right half the width for overlap */
+  margin-left: calc(100%); /* Shift right half the width for overlap */
 }
 
 .right-shift-1 {
   grid-column: span 2; /* Span across 2 columns */
   position: relative;
-  margin-left: calc(146.45%); /* Shift right half the width for overlap */
+  margin-right: calc(25%); /* Shift right half the width for overlap */
 }
 
 .right-shift-2 {
   grid-column: span 2; /* Span across 2 columns */
   position: relative;
-  margin-left: calc(177.35%); /* Shift right half the width for overlap */
+  margin-left: calc(25%); /* Shift right half the width for overlap */
 }
 
 .right-shift-3 {
   grid-column: span 2; /* Span across 2 columns */
   position: relative;
-  margin-left: calc(30.95%); /* Shift right half the width for overlap */
+  margin-left: calc(50%); /* Shift right half the width for overlap */
 }
 
 .right-shift-4 {
   grid-column: span 2; /* Span across 2 columns */
   position: relative;
-  margin-left: calc(92.85%); /* Shift right half the width for overlap */
+  margin-right: calc(50%); /* Shift right half the width for overlap */
 }
 
 .right-shift-5 {
   grid-column: span 2; /* Span across 2 columns */
   position: relative;
-  margin-left: calc(115.5%); /* Shift right half the width for overlap */
+  margin-left: calc(125%); /* Shift right half the width for overlap */
 }
 
 .right-shift-6 {
   grid-column: span 2; /* Span across 2 columns */
   position: relative;
-  margin-left: calc(8.25%); /* Shift right half the width for overlap */
+  margin-right: calc(125%); /* Shift right half the width for overlap */
 }
 
 .right-shift-8 {
   grid-column: span 2; /* Span across 2 columns */
   position: relative;
-  margin-left: calc(30.95%); /* Shift right half the width for overlap */
+  margin-left: calc(50%); /* Shift right half the width for overlap */
 }
 
 .right-shift-9 {
   grid-column: span 2; /* Span across 2 columns */
   position: relative;
-  margin-left: calc(61.9%); /* Shift right half the width for overlap */
+  margin-left: calc(100%); /* Shift right half the width for overlap */
 }
 
 .right-shift-10 {
   grid-column: span 2; /* Span across 2 columns */
   position: relative;
-  margin-left: calc(92.85%); /* Shift right half the width for overlap */
-}
-
-.right-shift-11 {
-  grid-column: span 2; /* Span across 2 columns */
-  position: relative;
-  margin-left: calc(123.75%); /* Shift right half the width for overlap */
+  margin-right: calc(50%); /* Shift right half the width for overlap */
 }
 
 /* Specific styles to position the circles correctly in a triangle */
@@ -114,22 +108,22 @@
   grid-column: 3;
 } /* Top */
 .circle-input:nth-child(2) {
-  grid-column: 2;
+  grid-column: 3;
 }
 .circle-input:nth-child(3) {
-  grid-column: 3;
+  grid-column: 4;
 }
 .circle-input:nth-child(4) {
   grid-column: 2;
 } /* 2nd row */
 .circle-input:nth-child(5) {
-  grid-column: 4;
+  grid-column: 5;
 }
 .circle-input:nth-child(6) {
   grid-column: 1;
 }
 .circle-input:nth-child(7) {
-  grid-column: 5;
+  grid-column: 6;
 }
 .circle-input:nth-child(8) {
   grid-column: 1;
@@ -141,10 +135,10 @@
   grid-column: 3;
 }
 .circle-input:nth-child(11) {
-  grid-column: 4;
+  grid-column: 5;
 }
 .circle-input:nth-child(12) {
-  grid-column: 5;
+  grid-column: 6;
 }
 
 .category-banner,
@@ -155,12 +149,15 @@
   font-family: 'Baloo 2', 'Fredoka', 'Luckiest Guy', cursive, sans-serif;
   box-shadow: 0 6px 14px rgba(17,17,17,0.06);
   border-radius: 14px;
-  padding: 12px 18px 10px 18px; /* 10px bottom padding for banner itself */
+  padding: 12px 0px 12px 0px;
   text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
+  width: 100%;
+  max-width: none;      // Remove or comment out any max-width
+  margin: 0;            // Remove auto margin so it fills the parent
 }
 
 /* Add spacing below the banner when the triangle is outside the banner */
@@ -192,18 +189,27 @@
 }
 
 /* mobile adjustments */
-@media (max-width: 480px) {
-  .category-banner,
-  .banner-with-triangle {
-    padding: 10px;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .banner-with-triangle .banner-triangle {
-    margin-left: 0;
-    margin-top: 10px;
-  }
-  .banner-text {
-    font-size: 16px;
-  }
+// @media (max-width: 480px) {
+//   .category-banner,
+//   .banner-with-triangle {
+//     padding: 10px;
+//     flex-direction: column;
+//     gap: 6px;
+//   }
+//   .banner-with-triangle .banner-triangle {
+//     margin-left: 0;
+//     margin-top: 10px;
+//   }
+//   .banner-text {
+//     font-size: 16px;
+//   }
+// }
+
+.triangle-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
 }

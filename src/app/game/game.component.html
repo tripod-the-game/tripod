@@ -1,23 +1,39 @@
-<div class="controls-row">
-  <app-past-date-selector (dateSelected)="onDateChosen($event)"></app-past-date-selector>
-  <button class="show-past-btn" (click)="showPast = true">Show Past Submissions</button>
+<div class="game-hero">
+  <div class="game-card">
+    <div class="controls-row">
+      <app-past-date-selector (dateSelected)="onDateChosen($event)"></app-past-date-selector>
+      <button class="show-past-btn" (click)="showPast = true">Show Past Submissions</button>
+    </div>
+
+    <app-triangle
+      [submitted]="submitted"
+      (valuesSubmitted)="onValuesSubmitted($event)"
+      [resetCounter]="resetCounter"
+      [letters]="currentLetters"
+      [category]="currentCategory"
+    ></app-triangle>
+
+    <app-submit-button (submit)="onSubmit()"></app-submit-button>
+    <app-reset-button (reset)="onReset()"></app-reset-button>
+  </div>
 </div>
 
-<app-triangle
-  [submitted]="submitted"
-  (valuesSubmitted)="onValuesSubmitted($event)"
-  [resetCounter]="resetCounter"
-  [letters]="currentLetters"
-  [category]="currentCategory"
-></app-triangle>
-
-<app-submit-button (submit)="onSubmit()"></app-submit-button>
-<app-reset-button (reset)="onReset()"></app-reset-button>
-
-<!-- pass only submissions for the currently selected game and provide currentLetters -->
 <app-past-submissions
   *ngIf="showPast"
   [submissions]="filteredSubmissions"
   [letters]="currentLetters"
   (close)="showPast = false"
 ></app-past-submissions>
+
+<div
+  class="congrats-modal"
+  *ngIf="congratsOpen"
+  (click)="congratsOpen = false"
+  tabindex="0"
+>
+  <div class="congrats-content" (click)="$event.stopPropagation()">
+    <h2>Congratulations!</h2>
+    <p>You solved the puzzle!!!</p>
+    <button (click)="congratsOpen = false" class="primary">Close</button>
+  </div>
+</div>
