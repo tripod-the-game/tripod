@@ -20,7 +20,7 @@ export class LandingComponent implements OnInit {
 
   ngOnInit(): void {
     // load the 12/26/25 game (MMDDYY = 122625)
-    const previewDate = new Date(2025, 11, 26); // month is 0-indexed
+    const previewDate = new Date(2026, 0, 2); // month is 0-indexed
     this.gameService.getGameForDate(previewDate).subscribe(game => {
       if (Array.isArray(game.letters) && game.letters.length === 12) {
         // map letters into circle keys 1..12 for displayValues

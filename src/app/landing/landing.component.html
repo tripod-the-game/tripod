@@ -7,17 +7,12 @@
       </p>
     </div>
 
-    <!-- mobile-friendly: preview moved nearer the top for quick visual -->
-    <div class="preview" aria-hidden="true">
-      <div class="triangle-preview-wrapper">
-        <app-triangle
-          [submitted]="true"
-          [displayOnly]="true"
-          [displayValues]="previewDisplayValues"
-          [category]="previewCategory"
-        ></app-triangle>
-      </div>
-    </div>
+    <app-triangle
+      [submitted]="true"
+      [displayOnly]="true"
+      [displayValues]="previewDisplayValues"
+      [category]="previewCategory"
+    ></app-triangle>
 
     <div class="actions">
       <button class="primary" routerLink="/play" aria-label="Start playing">

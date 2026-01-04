@@ -33,6 +33,7 @@
         [(ngModel)]="inputValues[circle]"
         (ngModelChange)="onModelChange($event, circle)"
         [disabled]="submitted || displayOnly"
+        [placeholder]="i"
       />
     </div>
   </div>
