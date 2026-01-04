@@ -194,3 +194,43 @@ button,
     padding: 38px 32px 28px 32px;
   }
 }
+
+/* Congrats modal styles */
+.congrats-modal {
+  position: fixed;
+  z-index: 2000;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.congrats-content {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(17,17,17,0.18);
+  padding: 32px 24px 24px 24px;
+  text-align: center;
+  max-width: 90vw;
+  min-width: 260px;
+}
+
+.congrats-content h2 {
+  margin-top: 0;
+  font-size: 2rem;
+  font-family: 'Baloo 2', 'Fredoka', 'Luckiest Guy', cursive, sans-serif;
+}
+
+.congrats-content button.primary {
+  margin-top: 18px;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Baloo 2', 'Fredoka', 'Luckiest Guy', cursive, sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding: 12px 32px;
+  cursor: pointer;
+}
