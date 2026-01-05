@@ -19,7 +19,7 @@ export class LandingComponent implements OnInit {
   constructor(private gameService: GameService) {}
 
   ngOnInit(): void {
-    // load the 12/26/25 game (MMDDYY = 122625)
+    // load the 01/02/26 game (MMDDYY = 010226)
     const previewDate = new Date(2026, 0, 2); // month is 0-indexed
     this.gameService.getGameForDate(previewDate).subscribe(game => {
       if (Array.isArray(game.letters) && game.letters.length === 12) {

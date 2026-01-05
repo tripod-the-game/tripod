@@ -22,6 +22,7 @@ export class TriangleComponent implements OnInit {
   @Input() letters?: string[];
   @Input() category?: string;
   @Input() resetCounter = 0;
+  @Input() aggregatedCorrect?: Record<number, boolean>;
 
   circles = Array.from({ length: 12 }, (_, i) => i + 1);
   letterValues = ["A","V","P","A","P","U","L","G","R","A","P","E"];
@@ -80,6 +81,20 @@ export class TriangleComponent implements OnInit {
     // If letters change in normal mode, update answer key
     if (!this.displayOnly && changes['letters'] && Array.isArray(this.letters) && this.letters.length === 12) {
       this.letterValues = this.letters.map(l => (l ?? '').toString().toUpperCase());
+    }
+
+    // Sync inputValues with aggregatedCorrect so correct letters persist
+    if (
+      changes['aggregatedCorrect'] &&
+      this.aggregatedCorrect &&
+      Array.isArray(this.letterValues)
+    ) {
+      for (let i = 0; i < this.letterValues.length; i++) {
+        const circle = i + 1;
+        if (this.aggregatedCorrect[circle]) {
+          this.inputValues[circle] = this.letterValues[i];
+        }
+      }
     }
   }
 

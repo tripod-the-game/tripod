@@ -7,10 +7,11 @@
 
     <app-triangle
       [submitted]="submitted"
-      (valuesSubmitted)="onValuesSubmitted($event)"
-      [resetCounter]="resetCounter"
       [letters]="currentLetters"
       [category]="currentCategory"
+      [aggregatedCorrect]="aggregatedCorrectLetters"
+      (valuesSubmitted)="onValuesSubmitted($event)"
+      [resetCounter]="resetCounter"
     ></app-triangle>
 
     <app-submit-button (submit)="onSubmit()"></app-submit-button>

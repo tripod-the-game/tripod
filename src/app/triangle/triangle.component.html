@@ -31,12 +31,14 @@
         autocomplete="off"
         autocapitalize="characters"
         [(ngModel)]="inputValues[circle]"
+        [value]="aggregatedCorrect?.[circle] ? letterValues[i] : inputValues[circle]"
         (ngModelChange)="onModelChange($event, circle)"
-        [disabled]="submitted || displayOnly"
+        [readonly]="aggregatedCorrect?.[circle] || submitted || displayOnly"
+        [disabled]="aggregatedCorrect?.[circle] || submitted || displayOnly"
         [placeholder]="i"
       />
     </div>
   </div>
 </div>
 
-        <!-- [placeholder]="letterValues[i]" -->
+<!-- [placeholder]="letterValues[i]" -->
