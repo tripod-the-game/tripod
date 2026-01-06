@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output, SimpleChanges, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, Output, SimpleChanges, OnInit, ElementRef, ViewChildren, QueryList } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -27,6 +27,17 @@ export class TriangleComponent implements OnInit {
   circles = Array.from({ length: 12 }, (_, i) => i + 1);
   letterValues = ["A","V","P","A","P","U","L","G","R","A","P","E"];
   inputValues: Record<number, string> = {};
+
+  @ViewChildren('triangleInput') inputs!: QueryList<ElementRef<HTMLInputElement>>;
+
+  // Logical layout: each row is an array of circle numbers (1-based)
+  triangleRows = [
+    [1],
+    [2, 3],
+    [4, 5],
+    [6, 7],
+    [8, 9, 10, 11, 12]
+  ];
 
   constructor(private gameService: GameService) {}
 
@@ -137,6 +148,55 @@ export class TriangleComponent implements OnInit {
       return (this.displayValues[circle] ?? '').toString();
     }
     return (this.inputValues[circle] ?? '').toString();
+  }
+
+  // Move focus based on arrow key
+  onInputKeydown(event: KeyboardEvent, circle: number) {
+    const pos = this.findPosition(circle);
+    if (!pos) return;
+    let targetCircle: number | undefined;
+
+    switch (event.key) {
+      case 'ArrowUp':
+        if (pos.row > 0 && this.triangleRows[pos.row - 1][pos.col - (pos.row > 1 ? 1 : 0)] !== undefined) {
+          targetCircle = this.triangleRows[pos.row - 1][pos.col - (pos.row > 1 ? 1 : 0)];
+        }
+        break;
+      case 'ArrowDown':
+        if (pos.row < this.triangleRows.length - 1 && this.triangleRows[pos.row + 1][pos.col + (pos.row > 0 ? 1 : 0)] !== undefined) {
+          targetCircle = this.triangleRows[pos.row + 1][pos.col + (pos.row > 0 ? 1 : 0)];
+        }
+        break;
+      case 'ArrowLeft':
+        if (pos.col > 0) {
+          targetCircle = this.triangleRows[pos.row][pos.col - 1];
+        }
+        break;
+      case 'ArrowRight':
+        if (pos.col < this.triangleRows[pos.row].length - 1) {
+          targetCircle = this.triangleRows[pos.row][pos.col + 1];
+        }
+        break;
+    }
+
+    if (targetCircle !== undefined) {
+      // Focus the target input
+      const idx = this.circles.indexOf(targetCircle);
+      const input = this.inputs.get(idx);
+      if (input) {
+        input.nativeElement.focus();
+        event.preventDefault();
+      }
+    }
+  }
+
+  // Helper to find row/col for a given circle number
+  private findPosition(circle: number): { row: number; col: number } | null {
+    for (let row = 0; row < this.triangleRows.length; row++) {
+      const col = this.triangleRows[row].indexOf(circle);
+      if (col !== -1) return { row, col };
+    }
+    return null;
   }
 }
 

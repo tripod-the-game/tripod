@@ -11,7 +11,11 @@ import { TriangleComponent } from "../triangle/triangle.component";
 })
 export class PastSubmissionsComponent {
   // now receives only submissions relevant to the current game (from parent)
-  @Input() submissions: Array<Record<number, string>> = [];
+  @Input() submissions: Array<{
+    date?: string;
+    values: Record<number, string>;
+    correct: Record<number, boolean>;
+  }> = [];
   // optional: pass the game's letters so triangle shows the correct placeholders/letters
   @Input() letters?: string[];
 
@@ -48,6 +52,8 @@ export class PastSubmissionsComponent {
 
   // helper for template
   get currentSubmission(): Record<number, string> | undefined {
-    return this.submissions?.[this.currentIndex];
+    // If submissions are objects with .values, return that
+    const sub = this.submissions?.[this.currentIndex];
+    return sub?.values ?? sub;
   }
 }

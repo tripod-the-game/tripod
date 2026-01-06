@@ -25,6 +25,7 @@
       [class.correct]="isCorrect(circle, i)"
     >
       <input
+        #triangleInput
         type="text"
         maxlength="1"
         inputmode="text"
@@ -35,7 +36,8 @@
         (ngModelChange)="onModelChange($event, circle)"
         [readonly]="aggregatedCorrect?.[circle] || submitted || displayOnly"
         [disabled]="aggregatedCorrect?.[circle] || submitted || displayOnly"
-        [placeholder]="i"
+        [attr.tabindex]="0"
+        (keydown)="onInputKeydown($event, circle)"
       />
     </div>
   </div>
