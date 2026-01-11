@@ -1,7 +1,17 @@
+:host {
+  display: flex;
+  flex: 1 1 0;
+  width: 100%;
+  max-width: none;
+}
+
+button {
+  width: 100%;
+  max-width: none;
+}
+
 button,
 .submit-btn {
-  width: 100%;
-  max-width: 520px;
   margin: 10px auto 0 auto;
   display: block;
   padding: 15px 0;

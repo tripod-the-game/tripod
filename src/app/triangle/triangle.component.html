@@ -25,18 +25,22 @@
       [class.correct]="isCorrect(circle, i)"
     >
       <input
+        #triangleInput
         type="text"
         maxlength="1"
         inputmode="text"
         autocomplete="off"
         autocapitalize="characters"
         [(ngModel)]="inputValues[circle]"
+        [value]="aggregatedCorrect?.[circle] ? letterValues[i] : inputValues[circle]"
         (ngModelChange)="onModelChange($event, circle)"
-        [disabled]="submitted || displayOnly"
-        [placeholder]="i"
+        [readonly]="aggregatedCorrect?.[circle] || submitted || displayOnly"
+        [disabled]="aggregatedCorrect?.[circle] || submitted || displayOnly"
+        [attr.tabindex]="0"
+        (keydown)="onInputKeydown($event, circle)"
       />
     </div>
   </div>
 </div>
 
-        <!-- [placeholder]="letterValues[i]" -->
+<!-- [placeholder]="letterValues[i]" -->
