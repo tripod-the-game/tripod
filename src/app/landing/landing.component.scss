@@ -153,6 +153,35 @@ button.secondary:active {
   background: #fff;
 }
 
+/* Action row */
+.action-row {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  width: 100%;
+  margin-top: 18px;
+}
+
+.action-row .primary,
+.action-row .secondary {
+  flex: 1 1 0;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  display: block;
+}
+
+@media (max-width: 520px) {
+  .action-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .action-row .primary,
+  .action-row .secondary {
+    width: 100%;
+  }
+}
+
 /* Responsive tweaks */
 @media (min-width: 600px) {
   .hero-card {

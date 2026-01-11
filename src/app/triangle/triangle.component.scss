@@ -4,6 +4,7 @@
   gap: 0px; /* Space between circles */
   justify-items: center; /* Center items in each grid cell */
   width: 300px;
+  margin-top: 25px;
 }
 
 .circle-input {
@@ -211,5 +212,5 @@
   align-items: center;
   width: 100%;
   max-width: 520px;
-  margin: 0 auto;
+  margin: 25px auto; // 50px space on top and bottom, centered horizontally
 }
