@@ -5,7 +5,7 @@
     <div class="banner-text">{{ category }}</div>
   </div>
 
-  <div class="triangle-container">
+  <div class="triangle-container" [class.all-wrong]="allWrong">
     <div
       *ngFor="let circle of circles; let i = index"
       class="circle-input"

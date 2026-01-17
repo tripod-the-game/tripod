@@ -16,6 +16,7 @@ import { GameService, ValidationState } from '../../services/game.service';
 export class TriangleComponent implements OnInit {
   @Input() submitted = false;
   @Output() valuesSubmitted = new EventEmitter<Record<number, string>>();
+  @Output() valuesChanged = new EventEmitter<Record<number, string>>();
 
   @Input() displayOnly = false;
   @Input() displayValues?: Record<number, string>;
@@ -24,6 +25,7 @@ export class TriangleComponent implements OnInit {
   @Input() resetCounter = 0;
   @Input() aggregatedCorrect?: Record<number, boolean>;
   @Input() aggregatedValidation?: Record<number, ValidationState>;
+  @Input() allWrong = false;
 
   circles = Array.from({ length: 12 }, (_, i) => i + 1);
   letterValues = ["A","V","P","A","P","U","L","G","R","A","P","E"];
@@ -130,6 +132,7 @@ export class TriangleComponent implements OnInit {
   onModelChange(value: string, circle: number) {
     const v = (value ?? '').toString().toUpperCase().slice(0, 1);
     this.inputValues[circle] = v;
+    this.valuesChanged.emit({ ...this.inputValues });
   }
 
   isCorrect(circle: number, index: number): boolean {
