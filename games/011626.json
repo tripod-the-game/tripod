@@ -2,6 +2,5 @@
     "category": "Medical A's",
     "wordOne": "atria",
     "wordTwo": "aorta",
-    "wordThree": "apnea",
-    "gameArray": ["a","i","o","r","r","t","t","a","p","n","e","a"]
+    "wordThree": "apnea"
 }

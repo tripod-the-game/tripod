@@ -32,6 +32,18 @@
   background: transparent;
 }
 
+/* show whole circle as wrong position (yellow background) */
+.circle-input.wrong-position {
+  background-color: #f9a825;
+  border-color: #c17900;
+}
+
+.circle-input.wrong-position input {
+  color: #fff;
+  font-weight: 700;
+  background: transparent;
+}
+
 /* always render entered letter as UPPERCASE visually */
 .circle-input input {
   border: none;
@@ -142,8 +154,7 @@
   grid-column: 6;
 }
 
-.category-banner,
-.banner-with-triangle {
+.category-banner {
   background: #fff;
   border: 1.5px solid #222;
   color: #111;
@@ -159,17 +170,6 @@
   width: 100%;
   max-width: none;      // Remove or comment out any max-width
   margin: 0;            // Remove auto margin so it fills the parent
-}
-
-/* Add spacing below the banner when the triangle is outside the banner */
-.category-banner:not(.banner-with-triangle) {
-  margin-bottom: 10px;
-}
-
-/* If your triangle is inside the banner (banner-with-triangle), 
-   add spacing between the banner content and the triangle container */
-.banner-with-triangle .banner-triangle {
-  margin-left: 10px;
 }
 
 .banner-label {
@@ -188,23 +188,6 @@
   color: #111;
   letter-spacing: 0.04em;
 }
-
-/* mobile adjustments */
-// @media (max-width: 480px) {
-//   .category-banner,
-//   .banner-with-triangle {
-//     padding: 10px;
-//     flex-direction: column;
-//     gap: 6px;
-//   }
-//   .banner-with-triangle .banner-triangle {
-//     margin-left: 0;
-//     margin-top: 10px;
-//   }
-//   .banner-text {
-//     font-size: 16px;
-//   }
-// }
 
 .triangle-wrapper {
   display: flex;

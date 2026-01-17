@@ -114,8 +114,7 @@
 }
 
 /* Past submissions panel */
-app-past-submissions,
-.past-submissions {
+app-past-submissions {
   max-width: 760px;
   width: 100%;
   margin: 18px auto 0 auto;
@@ -125,13 +124,6 @@ app-past-submissions,
   box-shadow: 0 10px 30px rgba(2,6,23,0.06);
   border: 1px solid rgba(2,6,23,0.03);
 }
-
-/* submission items inside the list */
-.past-submissions .submission-item {
-  border-top: 1px solid rgba(2,6,23,0.04);
-  padding: 12px 0;
-}
-.past-submissions .submission-item:first-child { border-top: none; }
 
 /* Responsive: stack controls and make buttons full width on small screens */
 @media (max-width: 760px) {

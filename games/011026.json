@@ -2,6 +2,5 @@
     "category": "Dog",
     "wordOne": "pooch",
     "wordTwo": "husky",
-    "wordThree": "puppy",
-    "gameArray": ["h","c","u","o","s","o","k","p","u","p","p","y"]
+    "wordThree": "puppy"
 }
