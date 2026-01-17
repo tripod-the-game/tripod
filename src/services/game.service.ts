@@ -20,7 +20,7 @@ export class GameService {
   }
 
   private getByFileName(name: string): Observable<GameData> {
-    const url = `/games/${name}.json`;
+    const url = `games/${name}.json`; // <-- remove leading slash
     return this.http.get<any>(url).pipe(
       map(res => {
         // support either { gameArray: [...] } or { game: { gameArray, category } } or { letters, category }
@@ -50,7 +50,7 @@ export class GameService {
 
   // index.json should be an array of MMDDYY strings, e.g. ["122625","122725"]
   getAvailableDates(): Observable<Date[]> {
-    const url = `/games/index.json`;
+    const url = `games/index.json`; 
     return this.http.get<string[]>(url).pipe(
       map(list => (list || [])
         .map(s => {
