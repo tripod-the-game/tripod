@@ -66,7 +66,6 @@ export class GameComponent implements OnInit {
     // Compute which letters are correct
     const correct: Record<number, boolean> = {};
     if (this.currentLetters) {
-      debugger;
       Object.entries(values).forEach(([key, value]) => {
         correct[Number(key)] =
           value?.trim().toUpperCase() ===
