@@ -70,7 +70,7 @@ export class GameComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.isAllEmpty) {
+    if (this.isAllEmpty || this.submitted) {
       this.submitShake = true;
       setTimeout(() => {
         this.submitShake = false;
