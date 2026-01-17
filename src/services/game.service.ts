@@ -6,7 +6,12 @@ import { map, catchError } from 'rxjs/operators';
 export interface GameData {
   letters: string[]; // length 12
   category?: string;
+  wordOne?: string;
+  wordTwo?: string;
+  wordThree?: string;
 }
+
+export type ValidationState = 'none' | 'correct' | 'wrong-position';
 
 @Injectable({ providedIn: 'root' })
 export class GameService {
@@ -32,7 +37,13 @@ export class GameService {
         const category =
           res?.category ?? res?.game?.category ?? undefined;
         const letters = (arr || []).map((c: any) => (c ?? '').toString().toUpperCase());
-        return { letters, category };
+
+        // Extract word metadata
+        const wordOne = (res?.wordOne ?? res?.game?.wordOne ?? '').toString().toUpperCase();
+        const wordTwo = (res?.wordTwo ?? res?.game?.wordTwo ?? '').toString().toUpperCase();
+        const wordThree = (res?.wordThree ?? res?.game?.wordThree ?? '').toString().toUpperCase();
+
+        return { letters, category, wordOne, wordTwo, wordThree };
       }),
       catchError(() => of({ letters: [], category: undefined }))
     );

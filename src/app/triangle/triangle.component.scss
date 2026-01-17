@@ -32,6 +32,18 @@
   background: transparent;
 }
 
+/* show whole circle as wrong position (yellow background) */
+.circle-input.wrong-position {
+  background-color: #f9a825;
+  border-color: #c17900;
+}
+
+.circle-input.wrong-position input {
+  color: #fff;
+  font-weight: 700;
+  background: transparent;
+}
+
 /* always render entered letter as UPPERCASE visually */
 .circle-input input {
   border: none;

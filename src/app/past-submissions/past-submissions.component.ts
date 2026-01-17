@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output, HostListener } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { TriangleComponent } from "../triangle/triangle.component";
+import { ValidationState } from "../../services/game.service";
 
 @Component({
   selector: "app-past-submissions",
@@ -14,7 +15,7 @@ export class PastSubmissionsComponent {
   @Input() submissions: Array<{
     date?: string;
     values: Record<number, string>;
-    correct: Record<number, boolean>;
+    validation: Record<number, ValidationState>;
   }> = [];
   // optional: pass the game's letters so triangle shows the correct placeholders/letters
   @Input() letters?: string[];
@@ -55,5 +56,11 @@ export class PastSubmissionsComponent {
     // If submissions are objects with .values, return that
     const sub = this.submissions?.[this.currentIndex];
     return sub?.values ?? sub;
+  }
+
+  // helper for template - get current submission's validation
+  get currentValidation(): Record<number, ValidationState> | undefined {
+    const sub = this.submissions?.[this.currentIndex];
+    return sub?.validation;
   }
 }

@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { HttpClientModule } from '@angular/common/http';
-import { GameService } from '../../services/game.service';
+import { GameService, ValidationState } from '../../services/game.service';
  
 @Component({
   selector: 'app-triangle',
@@ -23,6 +23,7 @@ export class TriangleComponent implements OnInit {
   @Input() category?: string;
   @Input() resetCounter = 0;
   @Input() aggregatedCorrect?: Record<number, boolean>;
+  @Input() aggregatedValidation?: Record<number, ValidationState>;
 
   circles = Array.from({ length: 12 }, (_, i) => i + 1);
   letterValues = ["A","V","P","A","P","U","L","G","R","A","P","E"];
@@ -138,6 +139,16 @@ export class TriangleComponent implements OnInit {
         this.valueFor(circle)?.trim().toUpperCase() ===
         this.letterValues[index]?.toUpperCase()
       );
+    }
+    return false;
+  }
+
+  isWrongPosition(circle: number): boolean {
+    // Only show wrong-position when submitted or in displayOnly mode
+    if (this.displayOnly || this.submitted) {
+      if (this.aggregatedValidation) {
+        return this.aggregatedValidation[circle] === 'wrong-position';
+      }
     }
     return false;
   }

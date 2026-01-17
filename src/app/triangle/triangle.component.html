@@ -22,6 +22,7 @@
         'right-shift-10': i === 10
       }"
       [class.correct]="isCorrect(circle, i)"
+      [class.wrong-position]="!isCorrect(circle, i) && isWrongPosition(circle)"
     >
       <input
         #triangleInput
