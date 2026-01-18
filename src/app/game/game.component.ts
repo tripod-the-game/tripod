@@ -1,5 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
+import { RouterModule } from "@angular/router";
 import { TriangleComponent } from "../triangle/triangle.component";
 import { SubmitButtonComponent } from "../submit-button/submit-button.component";
 import { ResetButtonComponent } from "../reset-button/reset-button.component";
@@ -12,6 +13,7 @@ import { GameService, ValidationState } from "../../services/game.service";
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
     TriangleComponent,
     SubmitButtonComponent,
     ResetButtonComponent,
@@ -101,7 +103,6 @@ export class GameComponent implements OnInit {
       });
 
       // Second pass: check for word-in-wrong-position (yellow)
-      debugger;
       if (this.currentWords) {
         this.checkWordWrongPosition(values, validation, 'wordOne');
         this.checkWordWrongPosition(values, validation, 'wordTwo');
@@ -147,7 +148,7 @@ export class GameComponent implements OnInit {
     validation: Record<number, ValidationState>,
     wordKey: 'wordOne' | 'wordTwo' | 'wordThree'
   ): void {
-    debugger;
+
     const positions = this.WORD_POSITIONS[wordKey];
     const enteredWord = positions
       .map((pos) => (values[pos] ?? '').trim().toUpperCase())

@@ -1,9 +1,9 @@
-import { Component, EventEmitter, Output, OnInit } from '@angular/core';
+import { Component, EventEmitter, Output, OnInit, Input, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatDatepickerModule, MatDatepicker } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { GameService } from '../../services/game.service';
 
@@ -15,7 +15,9 @@ import { GameService } from '../../services/game.service';
   styleUrls: ['./past-date-selector.component.scss']
 })
 export class PastDateSelectorComponent implements OnInit {
+  @Input() iconOnly = false;
   @Output() dateSelected = new EventEmitter<Date>();
+  @ViewChild('picker') picker!: MatDatepicker<Date>;
 
   availableDatesSet = new Set<string>(); // keys as YYYY-MM-DD for quick lookup
   selectedDate?: Date;
@@ -60,5 +62,9 @@ export class PastDateSelectorComponent implements OnInit {
     const m = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
     return `${y}-${m}-${dd}`;
+  }
+
+  openPicker(): void {
+    this.picker.open();
   }
 }
