@@ -11,6 +11,12 @@
             <polyline points="12 6 12 12 16 14"></polyline>
           </svg>
         </button>
+        <button class="icon-btn" (click)="showRevealConfirm = true" aria-label="Reveal answer" [disabled]="revealed">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        </button>
       </div>
     </header>
 
@@ -39,6 +45,22 @@
   [letters]="currentLetters"
   (close)="showPast = false"
 ></app-past-submissions>
+
+<div
+  class="confirm-modal"
+  *ngIf="showRevealConfirm"
+  (click)="showRevealConfirm = false"
+  tabindex="0"
+>
+  <div class="confirm-content" (click)="$event.stopPropagation()">
+    <h2>Reveal Answer?</h2>
+    <p>This will show all correct letters and end the game.</p>
+    <div class="confirm-buttons">
+      <button class="secondary" (click)="showRevealConfirm = false">Cancel</button>
+      <button class="primary" (click)="onRevealAnswer()">Reveal</button>
+    </div>
+  </div>
+</div>
 
 <div
   class="congrats-modal"
