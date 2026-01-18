@@ -43,6 +43,8 @@ export class GameComponent implements OnInit {
   congratsOpen = false;
   allWrong = false;
   submitShake = false;
+  showRevealConfirm = false;
+  revealed = false;
 
   // letters & category loaded for current game (today by default)
   currentLetters?: string[];
@@ -88,6 +90,11 @@ export class GameComponent implements OnInit {
   }
 
   onValuesSubmitted(values: Record<number, string>): void {
+    // Don't record submissions when answer was revealed
+    if (this.revealed) {
+      return;
+    }
+
     this.triangleInputValues = { ...values };
 
     const validation: Record<number, ValidationState> = {};
@@ -189,6 +196,19 @@ export class GameComponent implements OnInit {
     this.triangleInputValues = {};
   }
 
+  onRevealAnswer(): void {
+    this.showRevealConfirm = false;
+    this.revealed = true;
+    this.submitted = true;
+
+    // Fill in all correct letters
+    if (this.currentLetters) {
+      for (let i = 0; i < this.currentLetters.length; i++) {
+        this.triangleInputValues[i + 1] = this.currentLetters[i];
+      }
+    }
+  }
+
   // called by the PastDateSelectorComponent (immediate load)
   onDateChosen(date: Date): void {
     this.gameService.getGameForDate(date).subscribe((game) => {
@@ -204,6 +224,7 @@ export class GameComponent implements OnInit {
         this.currentGameDate = this.formatDateKey(date);
         // reset UI so Triangle picks up new letters/category
         this.submitted = false;
+        this.revealed = false;
         this.resetCounter++;
       } else {
         // no letters -> clear override (falls back to today)
@@ -247,10 +268,14 @@ export class GameComponent implements OnInit {
   }
 
   get aggregatedCorrectLetters(): Record<number, boolean> {
-    const validation = this.aggregatedValidation;
     const result: Record<number, boolean> = {};
     for (let i = 1; i <= 12; i++) {
-      result[i] = validation[i] === 'correct';
+      // If revealed, all letters are correct
+      if (this.revealed) {
+        result[i] = true;
+      } else {
+        result[i] = this.aggregatedValidation[i] === 'correct';
+      }
     }
     return result;
   }
