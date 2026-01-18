@@ -197,6 +197,76 @@ button,
   }
 }
 
+/* Game header with back button */
+.game-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Icon button style for header actions */
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1.5px solid #111;
+  color: #111;
+  cursor: pointer;
+  transition: background 0.18s, transform 0.12s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.icon-btn:active {
+  background: #f3f4f6;
+  transform: translateY(1px) scale(0.98);
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1.5px solid #111;
+  color: #111;
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.18s, transform 0.12s;
+  -webkit-appearance: none;
+  appearance: none;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.back-btn:active {
+  background: #f3f4f6;
+  transform: translateY(1px) scale(0.98);
+}
+
+.header-title {
+  flex: 1;
+  font-family: 'Baloo 2', 'Fredoka', 'Luckiest Guy', cursive, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: 0.04em;
+}
+
 /* Congrats modal styles */
 .congrats-modal {
   position: fixed;

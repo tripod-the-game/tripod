@@ -1,4 +1,15 @@
-<mat-form-field appearance="outline" class="date-field">
+<!-- Icon-only mode: just a button that opens the picker -->
+<button *ngIf="iconOnly" class="icon-btn" (click)="openPicker()" aria-label="Pick a past game">
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+    <line x1="16" y1="2" x2="16" y2="6"></line>
+    <line x1="8" y1="2" x2="8" y2="6"></line>
+    <line x1="3" y1="10" x2="21" y2="10"></line>
+  </svg>
+</button>
+
+<!-- Full form field mode (default) -->
+<mat-form-field *ngIf="!iconOnly" appearance="outline" class="date-field">
   <mat-label *ngIf="!selectedDate">Pick a past game</mat-label>
   <input
     matInput
@@ -10,5 +21,17 @@
     (focus)="$any($event.target).blur()"
   >
   <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-  <mat-datepicker #picker></mat-datepicker>
 </mat-form-field>
+
+<!-- Hidden input for icon-only mode (picker needs an input to bind to) -->
+<input
+  *ngIf="iconOnly"
+  [matDatepicker]="picker"
+  [(ngModel)]="selectedDate"
+  (dateChange)="onDateChange($event.value)"
+  [matDatepickerFilter]="dateFilter"
+  class="hidden-input"
+>
+
+<!-- Single picker shared by both modes -->
+<mat-datepicker #picker></mat-datepicker>
