@@ -33,14 +33,22 @@ export class TriangleComponent implements OnInit {
 
   @ViewChildren('triangleInput') inputs!: QueryList<ElementRef<HTMLInputElement>>;
 
-  // Logical layout: each row is an array of circle numbers (1-based)
-  triangleRows = [
-    [1],
-    [2, 3],
-    [4, 5],
-    [6, 7],
-    [8, 9, 10, 11, 12]
-  ];
+  // Neighbor map for arrow key navigation
+  // Follows word paths: left leg (1-2-4-6-8), right leg (1-3-5-7-12), bottom (8-9-10-11-12)
+  private neighbors: Record<number, { up?: number; down?: number; left?: number; right?: number }> = {
+    1:  { down: 2, left: 2, right: 3 },       // apex: down defaults to left leg
+    2:  { up: 1, down: 4, right: 3 },         // left leg
+    3:  { up: 1, down: 5, left: 2 },          // right leg
+    4:  { up: 2, down: 6, right: 5 },         // left leg
+    5:  { up: 3, down: 7, left: 4 },          // right leg
+    6:  { up: 4, down: 8, right: 7 },         // left leg
+    7:  { up: 5, down: 12, left: 6 },         // right leg
+    8:  { up: 6, right: 9 },                  // bottom-left corner
+    9:  { left: 8, right: 10 },               // bottom
+    10: { left: 9, right: 11 },               // bottom
+    11: { left: 10, right: 12 },              // bottom
+    12: { up: 7, left: 11 }                   // bottom-right corner
+  };
 
   constructor(private gameService: GameService) {}
 
@@ -164,37 +172,29 @@ export class TriangleComponent implements OnInit {
     return (this.inputValues[circle] ?? '').toString();
   }
 
-  // Move focus based on arrow key
+  // Move focus based on arrow key using neighbor map
   onInputKeydown(event: KeyboardEvent, circle: number) {
-    const pos = this.findPosition(circle);
-    if (!pos) return;
+    const circleNeighbors = this.neighbors[circle];
+    if (!circleNeighbors) return;
+
     let targetCircle: number | undefined;
 
     switch (event.key) {
       case 'ArrowUp':
-        if (pos.row > 0 && this.triangleRows[pos.row - 1][pos.col - (pos.row > 1 ? 1 : 0)] !== undefined) {
-          targetCircle = this.triangleRows[pos.row - 1][pos.col - (pos.row > 1 ? 1 : 0)];
-        }
+        targetCircle = circleNeighbors.up;
         break;
       case 'ArrowDown':
-        if (pos.row < this.triangleRows.length - 1 && this.triangleRows[pos.row + 1][pos.col + (pos.row > 0 ? 1 : 0)] !== undefined) {
-          targetCircle = this.triangleRows[pos.row + 1][pos.col + (pos.row > 0 ? 1 : 0)];
-        }
+        targetCircle = circleNeighbors.down;
         break;
       case 'ArrowLeft':
-        if (pos.col > 0) {
-          targetCircle = this.triangleRows[pos.row][pos.col - 1];
-        }
+        targetCircle = circleNeighbors.left;
         break;
       case 'ArrowRight':
-        if (pos.col < this.triangleRows[pos.row].length - 1) {
-          targetCircle = this.triangleRows[pos.row][pos.col + 1];
-        }
+        targetCircle = circleNeighbors.right;
         break;
     }
 
     if (targetCircle !== undefined) {
-      // Focus the target input
       const idx = this.circles.indexOf(targetCircle);
       const input = this.inputs.get(idx);
       if (input) {
@@ -202,15 +202,6 @@ export class TriangleComponent implements OnInit {
         event.preventDefault();
       }
     }
-  }
-
-  // Helper to find row/col for a given circle number
-  private findPosition(circle: number): { row: number; col: number } | null {
-    for (let row = 0; row < this.triangleRows.length; row++) {
-      const col = this.triangleRows[row].indexOf(circle);
-      if (col !== -1) return { row, col };
-    }
-    return null;
   }
 }
 
