@@ -11,12 +11,14 @@
       [category]="currentCategory"
       [aggregatedCorrect]="aggregatedCorrectLetters"
       [aggregatedValidation]="aggregatedValidation"
+      [allWrong]="allWrong"
+      (valuesChanged)="onValuesChanged($event)"
       (valuesSubmitted)="onValuesSubmitted($event)"
       [resetCounter]="resetCounter"
     ></app-triangle>
 
     <div class="action-row">
-      <app-submit-button (submit)="onSubmit()"></app-submit-button>
+      <app-submit-button [shake]="submitShake" (submit)="onSubmit()"></app-submit-button>
       <app-reset-button (reset)="onReset()"></app-reset-button>
     </div>
   </div>

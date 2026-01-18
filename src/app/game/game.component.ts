@@ -39,6 +39,8 @@ export class GameComponent implements OnInit {
   resetCounter = 0;
   showPast = false;
   congratsOpen = false;
+  allWrong = false;
+  submitShake = false;
 
   // letters & category loaded for current game (today by default)
   currentLetters?: string[];
@@ -68,8 +70,19 @@ export class GameComponent implements OnInit {
   }
 
   onSubmit(): void {
+    if (this.isAllEmpty || this.submitted) {
+      this.submitShake = true;
+      setTimeout(() => {
+        this.submitShake = false;
+      }, 400);
+      return;
+    }
     console.log("submissions: ", this.submissions);
     this.submitted = true;
+  }
+
+  onValuesChanged(values: Record<number, string>): void {
+    this.triangleInputValues = { ...values };
   }
 
   onValuesSubmitted(values: Record<number, string>): void {
@@ -110,6 +123,18 @@ export class GameComponent implements OnInit {
 
     if (isAllCorrect) {
       this.congratsOpen = true;
+    }
+
+    // Check for all wrong (no correct and no wrong-position, including partial submissions)
+    const isAllWrong =
+      Object.keys(validation).length > 0 &&
+      Object.values(validation).every((v) => v === 'none');
+
+    if (isAllWrong) {
+      this.allWrong = true;
+      setTimeout(() => {
+        this.allWrong = false;
+      }, 600);
     }
   }
 
@@ -160,6 +185,7 @@ export class GameComponent implements OnInit {
   onReset(): void {
     this.submitted = false;
     this.resetCounter++;
+    this.triangleInputValues = {};
   }
 
   // called by the PastDateSelectorComponent (immediate load)
@@ -226,6 +252,11 @@ export class GameComponent implements OnInit {
       result[i] = validation[i] === 'correct';
     }
     return result;
+  }
+
+  get isAllEmpty(): boolean {
+    const values = Object.values(this.triangleInputValues);
+    return values.length === 0 || values.every((v) => !v || v.trim() === '');
   }
 
   private formatDateKey(d: Date): string {

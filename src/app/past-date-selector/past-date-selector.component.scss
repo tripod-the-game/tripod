@@ -4,6 +4,79 @@
   box-sizing: border-box;
 }
 
+:host ::ng-deep .mat-mdc-form-field {
+  height: 60px;
+}
+
+:host ::ng-deep .mat-mdc-text-field-wrapper {
+  height: 60px !important;
+  padding: 0 16px !important;
+  background: #fff !important;
+  border: 1.5px solid #111 !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 18px rgba(17,17,17,0.10) !important;
+}
+
+:host ::ng-deep .mat-mdc-form-field-flex {
+  height: 60px !important;
+  align-items: center !important;
+}
+
+:host ::ng-deep .mat-mdc-form-field-infix {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  min-height: unset !important;
+}
+
+/* Style the floating label */
+:host ::ng-deep .mat-mdc-floating-label {
+  color: #111 !important;
+}
+
+:host ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+/* Hide the outline/border but keep label visible */
+:host ::ng-deep .mdc-notched-outline__leading,
+:host ::ng-deep .mdc-notched-outline__trailing {
+  border: none !important;
+}
+
+:host ::ng-deep .mdc-notched-outline__notch {
+  border: none !important;
+}
+
+/* Ensure label is visible and properly positioned */
+:host ::ng-deep .mdc-floating-label {
+  color: #111 !important;
+  opacity: 1 !important;
+}
+
+/* Style the input text */
+:host ::ng-deep input.mat-mdc-input-element {
+  color: #111 !important;
+  caret-color: #111 !important;
+}
+
+:host ::ng-deep input.mat-mdc-input-element::placeholder {
+  color: rgba(17,17,17,0.5) !important;
+}
+
+/* Style the calendar icon */
+:host ::ng-deep .mat-mdc-icon-button {
+  color: #111 !important;
+}
+
+:host ::ng-deep .mat-datepicker-toggle-default-icon {
+  color: #111 !important;
+  fill: #111 !important;
+}
+
+:host ::ng-deep .mat-mdc-icon-button svg {
+  fill: #111 !important;
+}
+
 :host ::ng-deep .mat-mdc-form-field,
 :host ::ng-deep .mat-mdc-form-field-infix,
 :host ::ng-deep .mat-mdc-form-field-label,

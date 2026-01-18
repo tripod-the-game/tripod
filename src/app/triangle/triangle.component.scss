@@ -26,10 +26,14 @@
   border-color: #357a38;
 }
 
-.circle-input.correct input {
+.circle-input.correct input,
+.circle-input.correct input:disabled,
+.circle-input.correct input[readonly] {
   color: #fff;
+  -webkit-text-fill-color: #fff;
   font-weight: 700;
   background: transparent;
+  opacity: 1;
 }
 
 /* show whole circle as wrong position (yellow background) */
@@ -38,10 +42,14 @@
   border-color: #c17900;
 }
 
-.circle-input.wrong-position input {
+.circle-input.wrong-position input,
+.circle-input.wrong-position input:disabled,
+.circle-input.wrong-position input[readonly] {
   color: #fff;
+  -webkit-text-fill-color: #fff;
   font-weight: 700;
   background: transparent;
+  opacity: 1;
 }
 
 /* always render entered letter as UPPERCASE visually */
@@ -51,9 +59,24 @@
   width: 100%;
   height: 100%;
   text-align: center; /* Center the text */
-  font-size: 32px; /* Adjust font size as needed */
+  font-size: 28px; /* Adjust font size as needed */
+  line-height: 1;
+  padding: 0;
+  margin: 0;
   background: transparent; /* let wrapper color show */
   text-transform: uppercase;
+  color: #000;
+  /* iOS-specific fixes */
+  -webkit-appearance: none;
+  -webkit-text-fill-color: #000;
+  opacity: 1; /* Override iOS disabled opacity */
+}
+
+/* Ensure disabled/readonly inputs maintain color on iOS */
+.circle-input input:disabled,
+.circle-input input[readonly] {
+  -webkit-text-fill-color: #000;
+  opacity: 1;
 }
 
 .right-shift-0 {
@@ -161,7 +184,9 @@
   font-family: 'Baloo 2', 'Fredoka', 'Luckiest Guy', cursive, sans-serif;
   box-shadow: 0 6px 14px rgba(17,17,17,0.06);
   border-radius: 14px;
-  padding: 12px 0px 12px 0px;
+  height: 48px;
+  padding: 0 12px;
+  box-sizing: border-box;
   text-align: center;
   display: flex;
   align-items: center;
@@ -196,4 +221,31 @@
   width: 100%;
   max-width: 520px;
   margin: 25px auto; // 50px space on top and bottom, centered horizontally
+}
+
+/* Shake animation keyframes */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-6px); }
+  20%, 40%, 60%, 80% { transform: translateX(6px); }
+}
+
+/* All wrong state: shake + red flash */
+.triangle-container.all-wrong {
+  animation: shake 0.5s ease-in-out;
+}
+
+.triangle-container.all-wrong .circle-input {
+  background-color: #ef5350;
+  border-color: #c62828;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.triangle-container.all-wrong .circle-input input,
+.triangle-container.all-wrong .circle-input input:disabled,
+.triangle-container.all-wrong .circle-input input[readonly] {
+  color: #fff;
+  -webkit-text-fill-color: #fff;
+  font-weight: 700;
+  opacity: 1;
 }
