@@ -2,12 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TriangleComponent } from '../triangle/triangle.component';
+import { HowToPlayComponent } from '../how-to-play/how-to-play.component';
 import { GameService } from '../../services/game.service';
 
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [CommonModule, RouterModule, TriangleComponent],
+  imports: [CommonModule, RouterModule, TriangleComponent, HowToPlayComponent],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss'
 })
@@ -15,6 +16,7 @@ export class LandingComponent implements OnInit {
   // preview data for the triangle (display-only)
   previewDisplayValues: Record<number, string> = {};
   previewCategory?: string;
+  showHowToPlay = false;
 
   constructor(private gameService: GameService) {}
 

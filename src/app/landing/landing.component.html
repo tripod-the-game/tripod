@@ -18,12 +18,14 @@
       <button class="primary" routerLink="/play" aria-label="Start playing">
         Play Now
       </button>
-      <button class="secondary" routerLink="/play" aria-label="How to play">
+      <button class="secondary" (click)="showHowToPlay = true" aria-label="How to play">
         How to Play
       </button>
     </div>
   </div>
 </div>
+
+<app-how-to-play *ngIf="showHowToPlay" (close)="showHowToPlay = false"></app-how-to-play>
 
 <!-- <section class="features">
   <div class="feature">

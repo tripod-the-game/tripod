@@ -16,7 +16,7 @@
   top: 50%;
   transform: translate(-50%, -50%);
   z-index: 1201;
-  width: min(92vw, 740px);
+  width: min(92vw, 480px);
   max-height: 90vh;
   display: flex;
   flex-direction: column;
@@ -36,18 +36,14 @@
   border-bottom: 1px solid rgba(2,6,23,0.04);
   background: linear-gradient(90deg, rgba(6,182,212,0.02), rgba(6,182,212,0.00));
 }
-.modal-header .title { 
-  font-weight: 700; 
-  color: #04202a; 
+
+.modal-header .title {
+  font-weight: 700;
+  color: #04202a;
   font-size: 1.35rem;
   letter-spacing: 0.04em;
 }
-.modal-header .count {
-  font-size: 1rem;
-  font-weight: 600;
-  opacity: 0.85;
-}
-.modal-header .meta { display: flex; align-items: center; gap: 12px; }
+
 .close-btn {
   background: transparent;
   border: none;
@@ -64,98 +60,139 @@
 /* body */
 .modal-body {
   padding: 18px;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.section {
+  margin-bottom: 18px;
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.section h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: #111;
+}
+
+.section p {
+  margin: 0 0 8px 0;
+  line-height: 1.5;
+  color: #333;
+}
+
+.section ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.section li {
+  margin-bottom: 4px;
+  line-height: 1.5;
+  color: #333;
+}
+
+/* color legend */
+.color-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.color-item {
   display: flex;
   align-items: center;
+  gap: 10px;
+}
+
+.color-box {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.color-box.green {
+  background: #22c55e;
+}
+
+.color-box.yellow {
+  background: #eab308;
+}
+
+.color-box.red {
+  background: #ef4444;
+}
+
+/* example triangle */
+.example-triangle {
+  display: flex;
   justify-content: center;
-  overflow: auto;
-  flex: 1 1 auto;
-  font-size: 1.1rem;
-  font-weight: 500;
-}
-.submission-wrapper { 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  width: 100%; 
-  font-size: 1.1rem;
-  font-weight: 500;
+  margin: 12px 0;
+  transform: scale(0.75);
+  transform-origin: center center;
 }
 
-/* small empty state */
-.empty {
-  color: #6b7280;
-  padding: 32px;
-  text-align: center;
-  font-size: 1.1rem;
-  font-weight: 500;
-}
-
-/* footer / nav */
+/* footer */
 .modal-footer {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
   padding: 12px 16px;
   border-top: 1px solid rgba(2,6,23,0.04);
 }
-.nav-btn {
+
+.close-btn-footer {
   min-width: 120px;
-  padding: 14px 0;
+  padding: 14px 32px;
   border-radius: 12px;
-  border: 1.5px solid #111;
-  background: #fff;
-  color: #111;
+  border: none;
+  background: #111;
+  color: #fff;
   font-family: 'Baloo 2', 'Fredoka', 'Luckiest Guy', cursive, sans-serif;
   font-weight: 700;
   font-size: 1.1rem;
   letter-spacing: 0.04em;
-  box-shadow: 0 2px 8px rgba(17,17,17,0.06);
+  box-shadow: 0 4px 18px rgba(17,17,17,0.10);
   cursor: pointer;
   transition: background 0.18s, color 0.18s, box-shadow 0.18s, transform 0.12s;
-  margin: 0 6px;
-  outline: none;
   -webkit-appearance: none;
   appearance: none;
 }
 
-.nav-btn:active {
-  background: #f3f4f6;
-  color: #111;
+.close-btn-footer:active {
+  background: #222;
   transform: translateY(1px) scale(0.98);
 }
 
-.nav-btn.primary {
-  background: #111;
-  color: #fff;
-  border: none;
-}
-
-.nav-btn.primary:active {
-  background: #222;
-  color: #fff;
-}
-
-.spacer { flex: 1 1 auto; }
-
 /* responsive */
 @media (max-width: 520px) {
-  .modal-panel { width: 96vw; height: 88vh; max-height: 88vh; }
-  .nav-btn {
-    min-width: 0;
+  .modal-panel {
+    width: 96vw;
+    max-height: 88vh;
+  }
+  .close-btn-footer {
     width: 100%;
     font-size: 1rem;
     padding: 12px 0;
   }
+  .example-triangle {
+    transform: scale(0.6);
+  }
 }
 
+/* font consistency */
 :host ::ng-deep,
 :host ::ng-deep .modal-header,
 :host ::ng-deep .modal-header .title,
-:host ::ng-deep .modal-header .count,
-:host ::ng-deep .modal-header .meta,
 :host ::ng-deep .modal-body,
-:host ::ng-deep .empty,
-:host ::ng-deep .submission-wrapper,
+:host ::ng-deep .section,
 :host ::ng-deep h1,
 :host ::ng-deep h2,
 :host ::ng-deep h3,
@@ -164,7 +201,8 @@
 :host ::ng-deep h6,
 :host ::ng-deep p,
 :host ::ng-deep span,
-:host ::ng-deep label,
+:host ::ng-deep li,
+:host ::ng-deep strong,
 :host ::ng-deep div {
   font-family: 'Baloo 2', 'Fredoka', 'Luckiest Guy', cursive, sans-serif !important;
   color: #111;
