@@ -1,0 +1,79 @@
+<div class="modal-backdrop" (click)="onClose()"></div>
+
+<div class="modal-panel" role="dialog" aria-modal="true" aria-label="How to play">
+  <header class="modal-header">
+    <div class="title">How to Play</div>
+    <button class="close-btn" aria-label="Close" (click)="onClose()">✕</button>
+  </header>
+
+  <main class="modal-body">
+    <section class="section">
+      <h2>Objective</h2>
+      <p>Fill in the triangle with three words that share a common category.</p>
+    </section>
+
+    <section class="section">
+      <h2>The Triangle</h2>
+      <p>Each puzzle has three words that form a triangle:</p>
+      <ul>
+        <li><strong>Left edge</strong> — Word 1 (reads bottom to top)</li>
+        <li><strong>Right edge</strong> — Word 2 (reads top to bottom)</li>
+        <li><strong>Bottom row</strong> — Word 3 (reads left to right)</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>Shared Letters</h2>
+      <p>The three words connect at the triangle's corners:</p>
+      <ul>
+        <li><strong>Top corner</strong> — Last letter of Word 1 = First letter of Word 2</li>
+        <li><strong>Bottom-left</strong> — First letter of Word 1 = First letter of Word 3</li>
+        <li><strong>Bottom-right</strong> — Last letter of Word 2 = Last letter of Word 3</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>Feedback Colors</h2>
+      <div class="color-legend">
+        <div class="color-item">
+          <span class="color-box green"></span>
+          <span><strong>Green</strong> — Letter is in the correct position</span>
+        </div>
+        <div class="color-item">
+          <span class="color-box yellow"></span>
+          <span><strong>Yellow</strong> — Valid word, but in the wrong position</span>
+        </div>
+        <div class="color-item">
+          <span class="color-box red"></span>
+          <span><strong>Red + shake</strong> — No correct letters</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Example: "Fruit"</h2>
+      <p>Here's a solved puzzle with the words GUAVA, APPLE, and GRAPE:</p>
+      <div class="example-triangle">
+        <app-triangle
+          [displayOnly]="true"
+          [displayValues]="exampleValues"
+          [letters]="exampleLetters"
+          [aggregatedValidation]="exampleValidation"
+        ></app-triangle>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Tips</h2>
+      <ul>
+        <li>Use the category hint to narrow down possibilities</li>
+        <li>Start by figuring out the shared corner letters</li>
+        <li>Submit partial guesses to get feedback</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="modal-footer">
+    <button class="close-btn-footer" (click)="onClose()">Got it!</button>
+  </footer>
+</div>
