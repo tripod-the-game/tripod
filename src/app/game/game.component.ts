@@ -43,8 +43,39 @@ export class GameComponent implements OnInit {
   congratsOpen = false;
   allWrong = false;
   submitShake = false;
+  resetShake = false;
+  revealShake = false;
   showRevealConfirm = false;
-  revealed = false;
+  maxHints = 3;
+
+  // Store game state per date (hints and revealed status)
+  private gameStateByDate: Record<string, {
+    hintsUsed: number;
+    hintedPositions: number[];
+    revealed: boolean;
+  }> = {};
+
+  // Current game state (computed from gameStateByDate)
+  get hintsUsed(): number {
+    return this.currentGameDate ? (this.gameStateByDate[this.currentGameDate]?.hintsUsed ?? 0) : 0;
+  }
+
+  get hintedPositions(): Set<number> {
+    const positions = this.currentGameDate ? (this.gameStateByDate[this.currentGameDate]?.hintedPositions ?? []) : [];
+    return new Set(positions);
+  }
+
+  get revealed(): boolean {
+    return this.currentGameDate ? (this.gameStateByDate[this.currentGameDate]?.revealed ?? false) : false;
+  }
+
+  private setRevealed(value: boolean): void {
+    if (!this.currentGameDate) return;
+    if (!this.gameStateByDate[this.currentGameDate]) {
+      this.gameStateByDate[this.currentGameDate] = { hintsUsed: 0, hintedPositions: [], revealed: false };
+    }
+    this.gameStateByDate[this.currentGameDate].revealed = value;
+  }
 
   // letters & category loaded for current game (today by default)
   currentLetters?: string[];
@@ -90,8 +121,8 @@ export class GameComponent implements OnInit {
   }
 
   onValuesSubmitted(values: Record<number, string>): void {
-    // Don't record submissions when answer was revealed
-    if (this.revealed) {
+    // Don't record submissions when answer was revealed or game is already solved
+    if (this.revealed || this.isAllCorrect) {
       return;
     }
 
@@ -191,14 +222,36 @@ export class GameComponent implements OnInit {
   }
 
   onReset(): void {
+    // Don't allow clear if puzzle is solved
+    if (this.isAllCorrect) {
+      this.resetShake = true;
+      setTimeout(() => {
+        this.resetShake = false;
+      }, 400);
+      return;
+    }
+
     this.submitted = false;
     this.resetCounter++;
-    this.triangleInputValues = {};
+    // triangleInputValues will be synced by valuesChanged from triangle
+    // Hints persist - triangle component preserves letters marked as correct
+  }
+
+  onRevealClick(): void {
+    // If already revealed or all correct, shake instead of showing modal
+    if (this.revealed || this.isAllCorrect) {
+      this.revealShake = true;
+      setTimeout(() => {
+        this.revealShake = false;
+      }, 400);
+      return;
+    }
+    this.showRevealConfirm = true;
   }
 
   onRevealAnswer(): void {
     this.showRevealConfirm = false;
-    this.revealed = true;
+    this.setRevealed(true);
     this.submitted = true;
 
     // Fill in all correct letters
@@ -207,6 +260,47 @@ export class GameComponent implements OnInit {
         this.triangleInputValues[i + 1] = this.currentLetters[i];
       }
     }
+  }
+
+  onRevealHint(): void {
+    if (this.hintsUsed >= this.maxHints || !this.currentLetters || !this.currentGameDate) {
+      return;
+    }
+
+    // Find all positions that are not yet correct (from guessing or hints)
+    const incorrectPositions: number[] = [];
+    const correctLetters = this.aggregatedCorrectLetters;
+
+    for (let i = 1; i <= 12; i++) {
+      if (!correctLetters[i]) {
+        incorrectPositions.push(i);
+      }
+    }
+
+    // If no incorrect positions left, nothing to hint
+    if (incorrectPositions.length === 0) {
+      return;
+    }
+
+    // Pick a random position from the incorrect ones
+    const randomIndex = Math.floor(Math.random() * incorrectPositions.length);
+    const positionToReveal = incorrectPositions[randomIndex];
+
+    // Reveal this letter
+    this.triangleInputValues[positionToReveal] = this.currentLetters[positionToReveal - 1];
+
+    // Save hint to per-date storage
+    if (!this.gameStateByDate[this.currentGameDate]) {
+      this.gameStateByDate[this.currentGameDate] = { hintsUsed: 0, hintedPositions: [], revealed: false };
+    }
+    this.gameStateByDate[this.currentGameDate].hintedPositions.push(positionToReveal);
+    this.gameStateByDate[this.currentGameDate].hintsUsed++;
+
+    this.showRevealConfirm = false;
+  }
+
+  get hintsRemaining(): number {
+    return this.maxHints - this.hintsUsed;
   }
 
   // called by the PastDateSelectorComponent (immediate load)
@@ -222,9 +316,12 @@ export class GameComponent implements OnInit {
         };
         // set currentGameDate to the chosen MMDDYY identifier
         this.currentGameDate = this.formatDateKey(date);
+        // Clear stale input values from previous game
+        this.triangleInputValues = {};
         // reset UI so Triangle picks up new letters/category
-        this.submitted = false;
-        this.revealed = false;
+        // If the game was previously revealed or solved, keep it submitted (locked)
+        this.submitted = this.revealed || this.isAllCorrect;
+        // revealed and hints are stored per-date in gameStateByDate, so they persist automatically
         this.resetCounter++;
       } else {
         // no letters -> clear override (falls back to today)
@@ -273,6 +370,9 @@ export class GameComponent implements OnInit {
       // If revealed, all letters are correct
       if (this.revealed) {
         result[i] = true;
+      } else if (this.hintedPositions.has(i)) {
+        // Hinted positions are also marked as correct
+        result[i] = true;
       } else {
         result[i] = this.aggregatedValidation[i] === 'correct';
       }
@@ -283,6 +383,12 @@ export class GameComponent implements OnInit {
   get isAllEmpty(): boolean {
     const values = Object.values(this.triangleInputValues);
     return values.length === 0 || values.every((v) => !v || v.trim() === '');
+  }
+
+  get isAllCorrect(): boolean {
+    const correctLetters = this.aggregatedCorrectLetters;
+    return Object.values(correctLetters).length === 12 &&
+           Object.values(correctLetters).every(v => v === true);
   }
 
   private formatDateKey(d: Date): string {

@@ -90,9 +90,18 @@ export class TriangleComponent implements OnInit {
       // keep this.category as provided
     }
 
-    // clear inputs when parent triggers a reset
+    // clear inputs when parent triggers a reset, but preserve correct letters
     if (changes['resetCounter'] && !this.displayOnly) {
       this.inputValues = {};
+      // Re-sync any letters that are marked as correct (including hints)
+      if (this.aggregatedCorrect && Array.isArray(this.letterValues)) {
+        for (let i = 0; i < this.letterValues.length; i++) {
+          const circle = i + 1;
+          if (this.aggregatedCorrect[circle]) {
+            this.inputValues[circle] = this.letterValues[i];
+          }
+        }
+      }
     }
 
     // emit a snapshot only when submitted changes to true (live submissions)

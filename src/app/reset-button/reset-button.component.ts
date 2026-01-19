@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -9,6 +9,8 @@ import { CommonModule } from '@angular/common';
   styleUrl: './reset-button.component.scss'
 })
 export class ResetButtonComponent {
+  @Input() shake = false;
+  @Input() disabled = false;
   @Output() reset = new EventEmitter<void>();
 
   onClick(): void {
