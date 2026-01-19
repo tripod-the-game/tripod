@@ -11,7 +11,7 @@
             <polyline points="12 6 12 12 16 14"></polyline>
           </svg>
         </button>
-        <button class="icon-btn" (click)="showRevealConfirm = true" aria-label="Reveal answer" [disabled]="revealed">
+        <button class="icon-btn" [class.shake]="revealShake" (click)="onRevealClick()" aria-label="Reveal answer">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
             <circle cx="12" cy="12" r="3"></circle>
@@ -34,7 +34,7 @@
 
     <div class="action-row">
       <app-submit-button [shake]="submitShake" (submit)="onSubmit()"></app-submit-button>
-      <app-reset-button (reset)="onReset()"></app-reset-button>
+      <app-reset-button [shake]="resetShake" (reset)="onReset()"></app-reset-button>
     </div>
   </div>
 </div>
@@ -52,13 +52,37 @@
   (click)="showRevealConfirm = false"
   tabindex="0"
 >
-  <div class="confirm-content" (click)="$event.stopPropagation()">
-    <h2>Reveal Answer?</h2>
-    <p>This will show all correct letters and end the game.</p>
-    <div class="confirm-buttons">
-      <button class="secondary" (click)="showRevealConfirm = false">Cancel</button>
-      <button class="primary" (click)="onRevealAnswer()">Reveal</button>
+  <div class="confirm-content reveal-options" (click)="$event.stopPropagation()">
+    <h2>Need Help?</h2>
+    <p>Choose how much to reveal:</p>
+    <div class="reveal-buttons">
+      <button
+        class="reveal-option hint-option"
+        (click)="onRevealHint()"
+        [disabled]="hintsRemaining === 0"
+      >
+        <span class="option-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"></path>
+            <path d="M9 21h6"></path>
+            <path d="M12 17v4"></path>
+          </svg>
+        </span>
+        <span class="option-label">Reveal Letter</span>
+        <span class="option-detail">{{ hintsRemaining }} hint{{ hintsRemaining === 1 ? '' : 's' }} left</span>
+      </button>
+      <button class="reveal-option reveal-all-option" (click)="onRevealAnswer()">
+        <span class="option-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        </span>
+        <span class="option-label">Reveal All</span>
+        <span class="option-detail">Show full answer</span>
+      </button>
     </div>
+    <button class="cancel-btn" (click)="showRevealConfirm = false">Cancel</button>
   </div>
 </div>
 

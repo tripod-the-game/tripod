@@ -30,11 +30,28 @@ button,
   transition: background 0.18s, color 0.18s, box-shadow 0.18s, transform 0.12s;
 }
 
-button:active,
-.reset-btn:active {
+button:active:not(:disabled),
+.reset-btn:active:not(:disabled) {
   background: #f3f4f6;
   color: #111;
   transform: translateY(1px) scale(0.98);
+}
+
+button:disabled,
+.reset-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@keyframes button-shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+  20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+button.shake,
+.reset-btn.shake {
+  animation: button-shake 0.4s ease-in-out;
 }
 
 @media (max-width: 520px) {
