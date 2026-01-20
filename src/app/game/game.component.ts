@@ -107,7 +107,7 @@ export class GameComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.isAllEmpty || this.submitted) {
+    if (this.hasNoNewInput || this.submitted) {
       this.submitShake = true;
       setTimeout(() => {
         this.submitShake = false;
@@ -418,9 +418,21 @@ export class GameComponent implements OnInit {
     return result;
   }
 
-  get isAllEmpty(): boolean {
-    const values = Object.values(this.triangleInputValues);
-    return values.length === 0 || values.every((v) => !v || v.trim() === '');
+  get hasNoNewInput(): boolean {
+    const correctLetters = this.aggregatedCorrectLetters;
+    // Check if there are any non-empty values in positions that aren't already correct
+    for (let i = 1; i <= 12; i++) {
+      if (correctLetters[i]) {
+        // Skip positions that are already correct
+        continue;
+      }
+      const value = this.triangleInputValues[i];
+      if (value && value.trim() !== '') {
+        // Found a new letter in a non-correct position
+        return false;
+      }
+    }
+    return true;
   }
 
   get isAllCorrect(): boolean {
