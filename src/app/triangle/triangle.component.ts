@@ -50,6 +50,9 @@ export class TriangleComponent implements OnInit {
     12: { up: 7, left: 11 }                   // bottom-right corner
   };
 
+  // Linear order for auto-advance (top-to-bottom, left-to-right reading order)
+  private readonly circleOrder = [8, 6, 4, 2, 1, 3, 5, 7, 12, 8, 9, 10, 11, 12];
+
   constructor(private gameService: GameService) {}
 
   ngOnInit(): void {
@@ -150,6 +153,63 @@ export class TriangleComponent implements OnInit {
     const v = (value ?? '').toString().toUpperCase().slice(0, 1);
     this.inputValues[circle] = v;
     this.valuesChanged.emit({ ...this.inputValues });
+
+    // Auto-advance to next circle if a letter was entered
+    if (v.length === 1) {
+      this.focusNextCircle(circle);
+    }
+  }
+
+  // Check if a circle is available for input (not correct and not already filled)
+  private isCircleAvailable(circle: number): boolean {
+    // Skip if already marked correct
+    if (this.aggregatedCorrect?.[circle]) {
+      return false;
+    }
+    // Skip if already has a value typed
+    const value = this.inputValues[circle] ?? '';
+    if (value.trim() !== '') {
+      return false;
+    }
+    return true;
+  }
+
+  // Focus the next available circle in reading order
+  private focusNextCircle(currentCircle: number): void {
+    const currentIndex = this.circleOrder.indexOf(currentCircle);
+    if (currentIndex === -1) return;
+
+    // Look for next circle that is available
+    for (let i = currentIndex + 1; i < this.circleOrder.length; i++) {
+      const nextCircle = this.circleOrder[i];
+      if (this.isCircleAvailable(nextCircle)) {
+        const idx = this.circles.indexOf(nextCircle);
+        const input = this.inputs.get(idx);
+        if (input) {
+          input.nativeElement.focus();
+        }
+        return;
+      }
+    }
+  }
+
+  // Focus the previous available circle in reading order
+  private focusPrevCircle(currentCircle: number): void {
+    const currentIndex = this.circleOrder.indexOf(currentCircle);
+    if (currentIndex === -1) return;
+
+    // Look for previous circle that isn't already correct (allow filled circles for backspace)
+    for (let i = currentIndex - 1; i >= 0; i--) {
+      const prevCircle = this.circleOrder[i];
+      if (!this.aggregatedCorrect?.[prevCircle]) {
+        const idx = this.circles.indexOf(prevCircle);
+        const input = this.inputs.get(idx);
+        if (input) {
+          input.nativeElement.focus();
+        }
+        return;
+      }
+    }
   }
 
   isCorrect(circle: number, index: number): boolean {
@@ -183,6 +243,16 @@ export class TriangleComponent implements OnInit {
 
   // Move focus based on arrow key using neighbor map
   onInputKeydown(event: KeyboardEvent, circle: number) {
+    // Handle backspace on empty circle - move to previous
+    if (event.key === 'Backspace') {
+      const currentValue = this.inputValues[circle] ?? '';
+      if (currentValue === '') {
+        this.focusPrevCircle(circle);
+        event.preventDefault();
+      }
+      return;
+    }
+
     const circleNeighbors = this.neighbors[circle];
     if (!circleNeighbors) return;
 
