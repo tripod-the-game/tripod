@@ -105,6 +105,8 @@ export class TriangleComponent implements OnInit {
           }
         }
       }
+      // Emit the cleared/updated values so parent stays in sync
+      this.valuesChanged.emit({ ...this.inputValues });
     }
 
     // emit a snapshot only when submitted changes to true (live submissions)
