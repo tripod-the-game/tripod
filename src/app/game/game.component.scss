@@ -294,6 +294,22 @@ app-past-submissions {
   transform: scale(0.96);
 }
 
+.confirm-buttons button.warning {
+  background: #f59e0b;
+  color: #fff;
+}
+
+/* Last hint confirmation modal */
+.last-hint-confirm {
+  max-width: 300px;
+}
+
+.warning-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
 /* Reveal options modal styles */
 .reveal-options {
   min-width: 280px;

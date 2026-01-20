@@ -87,6 +87,29 @@
 </div>
 
 <div
+  class="confirm-modal"
+  *ngIf="showLastHintConfirm"
+  (click)="onCancelLastHint()"
+  tabindex="0"
+>
+  <div class="confirm-content last-hint-confirm" (click)="$event.stopPropagation()">
+    <div class="warning-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"></path>
+        <path d="M9 21h6"></path>
+        <path d="M12 17v4"></path>
+      </svg>
+    </div>
+    <h2>Last Letter!</h2>
+    <p>This is your final unknown letter. Revealing it will end the game.</p>
+    <div class="confirm-buttons">
+      <button class="secondary" (click)="onCancelLastHint()">Cancel</button>
+      <button class="primary warning" (click)="onConfirmLastHint()">Reveal & End Game</button>
+    </div>
+  </div>
+</div>
+
+<div
   class="congrats-modal"
   *ngIf="congratsOpen"
   (click)="congratsOpen = false"
