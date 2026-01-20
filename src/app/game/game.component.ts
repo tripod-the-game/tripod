@@ -46,6 +46,8 @@ export class GameComponent implements OnInit {
   resetShake = false;
   revealShake = false;
   showRevealConfirm = false;
+  showLastHintConfirm = false;
+  lastHintPosition?: number;
   maxHints = 3;
 
   // Store game state per date (hints and revealed status)
@@ -286,6 +288,14 @@ export class GameComponent implements OnInit {
     const randomIndex = Math.floor(Math.random() * incorrectPositions.length);
     const positionToReveal = incorrectPositions[randomIndex];
 
+    // If this is the last letter, show confirmation modal instead
+    if (incorrectPositions.length === 1) {
+      this.lastHintPosition = positionToReveal;
+      this.showRevealConfirm = false;
+      this.showLastHintConfirm = true;
+      return;
+    }
+
     // Reveal this letter
     this.triangleInputValues[positionToReveal] = this.currentLetters[positionToReveal - 1];
 
@@ -297,6 +307,34 @@ export class GameComponent implements OnInit {
     this.gameStateByDate[this.currentGameDate].hintsUsed++;
 
     this.showRevealConfirm = false;
+  }
+
+  onConfirmLastHint(): void {
+    if (!this.currentLetters || !this.currentGameDate || this.lastHintPosition === undefined) {
+      return;
+    }
+
+    // Reveal the last letter
+    this.triangleInputValues[this.lastHintPosition] = this.currentLetters[this.lastHintPosition - 1];
+
+    // Save hint to per-date storage
+    if (!this.gameStateByDate[this.currentGameDate]) {
+      this.gameStateByDate[this.currentGameDate] = { hintsUsed: 0, hintedPositions: [], revealed: false };
+    }
+    this.gameStateByDate[this.currentGameDate].hintedPositions.push(this.lastHintPosition);
+    this.gameStateByDate[this.currentGameDate].hintsUsed++;
+
+    // End the game (similar to reveal all)
+    this.setRevealed(true);
+    this.submitted = true;
+
+    this.showLastHintConfirm = false;
+    this.lastHintPosition = undefined;
+  }
+
+  onCancelLastHint(): void {
+    this.showLastHintConfirm = false;
+    this.lastHintPosition = undefined;
   }
 
   get hintsRemaining(): number {
