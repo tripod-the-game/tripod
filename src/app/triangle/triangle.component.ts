@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output, SimpleChanges, OnInit, ElementRef, ViewChildren, QueryList } from '@angular/core';
+import { Component, EventEmitter, Input, Output, SimpleChanges, OnInit, AfterViewInit, ElementRef, ViewChildren, QueryList } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { HttpClientModule } from '@angular/common/http';
 import { GameService, ValidationState } from '../../services/game.service';
- 
+
 @Component({
   selector: 'app-triangle',
   standalone: true,
@@ -13,7 +13,8 @@ import { GameService, ValidationState } from '../../services/game.service';
   templateUrl: './triangle.component.html',
   styleUrl: './triangle.component.scss'
 })
-export class TriangleComponent implements OnInit {
+export class TriangleComponent implements OnInit, AfterViewInit {
+  isReady = false;
   @Input() submitted = false;
   @Output() valuesSubmitted = new EventEmitter<Record<number, string>>();
   @Output() valuesChanged = new EventEmitter<Record<number, string>>();
@@ -113,6 +114,13 @@ export class TriangleComponent implements OnInit {
         if (!this.category) this.category = game.category;
       }
     });
+  }
+
+  ngAfterViewInit(): void {
+    // Small delay to ensure layout is complete before showing
+    setTimeout(() => {
+      this.isReady = true;
+    }, 50);
   }
 
   ngOnChanges(changes: SimpleChanges): void {

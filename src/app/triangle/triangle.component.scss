@@ -273,16 +273,12 @@
   width: 100%;
   max-width: 520px;
   margin: 25px auto;
-  animation: fadeInTriangle 0.15s ease-out;
+  opacity: 0;
+  transition: opacity 0.2s ease-out;
 }
 
-@keyframes fadeInTriangle {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+.triangle-wrapper.ready {
+  opacity: 1;
 }
 
 /* Shake animation keyframes */

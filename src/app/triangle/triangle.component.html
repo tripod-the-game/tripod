@@ -1,4 +1,4 @@
-<div class="triangle-wrapper">
+<div class="triangle-wrapper" [class.ready]="isReady">
   <!-- new category banner -->
   <div class="category-banner" *ngIf="category && category.length">
     <span class="banner-label">Category</span>
