@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output, SimpleChanges, OnInit, ElementRef, ViewChildren, QueryList } from '@angular/core';
+import { Component, EventEmitter, Input, Output, SimpleChanges, OnInit, AfterViewInit, ElementRef, ViewChildren, QueryList } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { HttpClientModule } from '@angular/common/http';
 import { GameService, ValidationState } from '../../services/game.service';
- 
+
 @Component({
   selector: 'app-triangle',
   standalone: true,
@@ -13,7 +13,8 @@ import { GameService, ValidationState } from '../../services/game.service';
   templateUrl: './triangle.component.html',
   styleUrl: './triangle.component.scss'
 })
-export class TriangleComponent implements OnInit {
+export class TriangleComponent implements OnInit, AfterViewInit {
+  isReady = false;
   @Input() submitted = false;
   @Output() valuesSubmitted = new EventEmitter<Record<number, string>>();
   @Output() valuesChanged = new EventEmitter<Record<number, string>>();
@@ -26,16 +27,27 @@ export class TriangleComponent implements OnInit {
   @Input() aggregatedCorrect?: Record<number, boolean>;
   @Input() aggregatedValidation?: Record<number, ValidationState>;
   @Input() allWrong = false;
+  @Input() size: 4 | 5 = 5;
 
-  circles = Array.from({ length: 12 }, (_, i) => i + 1);
   letterValues = ["A","V","P","A","P","U","L","G","R","A","P","E"];
   inputValues: Record<number, string> = {};
 
   @ViewChildren('triangleInput') inputs!: QueryList<ElementRef<HTMLInputElement>>;
 
-  // Neighbor map for arrow key navigation
+  // Dynamic circles array based on size
+  get circles(): number[] {
+    return this.size === 4
+      ? Array.from({ length: 9 }, (_, i) => i + 1)
+      : Array.from({ length: 12 }, (_, i) => i + 1);
+  }
+
+  get totalCircles(): number {
+    return this.size === 4 ? 9 : 12;
+  }
+
+  // Neighbor map for arrow key navigation (5-letter puzzles)
   // Follows word paths: left leg (1-2-4-6-8), right leg (1-3-5-7-12), bottom (8-9-10-11-12)
-  private neighbors: Record<number, { up?: number; down?: number; left?: number; right?: number }> = {
+  private readonly neighbors5: Record<number, { up?: number; down?: number; left?: number; right?: number }> = {
     1:  { down: 2, left: 2, right: 3 },       // apex: down defaults to left leg
     2:  { up: 1, down: 4, right: 3 },         // left leg
     3:  { up: 1, down: 5, left: 2 },          // right leg
@@ -50,8 +62,34 @@ export class TriangleComponent implements OnInit {
     12: { up: 7, left: 11 }                   // bottom-right corner
   };
 
+  // Neighbor map for 4-letter puzzles
+  // Triangle layout:    1
+  //                    2 3
+  //                   4   5
+  //                  6 7 8 9
+  private readonly neighbors4: Record<number, { up?: number; down?: number; left?: number; right?: number }> = {
+    1:  { down: 2, left: 2, right: 3 },       // apex
+    2:  { up: 1, down: 4, right: 3 },         // left leg
+    3:  { up: 1, down: 5, left: 2 },          // right leg
+    4:  { up: 2, down: 6, right: 5 },         // left leg
+    5:  { up: 3, down: 9, left: 4 },          // right leg
+    6:  { up: 4, right: 7 },                  // bottom-left corner
+    7:  { left: 6, right: 8 },                // bottom
+    8:  { left: 7, right: 9 },                // bottom
+    9:  { up: 5, left: 8 }                    // bottom-right corner
+  };
+
+  get neighbors(): Record<number, { up?: number; down?: number; left?: number; right?: number }> {
+    return this.size === 4 ? this.neighbors4 : this.neighbors5;
+  }
+
   // Linear order for auto-advance (top-to-bottom, left-to-right reading order)
-  private readonly circleOrder = [8, 6, 4, 2, 1, 3, 5, 7, 12, 8, 9, 10, 11, 12];
+  private readonly circleOrder5 = [8, 6, 4, 2, 1, 3, 5, 7, 12, 8, 9, 10, 11, 12];
+  private readonly circleOrder4 = [6, 4, 2, 1, 3, 5, 9, 6, 7, 8, 9];
+
+  get circleOrder(): number[] {
+    return this.size === 4 ? this.circleOrder4 : this.circleOrder5;
+  }
 
   constructor(private gameService: GameService) {}
 
@@ -64,17 +102,25 @@ export class TriangleComponent implements OnInit {
     }
 
     // Normal mode: load today's game if no override
-    if (Array.isArray(this.letters) && this.letters.length === 12) {
+    if (Array.isArray(this.letters) && this.letters.length === this.totalCircles) {
       this.letterValues = this.letters.map(l => (l ?? '').toString().toUpperCase());
       return;
     }
 
     this.gameService.getTodayGame().subscribe(game => {
-      if (Array.isArray(game.letters) && game.letters.length === 12) {
+      const expectedLength = game.size === 4 ? 9 : 12;
+      if (Array.isArray(game.letters) && game.letters.length === expectedLength) {
         this.letterValues = game.letters;
         if (!this.category) this.category = game.category;
       }
     });
+  }
+
+  ngAfterViewInit(): void {
+    // Small delay to ensure layout is complete before showing
+    setTimeout(() => {
+      this.isReady = true;
+    }, 50);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -115,7 +161,7 @@ export class TriangleComponent implements OnInit {
     }
 
     // If letters change in normal mode, update answer key
-    if (!this.displayOnly && changes['letters'] && Array.isArray(this.letters) && this.letters.length === 12) {
+    if (!this.displayOnly && changes['letters'] && Array.isArray(this.letters) && this.letters.length === this.totalCircles) {
       this.letterValues = this.letters.map(l => (l ?? '').toString().toUpperCase());
     }
 
@@ -145,7 +191,7 @@ export class TriangleComponent implements OnInit {
   }
 
   private syncLetterValues() {
-    if (Array.isArray(this.letters) && this.letters.length === 12) {
+    if (Array.isArray(this.letters) && this.letters.length === this.totalCircles) {
       this.letterValues = this.letters.map(l => (l ?? '').toString().toUpperCase());
     }
   }

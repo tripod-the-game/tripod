@@ -1,10 +1,20 @@
 .triangle-container {
   display: grid;
-  grid-template-columns: repeat(6, 1fr); /* Maximum of 5 columns */
   gap: 0px; /* Space between circles */
   justify-items: center; /* Center items in each grid cell */
-  width: 300px;
   margin-top: 25px;
+}
+
+/* 5-letter puzzle: 6-column grid, 300px wide */
+.triangle-container.size-5 {
+  grid-template-columns: repeat(6, 1fr);
+  width: 300px;
+}
+
+/* 4-letter puzzle: 5-column grid, 250px wide */
+.triangle-container.size-4 {
+  grid-template-columns: repeat(5, 1fr);
+  width: 250px;
 }
 
 .circle-input {
@@ -79,103 +89,145 @@
   opacity: 1;
 }
 
-.right-shift-0 {
-  grid-column: span 2; /* Span across 2 columns */
+/* ==============================================
+   5-LETTER PUZZLE POSITIONING (12 circles)
+   Layout:
+            1           (apex)
+          2   3
+        4       5
+      6           7
+    8   9  10  11   12    (bottom row)
+   ============================================== */
+
+.size-5 .circle-input[data-index="0"] {
+  grid-column: span 2;
   position: relative;
-  margin-left: calc(100%); /* Shift right half the width for overlap */
+  margin-left: calc(100%);
 }
 
-.right-shift-1 {
-  grid-column: span 2; /* Span across 2 columns */
+.size-5 .circle-input[data-index="1"] {
+  grid-column: span 2;
   position: relative;
-  margin-right: calc(25%); /* Shift right half the width for overlap */
+  margin-right: calc(25%);
 }
 
-.right-shift-2 {
-  grid-column: span 2; /* Span across 2 columns */
+.size-5 .circle-input[data-index="2"] {
+  grid-column: span 2;
   position: relative;
-  margin-left: calc(25%); /* Shift right half the width for overlap */
+  margin-left: calc(25%);
 }
 
-.right-shift-3 {
-  grid-column: span 2; /* Span across 2 columns */
+.size-5 .circle-input[data-index="3"] {
+  grid-column: span 2;
   position: relative;
-  margin-left: calc(50%); /* Shift right half the width for overlap */
+  margin-left: calc(50%);
 }
 
-.right-shift-4 {
-  grid-column: span 2; /* Span across 2 columns */
+.size-5 .circle-input[data-index="4"] {
+  grid-column: span 2;
   position: relative;
-  margin-right: calc(50%); /* Shift right half the width for overlap */
+  margin-right: calc(50%);
 }
 
-.right-shift-5 {
-  grid-column: span 2; /* Span across 2 columns */
+.size-5 .circle-input[data-index="5"] {
+  grid-column: span 2;
   position: relative;
-  margin-left: calc(125%); /* Shift right half the width for overlap */
+  margin-left: calc(125%);
 }
 
-.right-shift-6 {
-  grid-column: span 2; /* Span across 2 columns */
+.size-5 .circle-input[data-index="6"] {
+  grid-column: span 2;
   position: relative;
-  margin-right: calc(125%); /* Shift right half the width for overlap */
+  margin-right: calc(125%);
 }
 
-.right-shift-8 {
-  grid-column: span 2; /* Span across 2 columns */
+.size-5 .circle-input[data-index="8"] {
+  grid-column: span 2;
   position: relative;
-  margin-left: calc(50%); /* Shift right half the width for overlap */
+  margin-left: calc(50%);
 }
 
-.right-shift-9 {
-  grid-column: span 2; /* Span across 2 columns */
+.size-5 .circle-input[data-index="9"] {
+  grid-column: span 2;
   position: relative;
-  margin-left: calc(100%); /* Shift right half the width for overlap */
+  margin-left: calc(100%);
 }
 
-.right-shift-10 {
-  grid-column: span 2; /* Span across 2 columns */
+.size-5 .circle-input[data-index="10"] {
+  grid-column: span 2;
   position: relative;
-  margin-right: calc(50%); /* Shift right half the width for overlap */
+  margin-right: calc(50%);
 }
 
-/* Specific styles to position the circles correctly in a triangle */
-.circle-input:nth-child(1) {
-  grid-column: 3;
-} /* Top */
-.circle-input:nth-child(2) {
-  grid-column: 3;
+/* Grid column positions for 5-letter puzzle */
+.size-5 .circle-input:nth-child(1) { grid-column: 3; }
+.size-5 .circle-input:nth-child(2) { grid-column: 3; }
+.size-5 .circle-input:nth-child(3) { grid-column: 4; }
+.size-5 .circle-input:nth-child(4) { grid-column: 2; }
+.size-5 .circle-input:nth-child(5) { grid-column: 5; }
+.size-5 .circle-input:nth-child(6) { grid-column: 1; }
+.size-5 .circle-input:nth-child(7) { grid-column: 6; }
+.size-5 .circle-input:nth-child(8) { grid-column: 1; }
+.size-5 .circle-input:nth-child(9) { grid-column: 2; }
+.size-5 .circle-input:nth-child(10) { grid-column: 3; }
+.size-5 .circle-input:nth-child(11) { grid-column: 5; }
+.size-5 .circle-input:nth-child(12) { grid-column: 6; }
+
+/* ==============================================
+   4-LETTER PUZZLE POSITIONING (9 circles)
+   Layout:
+       1          (apex)
+      2 3
+     4   5
+    6 7 8 9       (bottom row)
+   ============================================== */
+
+.size-4 .circle-input[data-index="1"] {
+  grid-column: span 2;
+  position: relative;
+  margin-left: calc(50%);
 }
-.circle-input:nth-child(3) {
-  grid-column: 4;
+
+.size-4 .circle-input[data-index="2"] {
+  grid-column: span 2;
+  position: relative;
+  margin-right: calc(50%);
 }
-.circle-input:nth-child(4) {
-  grid-column: 2;
-} /* 2nd row */
-.circle-input:nth-child(5) {
-  grid-column: 5;
+
+.size-4 .circle-input[data-index="3"] {
+  grid-column: span 2;
+  position: relative;
+  margin-left: calc(125%);
 }
-.circle-input:nth-child(6) {
-  grid-column: 1;
+
+.size-4 .circle-input[data-index="4"] {
+  grid-column: span 2;
+  position: relative;
+  margin-right: calc(125%);
 }
-.circle-input:nth-child(7) {
-  grid-column: 6;
+
+.size-4 .circle-input[data-index="6"] {
+  grid-column: span 2;
+  position: relative;
+  margin-left: calc(62.5%);
 }
-.circle-input:nth-child(8) {
-  grid-column: 1;
+
+.size-4 .circle-input[data-index="7"] {
+  grid-column: span 2;
+  position: relative;
+  margin-right: calc(62.5%);
 }
-.circle-input:nth-child(9) {
-  grid-column: 2;
-}
-.circle-input:nth-child(10) {
-  grid-column: 3;
-}
-.circle-input:nth-child(11) {
-  grid-column: 5;
-}
-.circle-input:nth-child(12) {
-  grid-column: 6;
-}
+
+/* Grid column positions for 4-letter puzzle */
+.size-4 .circle-input:nth-child(1) { grid-column: 3; }
+.size-4 .circle-input:nth-child(2) { grid-column: 2; }
+.size-4 .circle-input:nth-child(3) { grid-column: 4; }
+.size-4 .circle-input:nth-child(4) { grid-column: 1; }
+.size-4 .circle-input:nth-child(5) { grid-column: 5; }
+.size-4 .circle-input:nth-child(6) { grid-column: 1; }
+.size-4 .circle-input:nth-child(7) { grid-column: 2; }
+.size-4 .circle-input:nth-child(8) { grid-column: 4; }
+.size-4 .circle-input:nth-child(9) { grid-column: 5; }
 
 .category-banner {
   background: #fff;
@@ -220,7 +272,13 @@
   align-items: center;
   width: 100%;
   max-width: 520px;
-  margin: 25px auto; // 50px space on top and bottom, centered horizontally
+  margin: 25px auto;
+  opacity: 0;
+  transition: opacity 0.2s ease-out;
+}
+
+.triangle-wrapper.ready {
+  opacity: 1;
 }
 
 /* Shake animation keyframes */

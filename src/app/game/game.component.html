@@ -24,6 +24,7 @@
       [submitted]="submitted"
       [letters]="currentLetters"
       [category]="currentCategory"
+      [size]="currentSize"
       [aggregatedCorrect]="aggregatedCorrectLetters"
       [aggregatedValidation]="aggregatedValidation"
       [allWrong]="allWrong"
@@ -43,6 +44,7 @@
   *ngIf="showPast"
   [submissions]="filteredSubmissions"
   [letters]="currentLetters"
+  [size]="currentSize"
   (close)="showPast = false"
 ></app-past-submissions>
 

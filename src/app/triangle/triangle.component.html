@@ -1,26 +1,15 @@
-<div class="triangle-wrapper">
+<div class="triangle-wrapper" [class.ready]="isReady">
   <!-- new category banner -->
   <div class="category-banner" *ngIf="category && category.length">
     <span class="banner-label">Category</span>
     <div class="banner-text">{{ category }}</div>
   </div>
 
-  <div class="triangle-container" [class.all-wrong]="allWrong">
+  <div class="triangle-container" [class.all-wrong]="allWrong" [class.size-4]="size === 4" [class.size-5]="size === 5">
     <div
       *ngFor="let circle of circles; let i = index"
       class="circle-input"
-      [ngClass]="{
-        'right-shift-0': i === 0,
-        'right-shift-1': i === 1,
-        'right-shift-2': i === 2,
-        'right-shift-3': i === 3,
-        'right-shift-4': i === 4,
-        'right-shift-5': i === 5,
-        'right-shift-6': i === 6,
-        'right-shift-8': i === 8,
-        'right-shift-9': i === 9,
-        'right-shift-10': i === 10
-      }"
+      [attr.data-index]="i"
       [class.correct]="isCorrect(circle, i)"
       [class.wrong-position]="!isCorrect(circle, i) && isWrongPosition(circle)"
     >

@@ -24,12 +24,29 @@ import { GameService, ValidationState } from "../../services/game.service";
   styleUrls: ["./game.component.scss"],
 })
 export class GameComponent implements OnInit {
-  // Word position mapping (fixed for all puzzles)
-  private readonly WORD_POSITIONS = {
-    wordOne: [8, 6 , 4, 2, 1],      // left edge
+  // Word position mapping based on puzzle size
+  private readonly WORD_POSITIONS_5 = {
+    wordOne: [8, 6, 4, 2, 1],      // left edge (5-letter)
     wordTwo: [1, 3, 5, 7, 12],     // right edge
-    wordThree: [8, 9, 10, 11, 12] // bottom row
+    wordThree: [8, 9, 10, 11, 12]  // bottom row
   };
+
+  private readonly WORD_POSITIONS_4 = {
+    wordOne: [6, 4, 2, 1],         // left edge (4-letter)
+    wordTwo: [1, 3, 5, 9],         // right edge
+    wordThree: [6, 7, 8, 9]        // bottom row
+  };
+
+  // Current puzzle size (4 or 5 letter words)
+  currentSize: 4 | 5 = 5;
+
+  get WORD_POSITIONS() {
+    return this.currentSize === 4 ? this.WORD_POSITIONS_4 : this.WORD_POSITIONS_5;
+  }
+
+  get totalCircles(): number {
+    return this.currentSize === 4 ? 9 : 12;
+  }
 
   submitted = false;
   // now store submissions with a date so we can filter per-game
@@ -96,6 +113,7 @@ export class GameComponent implements OnInit {
     const today = new Date();
     this.currentGameDate = this.formatDateKey(today);
     this.gameService.getGameForDate(today).subscribe((game) => {
+      this.currentSize = game.size;
       this.currentLetters = game.letters;
       this.currentCategory = game.category;
       this.currentWords = {
@@ -159,7 +177,7 @@ export class GameComponent implements OnInit {
     // Check for all correct
     const isAllCorrect =
       this.currentLetters &&
-      Object.values(values).length === 12 &&
+      Object.values(values).length === this.totalCircles &&
       Object.values(validation).every((v) => v === 'correct');
 
     if (isAllCorrect) {
@@ -273,7 +291,7 @@ export class GameComponent implements OnInit {
     const incorrectPositions: number[] = [];
     const correctLetters = this.aggregatedCorrectLetters;
 
-    for (let i = 1; i <= 12; i++) {
+    for (let i = 1; i <= this.totalCircles; i++) {
       if (!correctLetters[i]) {
         incorrectPositions.push(i);
       }
@@ -344,7 +362,9 @@ export class GameComponent implements OnInit {
   // called by the PastDateSelectorComponent (immediate load)
   onDateChosen(date: Date): void {
     this.gameService.getGameForDate(date).subscribe((game) => {
-      if (Array.isArray(game.letters) && game.letters.length === 12) {
+      const expectedLength = game.size === 4 ? 9 : 12;
+      if (Array.isArray(game.letters) && game.letters.length === expectedLength) {
+        this.currentSize = game.size;
         this.currentLetters = game.letters;
         this.currentCategory = game.category;
         this.currentWords = {
@@ -367,6 +387,7 @@ export class GameComponent implements OnInit {
         this.currentCategory = undefined;
         this.currentWords = undefined;
         this.currentGameDate = this.formatDateKey(new Date());
+        this.currentSize = 5;
       }
     });
   }
@@ -385,7 +406,7 @@ export class GameComponent implements OnInit {
     const latestSubmission = relevant.length > 0 ? relevant[relevant.length - 1] : null;
     const result: Record<number, ValidationState> = {};
 
-    for (let i = 1; i <= 12; i++) {
+    for (let i = 1; i <= this.totalCircles; i++) {
       // 'correct' persists across all submissions (once correct, always correct)
       const hasCorrect = relevant.some((sub) => sub.validation[i] === 'correct');
       // 'wrong-position' only applies to the latest submission (not aggregated)
@@ -404,7 +425,7 @@ export class GameComponent implements OnInit {
 
   get aggregatedCorrectLetters(): Record<number, boolean> {
     const result: Record<number, boolean> = {};
-    for (let i = 1; i <= 12; i++) {
+    for (let i = 1; i <= this.totalCircles; i++) {
       // If revealed, all letters are correct
       if (this.revealed) {
         result[i] = true;
@@ -421,7 +442,7 @@ export class GameComponent implements OnInit {
   get hasNoNewInput(): boolean {
     const correctLetters = this.aggregatedCorrectLetters;
     // Check if there are any non-empty values in positions that aren't already correct
-    for (let i = 1; i <= 12; i++) {
+    for (let i = 1; i <= this.totalCircles; i++) {
       if (correctLetters[i]) {
         // Skip positions that are already correct
         continue;
@@ -437,7 +458,7 @@ export class GameComponent implements OnInit {
 
   get isAllCorrect(): boolean {
     const correctLetters = this.aggregatedCorrectLetters;
-    return Object.values(correctLetters).length === 12 &&
+    return Object.values(correctLetters).length === this.totalCircles &&
            Object.values(correctLetters).every(v => v === true);
   }
 

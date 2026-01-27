@@ -19,6 +19,8 @@ export class PastSubmissionsComponent {
   }> = [];
   // optional: pass the game's letters so triangle shows the correct placeholders/letters
   @Input() letters?: string[];
+  // puzzle size (4 or 5 letter words)
+  @Input() size: 4 | 5 = 5;
 
   @Output() close = new EventEmitter<void>();
 
