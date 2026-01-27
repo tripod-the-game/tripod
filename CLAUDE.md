@@ -39,7 +39,18 @@ Tripod is a word puzzle game. Players fill letters into circles arranged in a tr
 
 ## Game JSON format
 
-Games are stored in `games/MMDDYY.json`:
+Games are organized by year and month: `games/YYYY/MM/MMDDYY.json`
+
+```
+games/
+  index.json              ← list of available game dates
+  2026/
+    01/
+      012626.json
+      012726.json
+```
+
+Each game file:
 ```json
 {
     "category": "Category Hint",

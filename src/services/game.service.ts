@@ -25,6 +25,13 @@ export class GameService {
     return `${mm}${dd}${yy}`;
   }
 
+  private formatPathForDate(d: Date): string {
+    const yyyy = String(d.getFullYear());
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const fileName = this.formatFileNameForDate(d);
+    return `games/${yyyy}/${mm}/${fileName}`;
+  }
+
   /**
    * Generate the 12-letter array from three 5-letter words based on fixed position mapping.
    * Position mapping:
@@ -91,8 +98,8 @@ export class GameService {
     ].map(c => (c ?? '').toUpperCase());
   }
 
-  private getByFileName(name: string): Observable<GameData> {
-    const url = `games/${name}.json`;
+  private getByPath(path: string): Observable<GameData> {
+    const url = `${path}.json`;
     return this.http.get<any>(url).pipe(
       map(res => {
         const category = res?.category ?? res?.game?.category ?? undefined;
@@ -133,13 +140,13 @@ export class GameService {
   }
 
   getTodayGame(): Observable<GameData> {
-    const name = this.formatFileNameForDate(new Date());
-    return this.getByFileName(name);
+    const path = this.formatPathForDate(new Date());
+    return this.getByPath(path);
   }
 
   getGameForDate(date: Date): Observable<GameData> {
-    const name = this.formatFileNameForDate(date);
-    return this.getByFileName(name);
+    const path = this.formatPathForDate(date);
+    return this.getByPath(path);
   }
 
   // index.json should be an array of MMDDYY strings, e.g. ["122625","122725"]
