@@ -77,3 +77,19 @@ For 4-letter puzzles, add `"size": 4` (5-letter puzzles default and don't need t
 npm start        # dev server
 npm run build    # production build
 ```
+
+## iOS (Capacitor)
+
+The app uses Capacitor to wrap the Angular app as a native iOS app.
+
+- **Package ID:** `com.tripod.app`
+- **Xcode project:** `ios/`
+- **Config:** `capacitor.config.ts`
+
+```
+npm run build          # build Angular app
+npx cap sync           # copy web assets to iOS project
+npx cap open ios       # open in Xcode
+```
+
+To deploy updates: build → sync → archive in Xcode → upload to App Store Connect.

@@ -117,6 +117,11 @@ export class TriangleComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    // In displayOnly mode, show immediately (no layout calculations needed)
+    if (this.displayOnly) {
+      this.isReady = true;
+      return;
+    }
     // Small delay to ensure layout is complete before showing
     setTimeout(() => {
       this.isReady = true;
