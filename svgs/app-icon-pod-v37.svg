@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- Sunrise gradient - stronger -->
+    <linearGradient id="sunriseGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffd6d6"/>
+      <stop offset="50%" stop-color="#fff0c2"/>
+      <stop offset="100%" stop-color="#d4edda"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Gradient background -->
+  <rect width="1024" height="1024" rx="180" fill="url(#sunriseGrad)"/>
+
+  <style>
+    .letter {
+      font-family: 'Baloo 2', 'Fredoka', 'Luckiest Guy', cursive, sans-serif;
+      font-weight: 700;
+      text-anchor: middle;
+      stroke: #111111;
+      stroke-width: 14;
+      paint-order: stroke fill;
+      font-size: 155px;
+    }
+    .circle-outer {
+      stroke: #111111;
+      stroke-width: 10;
+    }
+    .circle-inner {
+      fill: #ffffff;
+    }
+  </style>
+
+  <!-- Row 1: T circle - RED -->
+  <circle cx="512" cy="265" r="120" class="circle-outer" fill="#ef5350"/>
+  <circle cx="512" cy="265" r="103" class="circle-inner"/>
+  <text x="512" y="318" class="letter" fill="#ef5350">T</text>
+
+  <!-- Row 2: R circle - YELLOW -->
+  <circle cx="365" cy="512" r="120" class="circle-outer" fill="#f9a825"/>
+  <circle cx="365" cy="512" r="103" class="circle-inner"/>
+  <text x="365" y="565" class="letter" fill="#f9a825">R</text>
+
+  <!-- Row 2: I circle - YELLOW -->
+  <circle cx="659" cy="512" r="120" class="circle-outer" fill="#f9a825"/>
+  <circle cx="659" cy="512" r="103" class="circle-inner"/>
+  <text x="659" y="565" class="letter" fill="#f9a825">I</text>
+
+  <!-- Row 3: P circle - GREEN -->
+  <circle cx="218" cy="759" r="120" class="circle-outer" fill="#4caf50"/>
+  <circle cx="218" cy="759" r="103" class="circle-inner"/>
+  <text x="218" y="812" class="letter" fill="#4caf50">P</text>
+
+  <!-- Row 3: O circle - GREEN -->
+  <circle cx="512" cy="759" r="120" class="circle-outer" fill="#4caf50"/>
+  <circle cx="512" cy="759" r="103" class="circle-inner"/>
+  <text x="512" y="812" class="letter" fill="#4caf50">O</text>
+
+  <!-- Row 3: D circle - GREEN -->
+  <circle cx="806" cy="759" r="120" class="circle-outer" fill="#4caf50"/>
+  <circle cx="806" cy="759" r="103" class="circle-inner"/>
+  <text x="806" y="812" class="letter" fill="#4caf50">D</text>
+</svg>

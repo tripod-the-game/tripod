@@ -37,6 +37,7 @@ app-past-submissions {
   justify-content: center;
   min-height: 80vh;
   padding: 32px 8px 0 8px;
+  padding-top: calc(32px + env(safe-area-inset-top, 0px));
 }
 
 .game-card {
