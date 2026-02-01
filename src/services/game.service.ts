@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { Observable, of, from } from 'rxjs';
+import { map, catchError, tap, switchMap } from 'rxjs/operators';
 
 export interface GameData {
   letters: string[]; // length 12 for 5-letter words, 9 for 4-letter words
@@ -14,8 +14,15 @@ export interface GameData {
 
 export type ValidationState = 'none' | 'correct' | 'wrong-position';
 
+// Remote URL for game data (GitHub raw content from public tripod-games repo)
+const GAMES_BASE_URL = 'https://raw.githubusercontent.com/tripod-the-game/tripod-games/main';
+
 @Injectable({ providedIn: 'root' })
 export class GameService {
+  // Cache key prefix for localStorage
+  private readonly CACHE_PREFIX = 'tripod_game_';
+  private readonly INDEX_CACHE_KEY = 'tripod_games_index';
+
   constructor(private http: HttpClient) {}
 
   private formatFileNameForDate(d: Date): string {
@@ -99,44 +106,67 @@ export class GameService {
   }
 
   private getByPath(path: string): Observable<GameData> {
-    const url = `${path}.json`;
-    return this.http.get<any>(url).pipe(
-      map(res => {
-        const category = res?.category ?? res?.game?.category ?? undefined;
+    const remoteUrl = `${GAMES_BASE_URL}/${path.replace('games/', '')}.json`;
+    const cacheKey = this.CACHE_PREFIX + path.replace(/\//g, '_');
 
-        // Extract word metadata
-        const wordOne = (res?.wordOne ?? res?.game?.wordOne ?? '').toString().toUpperCase();
-        const wordTwo = (res?.wordTwo ?? res?.game?.wordTwo ?? '').toString().toUpperCase();
-        const wordThree = (res?.wordThree ?? res?.game?.wordThree ?? '').toString().toUpperCase();
-
-        // Determine size from explicit field or word lengths
-        let size: 4 | 5 = res?.size ?? 5;
-        if (!res?.size && wordOne.length === 4 && wordTwo.length === 4 && wordThree.length === 4) {
-          size = 4;
+    return this.http.get<any>(remoteUrl).pipe(
+      tap(res => {
+        // Cache the raw response
+        try {
+          localStorage.setItem(cacheKey, JSON.stringify(res));
+        } catch (e) {
+          // localStorage might be full or unavailable
         }
-
-        // Check if gameArray is provided, otherwise generate from words
-        const arr = res?.gameArray ?? res?.game?.gameArray ?? res?.letters ?? null;
-        const expectedLength = size === 4 ? 9 : 12;
-
-        let letters: string[];
-        if (arr && arr.length === expectedLength) {
-          // Use provided array
-          letters = arr.map((c: any) => (c ?? '').toString().toUpperCase());
-        } else if (size === 4 && wordOne.length >= 4 && wordTwo.length >= 4 && wordThree.length >= 4) {
-          // Generate from 4-letter words
-          letters = this.generateLettersFromWords4(wordOne, wordTwo, wordThree);
-        } else if (size === 5 && wordOne.length >= 5 && wordTwo.length >= 5 && wordThree.length >= 5) {
-          // Generate from 5-letter words
-          letters = this.generateLettersFromWords5(wordOne, wordTwo, wordThree);
-        } else {
-          letters = [];
-        }
-
-        return { letters, category, wordOne, wordTwo, wordThree, size };
       }),
-      catchError(() => of({ letters: [], category: undefined, size: 5 as const }))
+      map(res => this.parseGameResponse(res)),
+      catchError(() => {
+        // Try to load from cache
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) {
+          try {
+            return of(this.parseGameResponse(JSON.parse(cached)));
+          } catch (e) {
+            // Invalid cache
+          }
+        }
+        return of({ letters: [], category: undefined, size: 5 as const });
+      })
     );
+  }
+
+  private parseGameResponse(res: any): GameData {
+    const category = res?.category ?? res?.game?.category ?? undefined;
+
+    // Extract word metadata
+    const wordOne = (res?.wordOne ?? res?.game?.wordOne ?? '').toString().toUpperCase();
+    const wordTwo = (res?.wordTwo ?? res?.game?.wordTwo ?? '').toString().toUpperCase();
+    const wordThree = (res?.wordThree ?? res?.game?.wordThree ?? '').toString().toUpperCase();
+
+    // Determine size from explicit field or word lengths
+    let size: 4 | 5 = res?.size ?? 5;
+    if (!res?.size && wordOne.length === 4 && wordTwo.length === 4 && wordThree.length === 4) {
+      size = 4;
+    }
+
+    // Check if gameArray is provided, otherwise generate from words
+    const arr = res?.gameArray ?? res?.game?.gameArray ?? res?.letters ?? null;
+    const expectedLength = size === 4 ? 9 : 12;
+
+    let letters: string[];
+    if (arr && arr.length === expectedLength) {
+      // Use provided array
+      letters = arr.map((c: any) => (c ?? '').toString().toUpperCase());
+    } else if (size === 4 && wordOne.length >= 4 && wordTwo.length >= 4 && wordThree.length >= 4) {
+      // Generate from 4-letter words
+      letters = this.generateLettersFromWords4(wordOne, wordTwo, wordThree);
+    } else if (size === 5 && wordOne.length >= 5 && wordTwo.length >= 5 && wordThree.length >= 5) {
+      // Generate from 5-letter words
+      letters = this.generateLettersFromWords5(wordOne, wordTwo, wordThree);
+    } else {
+      letters = [];
+    }
+
+    return { letters, category, wordOne, wordTwo, wordThree, size };
   }
 
   getTodayGame(): Observable<GameData> {
@@ -151,20 +181,43 @@ export class GameService {
 
   // index.json should be an array of MMDDYY strings, e.g. ["122625","122725"]
   getAvailableDates(): Observable<Date[]> {
-    const url = `games/index.json`; 
-    return this.http.get<string[]>(url).pipe(
-      map(list => (list || [])
-        .map(s => {
-          if (!s || typeof s !== 'string' || s.length !== 6) return null;
-          const mm = Number(s.slice(0,2));
-          const dd = Number(s.slice(2,4));
-          const yy = Number(s.slice(4,6));
-          const fullYear = yy + (yy < 50 ? 2000 : 1900);
-          return new Date(fullYear, mm - 1, dd);
-        })
-        .filter((d): d is Date => d instanceof Date && !isNaN(d.getTime()))
-      ),
-      catchError(() => of([]))
+    const remoteUrl = `${GAMES_BASE_URL}/index.json`;
+
+    return this.http.get<string[]>(remoteUrl).pipe(
+      tap(list => {
+        // Cache the index
+        try {
+          localStorage.setItem(this.INDEX_CACHE_KEY, JSON.stringify(list));
+        } catch (e) {
+          // localStorage might be full or unavailable
+        }
+      }),
+      map(list => this.parseIndexResponse(list)),
+      catchError(() => {
+        // Try to load from cache
+        const cached = localStorage.getItem(this.INDEX_CACHE_KEY);
+        if (cached) {
+          try {
+            return of(this.parseIndexResponse(JSON.parse(cached)));
+          } catch (e) {
+            // Invalid cache
+          }
+        }
+        return of([]);
+      })
     );
+  }
+
+  private parseIndexResponse(list: string[]): Date[] {
+    return (list || [])
+      .map(s => {
+        if (!s || typeof s !== 'string' || s.length !== 6) return null;
+        const mm = Number(s.slice(0, 2));
+        const dd = Number(s.slice(2, 4));
+        const yy = Number(s.slice(4, 6));
+        const fullYear = yy + (yy < 50 ? 2000 : 1900);
+        return new Date(fullYear, mm - 1, dd);
+      })
+      .filter((d): d is Date => d instanceof Date && !isNaN(d.getTime()));
   }
 }

@@ -1,12 +1,49 @@
 /* You can add global styles to this file, and also import other style files */
 
-html, body { height: 100%; }
+html, body {
+  height: 100%;
+}
 
 body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
   background: #ffffff;
   color: #222;
+}
+
+/* iOS-specific styles (class added by app.component when running on iOS) */
+html.ios-native, html.ios-native body {
+  overflow: hidden;
+  overscroll-behavior: none;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
+html.ios-native app-root {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Disable iOS tap highlight (applies everywhere but harmless on web) */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Disable text selection on iOS native only */
+html.ios-native body {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Allow text selection in inputs */
+input, textarea {
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 /* Global focus-visible styles for accessibility */

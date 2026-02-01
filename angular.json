@@ -32,11 +32,6 @@
               {
                 "glob": "**/*",
                 "input": "public"
-              },
-              {
-                "glob": "**/*",
-                "input": "games",
-                "output": "games"
               }
             ],
             "styles": [

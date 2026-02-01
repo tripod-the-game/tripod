@@ -1,6 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { RouterOutlet } from "@angular/router";
 import { CommonModule } from "@angular/common";
+import { Capacitor } from "@capacitor/core";
 
 @Component({
   selector: "app-root",
@@ -52,6 +53,11 @@ export class AppComponent implements OnInit {
   isLoading = true;
 
   ngOnInit(): void {
+    // Add iOS-native class for platform-specific styles
+    if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios') {
+      document.documentElement.classList.add('ios-native');
+    }
+
     // Wait for both fonts to load AND minimum 500ms
     const minDelay = new Promise(resolve => setTimeout(resolve, 500));
     const fontsReady = document.fonts?.ready ?? Promise.resolve();
