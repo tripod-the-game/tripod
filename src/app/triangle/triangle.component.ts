@@ -122,10 +122,22 @@ export class TriangleComponent implements OnInit, AfterViewInit {
       this.isReady = true;
       return;
     }
-    // Small delay to ensure layout is complete before showing
-    setTimeout(() => {
-      this.isReady = true;
-    }, 50);
+    // Wait for letters data to be loaded before showing
+    this.checkReadyState();
+  }
+
+  private checkReadyState(): void {
+    // Only become ready when we have valid letters data
+    const expectedLength = this.size === 4 ? 9 : 12;
+    if (this.letters && this.letters.length === expectedLength) {
+      // Small delay to ensure layout is complete
+      setTimeout(() => {
+        this.isReady = true;
+      }, 50);
+    } else {
+      // Check again in a bit
+      setTimeout(() => this.checkReadyState(), 50);
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -137,6 +149,12 @@ export class TriangleComponent implements OnInit, AfterViewInit {
       if (changes['letters'] || changes['displayOnly']) {
         this.syncLetterValues();
       }
+    }
+
+    // When letters change (new game loaded), reset ready state and re-check
+    if (changes['letters'] && !changes['letters'].firstChange && !this.displayOnly) {
+      this.isReady = false;
+      this.checkReadyState();
     }
 
     // If parent provides category via input, prefer it (no-op otherwise)

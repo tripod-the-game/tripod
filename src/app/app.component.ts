@@ -53,13 +53,18 @@ export class AppComponent implements OnInit {
   isLoading = true;
 
   ngOnInit(): void {
+    const isIOS = Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios';
+
     // Add iOS-native class for platform-specific styles
-    if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios') {
+    if (isIOS) {
       document.documentElement.classList.add('ios-native');
+      // Skip loading screen on iOS - splash screen handles it
+      this.isLoading = false;
+      return;
     }
 
-    // Wait for both fonts to load AND minimum 500ms
-    const minDelay = new Promise(resolve => setTimeout(resolve, 500));
+    // Web: wait for both fonts to load AND minimum 1.5 seconds
+    const minDelay = new Promise(resolve => setTimeout(resolve, 1000));
     const fontsReady = document.fonts?.ready ?? Promise.resolve();
 
     Promise.all([minDelay, fontsReady]).then(() => {

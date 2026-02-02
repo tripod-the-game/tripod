@@ -6,7 +6,7 @@ const config: CapacitorConfig = {
   webDir: 'dist/tripod',
   plugins: {
     SplashScreen: {
-      launchShowDuration: 2000,
+      launchShowDuration: 1000,
       launchAutoHide: true,
       backgroundColor: '#ffffff',
       showSpinner: false,
@@ -16,7 +16,7 @@ const config: CapacitorConfig = {
     },
   },
   ios: {
-    contentInset: 'automatic',
+    contentInset: 'never',
   },
 };
 
