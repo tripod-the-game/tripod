@@ -29,15 +29,16 @@
   justify-content: center;
   min-height: 80vh;
   padding: 32px 8px 0 8px;
-  padding-top: calc(32px + env(safe-area-inset-top, 0px));
   background: #fff;
 }
 
-/* iOS native: use flex to fill space */
+/* iOS native: use flex to fill space, align to top */
 :host-context(html.ios-native) .landing-hero {
   flex: 1;
   min-height: unset;
   overflow: hidden;
+  align-items: flex-start;
+  padding-top: 100px;
 }
 
 .hero-card {
