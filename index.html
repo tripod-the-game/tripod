@@ -30,6 +30,10 @@
         z-index: 9999;
         animation: fadeIn 0.2s ease-out;
       }
+      /* Hide loader on iOS - splash screen handles it */
+      .app-loader.ios-hidden {
+        display: none;
+      }
       .app-loader-title {
         font-family: 'Baloo 2', sans-serif;
         font-size: 32px;
@@ -53,10 +57,20 @@
         to { opacity: 1; }
       }
     </style>
-    <div class="app-loader">
+    <div class="app-loader" id="app-loader">
       <div class="app-loader-title">Tripod</div>
       <div class="app-loader-spinner"></div>
     </div>
+    <script>
+      (function() {
+        var isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        var isCapacitor = window.Capacitor !== undefined;
+        if (isIOS || isCapacitor) {
+          document.getElementById('app-loader').classList.add('ios-hidden');
+        }
+      })();
+    </script>
   </app-root>
-<script src="polyfills-FFHMD2TL.js" type="module"></script><script src="main-ENKDTMWT.js" type="module"></script></body>
+<script src="polyfills-FFHMD2TL.js" type="module"></script><script src="main-IYGU2FI3.js" type="module"></script></body>
 </html>
