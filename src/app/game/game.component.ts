@@ -7,6 +7,7 @@ import { ResetButtonComponent } from "../reset-button/reset-button.component";
 import { PastSubmissionsComponent } from "../past-submissions/past-submissions.component";
 import { PastDateSelectorComponent } from "../past-date-selector/past-date-selector.component";
 import { GameService, ValidationState } from "../../services/game.service";
+import { LoaderService } from "../../services/loader.service";
 
 @Component({
   selector: "app-game",
@@ -106,7 +107,7 @@ export class GameComponent implements OnInit {
   // added property to store triangle input values
   triangleInputValues: Record<number, string> = {};
 
-  constructor(private gameService: GameService) {}
+  constructor(private gameService: GameService, private loaderService: LoaderService) {}
 
   ngOnInit(): void {
     // On initial load, fetch today's game and set all relevant state
@@ -361,6 +362,8 @@ export class GameComponent implements OnInit {
 
   // called by the PastDateSelectorComponent (immediate load)
   onDateChosen(date: Date): void {
+    // Show loader for half second during date change
+    this.loaderService.show(500);
     this.gameService.getGameForDate(date).subscribe((game) => {
       const expectedLength = game.size === 4 ? 9 : 12;
       if (Array.isArray(game.letters) && game.letters.length === expectedLength) {
