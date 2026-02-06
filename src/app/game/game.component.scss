@@ -5,7 +5,6 @@
   background: #fff;
   font-family: Roboto, "Helvetica Neue", sans-serif;
   color: #0f172a;
-  animation: fadeInPage 0.2s ease-out;
 }
 
 /* iOS native: use fixed layout to prevent scroll */
@@ -15,11 +14,6 @@
   height: 100%;
   min-height: unset;
   overflow: hidden;
-}
-
-@keyframes fadeInPage {
-  from { opacity: 0; }
-  to { opacity: 1; }
 }
 
 /* center the triangle and constrain width */
