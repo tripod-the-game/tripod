@@ -8,6 +8,7 @@ import { PastSubmissionsComponent } from "../past-submissions/past-submissions.c
 import { PastDateSelectorComponent } from "../past-date-selector/past-date-selector.component";
 import { GameService, ValidationState } from "../../services/game.service";
 import { LoaderService } from "../../services/loader.service";
+import { HapticService } from "../../services/haptic.service";
 
 @Component({
   selector: "app-game",
@@ -107,7 +108,11 @@ export class GameComponent implements OnInit {
   // added property to store triangle input values
   triangleInputValues: Record<number, string> = {};
 
-  constructor(private gameService: GameService, private loaderService: LoaderService) {}
+  constructor(
+    private gameService: GameService,
+    private loaderService: LoaderService,
+    private hapticService: HapticService
+  ) {}
 
   ngOnInit(): void {
     // On initial load, fetch today's game and set all relevant state
@@ -127,12 +132,14 @@ export class GameComponent implements OnInit {
 
   onSubmit(): void {
     if (this.hasNoNewInput || this.submitted) {
+      this.hapticService.error();
       this.submitShake = true;
       setTimeout(() => {
         this.submitShake = false;
       }, 400);
       return;
     }
+    this.hapticService.submit();
     console.log("submissions: ", this.submissions);
     this.submitted = true;
   }
@@ -182,6 +189,7 @@ export class GameComponent implements OnInit {
       Object.values(validation).every((v) => v === 'correct');
 
     if (isAllCorrect) {
+      this.hapticService.celebrate();
       this.congratsOpen = true;
     }
 
@@ -191,10 +199,20 @@ export class GameComponent implements OnInit {
       Object.values(validation).every((v) => v === 'none');
 
     if (isAllWrong) {
+      this.hapticService.error();
       this.allWrong = true;
       setTimeout(() => {
         this.allWrong = false;
       }, 600);
+    } else if (!isAllCorrect) {
+      // Some correct or wrong-position - give success feedback
+      const hasCorrect = Object.values(validation).some((v) => v === 'correct');
+      const hasWrongPosition = Object.values(validation).some((v) => v === 'wrong-position');
+      if (hasCorrect) {
+        this.hapticService.success();
+      } else if (hasWrongPosition) {
+        this.hapticService.warning();
+      }
     }
   }
 
@@ -245,6 +263,7 @@ export class GameComponent implements OnInit {
   onReset(): void {
     // Don't allow clear if puzzle is solved
     if (this.isAllCorrect) {
+      this.hapticService.error();
       this.resetShake = true;
       setTimeout(() => {
         this.resetShake = false;
@@ -252,6 +271,7 @@ export class GameComponent implements OnInit {
       return;
     }
 
+    this.hapticService.tap();
     this.submitted = false;
     this.resetCounter++;
     // triangleInputValues will be synced by valuesChanged from triangle
@@ -261,16 +281,19 @@ export class GameComponent implements OnInit {
   onRevealClick(): void {
     // If already revealed or all correct, shake instead of showing modal
     if (this.revealed || this.isAllCorrect) {
+      this.hapticService.error();
       this.revealShake = true;
       setTimeout(() => {
         this.revealShake = false;
       }, 400);
       return;
     }
+    this.hapticService.tap();
     this.showRevealConfirm = true;
   }
 
   onRevealAnswer(): void {
+    this.hapticService.tap();
     this.showRevealConfirm = false;
     this.setRevealed(true);
     this.submitted = true;
@@ -316,6 +339,7 @@ export class GameComponent implements OnInit {
     }
 
     // Reveal this letter
+    this.hapticService.success();
     this.triangleInputValues[positionToReveal] = this.currentLetters[positionToReveal - 1];
 
     // Save hint to per-date storage
@@ -333,6 +357,7 @@ export class GameComponent implements OnInit {
       return;
     }
 
+    this.hapticService.success();
     // Reveal the last letter
     this.triangleInputValues[this.lastHintPosition] = this.currentLetters[this.lastHintPosition - 1];
 
