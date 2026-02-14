@@ -9,6 +9,7 @@ import { PastDateSelectorComponent } from "../past-date-selector/past-date-selec
 import { GameService, ValidationState } from "../../services/game.service";
 import { LoaderService } from "../../services/loader.service";
 import { HapticService } from "../../services/haptic.service";
+import { ShareService } from "../../services/share.service";
 
 @Component({
   selector: "app-game",
@@ -111,7 +112,8 @@ export class GameComponent implements OnInit {
   constructor(
     private gameService: GameService,
     private loaderService: LoaderService,
-    private hapticService: HapticService
+    private hapticService: HapticService,
+    private shareService: ShareService
   ) {}
 
   ngOnInit(): void {
@@ -495,5 +497,29 @@ export class GameComponent implements OnInit {
     const dd = String(d.getDate()).padStart(2, "0");
     const yy = String(d.getFullYear()).slice(-2);
     return `${mm}${dd}${yy}`;
+  }
+
+  // Share functionality
+  shareButtonText = 'Share';
+
+  async onShare(): Promise<void> {
+    if (!this.currentGameDate) return;
+
+    this.hapticService.tap();
+    const success = await this.shareService.shareResult(
+      this.currentGameDate,
+      this.filteredSubmissions.length,
+      this.currentSize,
+      this.revealed,
+      this.hintsUsed
+    );
+
+    if (success) {
+      // Show "Copied!" feedback briefly on web
+      this.shareButtonText = 'Copied!';
+      setTimeout(() => {
+        this.shareButtonText = 'Share';
+      }, 2000);
+    }
   }
 }
