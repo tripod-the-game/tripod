@@ -1,4 +1,12 @@
 node_modules
 dist
 .angular
-ios
+
+# iOS - ignore build artifacts but keep project files
+ios/App/Pods/
+ios/App/App/public/
+ios/DerivedData/
+ios/App/App.xcworkspace/xcuserdata/
+ios/App/App.xcodeproj/xcuserdata/
+*.xcuserdatad
+xcuserdata/
