@@ -47,7 +47,7 @@ export class ShareService {
     return result;
   }
 
-  private readonly SHARE_URL = 'https://tripod-the-game.github.io/tripod';
+  private readonly SHARE_URL = 'https://playtripod.com';
 
   /**
    * Share the result using native share sheet or fallback to clipboard
