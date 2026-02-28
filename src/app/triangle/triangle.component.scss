@@ -185,25 +185,25 @@
 .size-4 .circle-input[data-index="1"] {
   grid-column: span 2;
   position: relative;
-  margin-left: calc(50%);
+  margin-left: calc(200% / 3);
 }
 
 .size-4 .circle-input[data-index="2"] {
   grid-column: span 2;
   position: relative;
-  margin-right: calc(50%);
+  margin-right: calc(200% / 3);
 }
 
 .size-4 .circle-input[data-index="3"] {
   grid-column: span 2;
   position: relative;
-  margin-left: calc(125%);
+  margin-left: calc(400% / 3);
 }
 
 .size-4 .circle-input[data-index="4"] {
   grid-column: span 2;
   position: relative;
-  margin-right: calc(125%);
+  margin-right: calc(400% / 3);
 }
 
 .size-4 .circle-input[data-index="6"] {
