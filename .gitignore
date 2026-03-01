@@ -11,3 +11,7 @@ ios/App/App.xcodeproj/xcuserdata/
 *.xcuserdatad
 xcuserdata/
 .vercel
+
+# Playwright
+test-results/
+playwright-report/
