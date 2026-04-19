@@ -118,7 +118,7 @@ export class GameComponent implements OnInit {
 
   ngOnInit(): void {
     // On initial load, fetch today's game and set all relevant state
-    const today = new Date();
+    const today = this.gameService.getTodayEST();
     this.currentGameDate = this.formatDateKey(today);
     this.gameService.getGameForDate(today).subscribe((game) => {
       this.currentSize = game.size;
@@ -129,6 +129,7 @@ export class GameComponent implements OnInit {
         wordTwo: game.wordTwo || '',
         wordThree: game.wordThree || ''
       };
+      this.loaderService.markReady();
     });
   }
 
@@ -389,8 +390,7 @@ export class GameComponent implements OnInit {
 
   // called by the PastDateSelectorComponent (immediate load)
   onDateChosen(date: Date): void {
-    // Show loader for half second during date change
-    this.loaderService.show(500);
+    this.loaderService.showUntilReady(500);
     this.gameService.getGameForDate(date).subscribe((game) => {
       const expectedLength = game.size === 4 ? 9 : 12;
       if (Array.isArray(game.letters) && game.letters.length === expectedLength) {
@@ -419,6 +419,7 @@ export class GameComponent implements OnInit {
         this.currentGameDate = this.formatDateKey(new Date());
         this.currentSize = 5;
       }
+      this.loaderService.markReady();
     });
   }
 

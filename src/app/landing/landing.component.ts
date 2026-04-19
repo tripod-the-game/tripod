@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { TriangleComponent } from '../triangle/triangle.component';
 import { HowToPlayComponent } from '../how-to-play/how-to-play.component';
 import { GameService } from '../../services/game.service';
+import { LoaderService } from '../../services/loader.service';
 
 @Component({
   selector: 'app-landing',
@@ -18,7 +19,7 @@ export class LandingComponent implements OnInit {
   previewCategory?: string;
   showHowToPlay = false;
 
-  constructor(private gameService: GameService) {}
+  constructor(private gameService: GameService, private loaderService: LoaderService) {}
 
   ngOnInit(): void {
     // load the 01/02/26 game (MMDDYY = 010226)
@@ -39,6 +40,7 @@ export class LandingComponent implements OnInit {
         };
         this.previewCategory = 'Example';
       }
+      this.loaderService.markReady();
     });
   }
 }

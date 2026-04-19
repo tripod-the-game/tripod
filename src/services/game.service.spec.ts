@@ -25,18 +25,64 @@ describe('GameService', () => {
 
   // ── URL helpers ─────────────────────────────────────────────────────────────
 
+  describe('getTodayEST', () => {
+    afterEach(() => {
+      jasmine.clock().uninstall();
+    });
+
+    it('should return the current date when already in EST daytime hours', () => {
+      // 2026-01-27 15:00:00 UTC = 2026-01-27 10:00 EST — same calendar date
+      jasmine.clock().install();
+      jasmine.clock().mockDate(new Date('2026-01-27T15:00:00Z'));
+
+      const result = service.getTodayEST();
+      expect(result.getFullYear()).toBe(2026);
+      expect(result.getMonth()).toBe(0);  // January
+      expect(result.getDate()).toBe(27);
+    });
+
+    it('should return the EST date (not UTC date) when UTC is past midnight but EST is not', () => {
+      // 2026-01-27 02:00:00 UTC = 2026-01-26 21:00 EST (still Jan 26 in New York)
+      jasmine.clock().install();
+      jasmine.clock().mockDate(new Date('2026-01-27T02:00:00Z'));
+
+      const result = service.getTodayEST();
+      expect(result.getFullYear()).toBe(2026);
+      expect(result.getMonth()).toBe(0);  // January
+      expect(result.getDate()).toBe(26);  // EST says it's still the 26th
+    });
+
+    it('should return the next day once EST midnight passes (05:00 UTC = 00:00 EST in winter)', () => {
+      // 2026-01-27 05:00:00 UTC = 2026-01-27 00:00 EST — just ticked over to Jan 27 in New York
+      jasmine.clock().install();
+      jasmine.clock().mockDate(new Date('2026-01-27T05:00:00Z'));
+
+      const result = service.getTodayEST();
+      expect(result.getFullYear()).toBe(2026);
+      expect(result.getMonth()).toBe(0);  // January
+      expect(result.getDate()).toBe(27);
+    });
+
+    it('should return a plain local Date (no time component)', () => {
+      jasmine.clock().install();
+      jasmine.clock().mockDate(new Date('2026-03-15T14:00:00Z'));
+
+      const result = service.getTodayEST();
+      expect(result.getHours()).toBe(0);
+      expect(result.getMinutes()).toBe(0);
+      expect(result.getSeconds()).toBe(0);
+      expect(result.getMilliseconds()).toBe(0);
+    });
+  });
+
   describe('getTodayGame', () => {
-    it('should fetch from a URL matching today\'s date', () => {
-      const d = new Date();
-      const mm = String(d.getMonth() + 1).padStart(2, '0');
-      const dd = String(d.getDate()).padStart(2, '0');
-      const yy = String(d.getFullYear()).slice(-2);
-      const yyyy = String(d.getFullYear());
-      const expectedUrl = `${BASE_URL}/${yyyy}/${mm}/${mm}${dd}${yy}.json`;
+    it('should fetch from the URL for the current EST date', () => {
+      // Spy on getTodayEST so the test is independent of the machine's local timezone
+      spyOn(service, 'getTodayEST').and.returnValue(new Date(2026, 0, 27)); // Jan 27 2026
 
       service.getTodayGame().subscribe();
 
-      const req = httpMock.expectOne(expectedUrl);
+      const req = httpMock.expectOne(`${BASE_URL}/2026/01/012726.json`);
       expect(req.request.method).toBe('GET');
       req.flush({});
     });

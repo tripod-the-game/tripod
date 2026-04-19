@@ -25,6 +25,16 @@ export class GameService {
 
   constructor(private http: HttpClient) {}
 
+  // Returns today's date in the America/New_York timezone so the game
+  // rolls over at midnight EST/EDT regardless of the user's local timezone.
+  getTodayEST(): Date {
+    const parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' })
+      .format(new Date())
+      .split('-')
+      .map(Number);
+    return new Date(parts[0], parts[1] - 1, parts[2]);
+  }
+
   private formatFileNameForDate(d: Date): string {
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
@@ -170,7 +180,7 @@ export class GameService {
   }
 
   getTodayGame(): Observable<GameData> {
-    const path = this.formatPathForDate(new Date());
+    const path = this.formatPathForDate(this.getTodayEST());
     return this.getByPath(path);
   }
 

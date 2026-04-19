@@ -41,12 +41,13 @@ describe('GameComponent', () => {
   let shareServiceSpy: jasmine.SpyObj<ShareService>;
 
   beforeEach(async () => {
-    gameServiceSpy = jasmine.createSpyObj('GameService', ['getGameForDate', 'getTodayGame', 'getAvailableDates']);
+    gameServiceSpy = jasmine.createSpyObj('GameService', ['getGameForDate', 'getTodayGame', 'getAvailableDates', 'getTodayEST']);
     gameServiceSpy.getGameForDate.and.returnValue(of(MOCK_GAME_5));
     gameServiceSpy.getTodayGame.and.returnValue(of(MOCK_GAME_5));
     gameServiceSpy.getAvailableDates.and.returnValue(of([]));
+    gameServiceSpy.getTodayEST.and.returnValue(new Date(2026, 0, 27)); // Jan 27 2026
 
-    loaderServiceSpy = jasmine.createSpyObj('LoaderService', ['show', 'hide']);
+    loaderServiceSpy = jasmine.createSpyObj('LoaderService', ['show', 'hide', 'showUntilReady', 'markReady']);
     hapticServiceSpy = jasmine.createSpyObj('HapticService', ['tap', 'submit', 'success', 'warning', 'error', 'celebrate']);
     hapticServiceSpy.tap.and.returnValue(Promise.resolve());
     hapticServiceSpy.submit.and.returnValue(Promise.resolve());
@@ -93,12 +94,9 @@ describe('GameComponent', () => {
       expect(component.currentSize).toBe(5);
     });
 
-    it('should set currentGameDate to today\'s MMDDYY key', () => {
-      const d = new Date();
-      const mm = String(d.getMonth() + 1).padStart(2, '0');
-      const dd = String(d.getDate()).padStart(2, '0');
-      const yy = String(d.getFullYear()).slice(-2);
-      expect(component.currentGameDate).toBe(`${mm}${dd}${yy}`);
+    it('should set currentGameDate to the EST date MMDDYY key', () => {
+      // getTodayEST is mocked to return Jan 27 2026 → "012726"
+      expect(component.currentGameDate).toBe('012726');
     });
   });
 
@@ -640,9 +638,9 @@ describe('GameComponent', () => {
       expect(component.currentSize).toBe(4);
     });
 
-    it('should call loaderService.show', () => {
+    it('should call loaderService.showUntilReady(500)', () => {
       component.onDateChosen(new Date(2026, 0, 27));
-      expect(loaderServiceSpy.show).toHaveBeenCalled();
+      expect(loaderServiceSpy.showUntilReady).toHaveBeenCalledWith(500);
     });
 
     it('should reset triangleInputValues when switching dates', () => {

@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { LoaderService } from '../../services/loader.service';
 
 @Component({
   selector: 'app-support',
@@ -8,4 +9,10 @@ import { RouterLink } from '@angular/router';
   templateUrl: './support.component.html',
   styleUrl: './support.component.scss'
 })
-export class SupportComponent {}
+export class SupportComponent implements OnInit {
+  constructor(private loaderService: LoaderService) {}
+
+  ngOnInit(): void {
+    this.loaderService.markReady();
+  }
+}
