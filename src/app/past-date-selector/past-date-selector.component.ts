@@ -36,7 +36,7 @@ export class PastDateSelectorComponent implements OnInit {
   // used by matDatepicker to enable only available dates (and past)
   dateFilter = (d: Date | null): boolean => {
     if (!d) return false;
-    const today = new Date();
+    const today = this.gameService.getTodayEST();
     // only allow past or today
     if (d > today) return false;
     return this.availableDatesSet.has(this.toKey(d));

@@ -3,7 +3,7 @@ import { Router, RouterOutlet, NavigationStart, NavigationEnd } from "@angular/r
 import { CommonModule } from "@angular/common";
 import { Capacitor } from "@capacitor/core";
 import { Subscription } from "rxjs";
-import { filter } from "rxjs/operators";
+import { filter, skip } from "rxjs/operators";
 import { LoaderService } from "../services/loader.service";
 
 @Component({
@@ -88,9 +88,17 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       this.isReady = true;
     }
 
-    // Listen for loader service (used by game component for date changes)
-    this.loaderSub = this.loaderService.visible$.subscribe(visible => {
-      if (this.isFirstLoad) return;
+    // Listen for loader service visibility changes
+    this.loaderSub = this.loaderService.visible$.pipe(skip(1)).subscribe(visible => {
+      if (this.isFirstLoad) {
+        // During initial load, only react to the hide signal — that's when data + timer are done
+        if (!visible) {
+          this.isFirstLoad = false;
+          this.isReady = true;
+          setTimeout(() => { this.showLoader = false; }, 200);
+        }
+        return;
+      }
       if (visible) {
         this.isReady = false;
         this.showLoader = true;
@@ -125,17 +133,9 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    // Fonts are already loaded via APP_INITIALIZER
-    // For web: show content after a brief delay for loader visibility
     if (!this.isIOS) {
-      setTimeout(() => {
-        this.isReady = true;
-        this.isFirstLoad = false;
-        // Fade out loader after content is visible
-        setTimeout(() => {
-          this.showLoader = false;
-        }, 200);
-      }, 800);
+      this.loaderService.showUntilReady(800);
+      // isFirstLoad stays true until visible$ emits false, keeping router events guarded
     } else {
       this.isFirstLoad = false;
     }
