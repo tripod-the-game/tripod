@@ -313,16 +313,27 @@
   opacity: 1;
 }
 
-/* Staggered transition delay so circles reveal colour one by one */
-.circle-input:nth-child(1)  { transition-delay: 0ms; }
-.circle-input:nth-child(2)  { transition-delay: 60ms; }
-.circle-input:nth-child(3)  { transition-delay: 120ms; }
-.circle-input:nth-child(4)  { transition-delay: 180ms; }
-.circle-input:nth-child(5)  { transition-delay: 240ms; }
-.circle-input:nth-child(6)  { transition-delay: 300ms; }
-.circle-input:nth-child(7)  { transition-delay: 360ms; }
-.circle-input:nth-child(8)  { transition-delay: 420ms; }
-.circle-input:nth-child(9)  { transition-delay: 480ms; }
-.circle-input:nth-child(10) { transition-delay: 540ms; }
-.circle-input:nth-child(11) { transition-delay: 600ms; }
-.circle-input:nth-child(12) { transition-delay: 660ms; }
+/* Staggered transition delay ordered by grid column (left to right) */
+
+/* 5-letter: col 1 */ .size-5 .circle-input:nth-child(6),
+/* 5-letter: col 1 */ .size-5 .circle-input:nth-child(8)  { transition-delay: 0ms; }
+/* 5-letter: col 2 */ .size-5 .circle-input:nth-child(4),
+/* 5-letter: col 2 */ .size-5 .circle-input:nth-child(9)  { transition-delay: 110ms; }
+/* 5-letter: col 3 */ .size-5 .circle-input:nth-child(1),
+/* 5-letter: col 3 */ .size-5 .circle-input:nth-child(2),
+/* 5-letter: col 3 */ .size-5 .circle-input:nth-child(10) { transition-delay: 220ms; }
+/* 5-letter: col 4 */ .size-5 .circle-input:nth-child(3)  { transition-delay: 330ms; }
+/* 5-letter: col 5 */ .size-5 .circle-input:nth-child(5),
+/* 5-letter: col 5 */ .size-5 .circle-input:nth-child(11) { transition-delay: 440ms; }
+/* 5-letter: col 6 */ .size-5 .circle-input:nth-child(7),
+/* 5-letter: col 6 */ .size-5 .circle-input:nth-child(12) { transition-delay: 550ms; }
+
+/* 4-letter: col 1 */ .size-4 .circle-input:nth-child(4),
+/* 4-letter: col 1 */ .size-4 .circle-input:nth-child(6)  { transition-delay: 0ms; }
+/* 4-letter: col 2 */ .size-4 .circle-input:nth-child(2),
+/* 4-letter: col 2 */ .size-4 .circle-input:nth-child(7)  { transition-delay: 110ms; }
+/* 4-letter: col 3 */ .size-4 .circle-input:nth-child(1)  { transition-delay: 220ms; }
+/* 4-letter: col 4 */ .size-4 .circle-input:nth-child(3),
+/* 4-letter: col 4 */ .size-4 .circle-input:nth-child(8)  { transition-delay: 330ms; }
+/* 4-letter: col 5 */ .size-4 .circle-input:nth-child(5),
+/* 4-letter: col 5 */ .size-4 .circle-input:nth-child(9)  { transition-delay: 440ms; }
