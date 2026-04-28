@@ -114,11 +114,6 @@
   *ngIf="congratsOpen"
   (click)="congratsOpen = false"
 >
-  <!-- Confetti pieces -->
-  <div class="confetti-container">
-    <div class="confetti" *ngFor="let i of [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18]"></div>
-  </div>
-
   <div class="congrats-content" (click)="$event.stopPropagation()">
     <div class="trophy">
       <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="#FFD700" stroke="#DAA520" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
