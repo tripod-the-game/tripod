@@ -1,4 +1,5 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, NgZone } from "@angular/core";
+import confetti from 'canvas-confetti';
 import { CommonModule } from "@angular/common";
 import { RouterModule } from "@angular/router";
 import { TriangleComponent } from "../triangle/triangle.component";
@@ -113,7 +114,8 @@ export class GameComponent implements OnInit {
     private gameService: GameService,
     private loaderService: LoaderService,
     private hapticService: HapticService,
-    private shareService: ShareService
+    private shareService: ShareService,
+    private ngZone: NgZone
   ) {}
 
   ngOnInit(): void {
@@ -194,6 +196,7 @@ export class GameComponent implements OnInit {
     if (isAllCorrect) {
       this.hapticService.celebrate();
       this.congratsOpen = true;
+      this.launchConfetti();
     }
 
     // Check for all wrong (no correct and no wrong-position, including partial submissions)
@@ -491,6 +494,24 @@ export class GameComponent implements OnInit {
     const correctLetters = this.aggregatedCorrectLetters;
     return Object.values(correctLetters).length === this.totalCircles &&
            Object.values(correctLetters).every(v => v === true);
+  }
+
+  private launchConfetti(): void {
+    this.ngZone.runOutsideAngular(() => {
+      const colors = ['#ff6b6b', '#4ecdc4', '#ffe66d', '#a8e6cf', '#6c5ce7', '#fd79a8'];
+      const shared = { particleCount: 60, spread: 70, colors, ticks: 200 };
+
+      // Fire from bottom-left corner (mirroring the triangle)
+      confetti({ ...shared, origin: { x: 0.1, y: 0.9 }, angle: 60 });
+      // Fire from bottom-right corner
+      confetti({ ...shared, origin: { x: 0.9, y: 0.9 }, angle: 120 });
+
+      // Second volley with a slight delay
+      setTimeout(() => {
+        confetti({ ...shared, particleCount: 40, origin: { x: 0.2, y: 0.85 }, angle: 70 });
+        confetti({ ...shared, particleCount: 40, origin: { x: 0.8, y: 0.85 }, angle: 110 });
+      }, 300);
+    });
   }
 
   private formatDateKey(d: Date): string {
