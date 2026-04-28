@@ -31,7 +31,7 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.13);
 }
 
-.triangle-wrapper.ready .circle-input {
+.triangle-wrapper.ready:not(.display-only) .circle-input {
   transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -317,15 +317,15 @@
 }
 
 /* Staggered transition delay so circles reveal colour one by one */
-.triangle-wrapper.ready .circle-input:nth-child(1)  { transition-delay: 0ms; }
-.triangle-wrapper.ready .circle-input:nth-child(2)  { transition-delay: 60ms; }
-.triangle-wrapper.ready .circle-input:nth-child(3)  { transition-delay: 120ms; }
-.triangle-wrapper.ready .circle-input:nth-child(4)  { transition-delay: 180ms; }
-.triangle-wrapper.ready .circle-input:nth-child(5)  { transition-delay: 240ms; }
-.triangle-wrapper.ready .circle-input:nth-child(6)  { transition-delay: 300ms; }
-.triangle-wrapper.ready .circle-input:nth-child(7)  { transition-delay: 360ms; }
-.triangle-wrapper.ready .circle-input:nth-child(8)  { transition-delay: 420ms; }
-.triangle-wrapper.ready .circle-input:nth-child(9)  { transition-delay: 480ms; }
-.triangle-wrapper.ready .circle-input:nth-child(10) { transition-delay: 540ms; }
-.triangle-wrapper.ready .circle-input:nth-child(11) { transition-delay: 600ms; }
-.triangle-wrapper.ready .circle-input:nth-child(12) { transition-delay: 660ms; }
+.triangle-wrapper.ready:not(.display-only) .circle-input:nth-child(1)  { transition-delay: 0ms; }
+.triangle-wrapper.ready:not(.display-only) .circle-input:nth-child(2)  { transition-delay: 60ms; }
+.triangle-wrapper.ready:not(.display-only) .circle-input:nth-child(3)  { transition-delay: 120ms; }
+.triangle-wrapper.ready:not(.display-only) .circle-input:nth-child(4)  { transition-delay: 180ms; }
+.triangle-wrapper.ready:not(.display-only) .circle-input:nth-child(5)  { transition-delay: 240ms; }
+.triangle-wrapper.ready:not(.display-only) .circle-input:nth-child(6)  { transition-delay: 300ms; }
+.triangle-wrapper.ready:not(.display-only) .circle-input:nth-child(7)  { transition-delay: 360ms; }
+.triangle-wrapper.ready:not(.display-only) .circle-input:nth-child(8)  { transition-delay: 420ms; }
+.triangle-wrapper.ready:not(.display-only) .circle-input:nth-child(9)  { transition-delay: 480ms; }
+.triangle-wrapper.ready:not(.display-only) .circle-input:nth-child(10) { transition-delay: 540ms; }
+.triangle-wrapper.ready:not(.display-only) .circle-input:nth-child(11) { transition-delay: 600ms; }
+.triangle-wrapper.ready:not(.display-only) .circle-input:nth-child(12) { transition-delay: 660ms; }
