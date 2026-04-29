@@ -18,22 +18,28 @@
 }
 
 .circle-input {
-  width: 46px; /* Adjust size as needed */
-  height: 46px; /* Same as width for a perfect circle */
-  border-radius: 50%; /* Makes it circular */
-  overflow: hidden; /* Ensures the input is clipped to the circle */
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  overflow: hidden;
   background-color: #ffffff;
-  border: 2px solid #000;
+  border: 2px solid #555;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0px; /* Space between circles */
+  margin: 0px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22), 0 2px 4px rgba(0, 0, 0, 0.10);
+}
+
+.triangle-wrapper.ready:not(.display-only) .circle-input {
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* show whole circle as correct (green background) */
 .circle-input.correct {
   background-color: #4caf50;
   border-color: #357a38;
+  box-shadow: 0 4px 14px rgba(76, 175, 80, 0.55), 0 2px 4px rgba(76, 175, 80, 0.30);
 }
 
 .circle-input.correct input,
@@ -50,6 +56,7 @@
 .circle-input.wrong-position {
   background-color: #f9a825;
   border-color: #c17900;
+  box-shadow: 0 4px 14px rgba(249, 168, 37, 0.55), 0 2px 4px rgba(249, 168, 37, 0.30);
 }
 
 .circle-input.wrong-position input,
@@ -296,7 +303,8 @@
 .triangle-container.all-wrong .circle-input {
   background-color: #ef5350;
   border-color: #c62828;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+  box-shadow: 0 4px 14px rgba(239, 83, 80, 0.55), 0 2px 4px rgba(239, 83, 80, 0.30);
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .triangle-container.all-wrong .circle-input input,
@@ -307,3 +315,17 @@
   font-weight: 700;
   opacity: 1;
 }
+
+/* Staggered transition delay so circles reveal colour one by one */
+.triangle-wrapper.ready:not(.display-only) .circle-input:nth-child(1)  { transition-delay: 0ms; }
+.triangle-wrapper.ready:not(.display-only) .circle-input:nth-child(2)  { transition-delay: 60ms; }
+.triangle-wrapper.ready:not(.display-only) .circle-input:nth-child(3)  { transition-delay: 120ms; }
+.triangle-wrapper.ready:not(.display-only) .circle-input:nth-child(4)  { transition-delay: 180ms; }
+.triangle-wrapper.ready:not(.display-only) .circle-input:nth-child(5)  { transition-delay: 240ms; }
+.triangle-wrapper.ready:not(.display-only) .circle-input:nth-child(6)  { transition-delay: 300ms; }
+.triangle-wrapper.ready:not(.display-only) .circle-input:nth-child(7)  { transition-delay: 360ms; }
+.triangle-wrapper.ready:not(.display-only) .circle-input:nth-child(8)  { transition-delay: 420ms; }
+.triangle-wrapper.ready:not(.display-only) .circle-input:nth-child(9)  { transition-delay: 480ms; }
+.triangle-wrapper.ready:not(.display-only) .circle-input:nth-child(10) { transition-delay: 540ms; }
+.triangle-wrapper.ready:not(.display-only) .circle-input:nth-child(11) { transition-delay: 600ms; }
+.triangle-wrapper.ready:not(.display-only) .circle-input:nth-child(12) { transition-delay: 660ms; }
