@@ -4,10 +4,15 @@ import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http"
 import { provideAnimations } from "@angular/platform-browser/animations";
 
 import { routes } from "./app.routes";
+import { SupabaseService } from "../services/supabase.service";
 
 // Factory to wait for fonts before Angular renders
 function waitForFonts(): () => Promise<void> {
   return () => (document.fonts?.ready ?? Promise.resolve()).then(() => {});
+}
+
+function initSupabase(supabase: SupabaseService): () => Promise<void> {
+  return () => supabase.initialize();
 }
 
 export const appConfig: ApplicationConfig = {
@@ -21,6 +26,13 @@ export const appConfig: ApplicationConfig = {
     {
       provide: APP_INITIALIZER,
       useFactory: waitForFonts,
+      multi: true,
+    },
+    // Sign in anonymously before any game state is written
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initSupabase,
+      deps: [SupabaseService],
       multi: true,
     },
   ],

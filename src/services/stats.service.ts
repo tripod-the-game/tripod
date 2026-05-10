@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { CloudSyncService } from './cloud-sync.service';
 
 export interface GameResult {
   date: string;     // MMDDYY
@@ -19,6 +20,8 @@ export interface ComputedStats {
 @Injectable({ providedIn: 'root' })
 export class StatsService {
   private readonly KEY = 'tripod_stats';
+
+  constructor(private cloudSync: CloudSyncService) {}
 
   private load(): GameResult[] {
     try {
@@ -48,6 +51,7 @@ export class StatsService {
       results.push(result);
     }
     this.save(results);
+    this.cloudSync.upsertGameResult(result);
   }
 
   getComputedStats(): ComputedStats {

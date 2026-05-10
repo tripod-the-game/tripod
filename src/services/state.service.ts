@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ValidationState } from './game.service';
+import { CloudSyncService } from './cloud-sync.service';
 
 export interface Submission {
   date?: string;
@@ -16,6 +17,8 @@ export interface DateState {
 @Injectable({ providedIn: 'root' })
 export class StateService {
   private readonly SUBMISSIONS_KEY = 'tripod_submissions';
+
+  constructor(private cloudSync: CloudSyncService) {}
 
   private stateKey(date: string): string {
     return `tripod_state_${date}`;
@@ -38,6 +41,12 @@ export class StateService {
     try {
       localStorage.setItem(this.SUBMISSIONS_KEY, JSON.stringify(submissions));
     } catch { /* storage full or unavailable */ }
+
+    // Sync each date's submissions to cloud
+    const dates = [...new Set(submissions.map(s => s.date).filter(Boolean))] as string[];
+    for (const date of dates) {
+      this.cloudSync.upsertSubmissions(date, submissions);
+    }
   }
 
   loadDateState(date: string): DateState | null {
@@ -53,6 +62,7 @@ export class StateService {
     try {
       localStorage.setItem(this.stateKey(date), JSON.stringify(state));
     } catch { /* storage full or unavailable */ }
+    this.cloudSync.upsertGameState(date, state);
   }
 
   loadInputValues(date: string): Record<number, string> {
@@ -68,5 +78,6 @@ export class StateService {
     try {
       localStorage.setItem(this.inputsKey(date), JSON.stringify(values));
     } catch { /* storage full or unavailable */ }
+    this.cloudSync.upsertInputValues(date, values);
   }
 }
