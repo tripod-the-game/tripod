@@ -1,5 +1,5 @@
 export const environment = {
   production: false,
-  supabaseUrl: '',
+  supabaseUrl: 'https://fenkavnqrzokalipkctd.supabase.co',
   supabaseAnonKey: '',
 };
