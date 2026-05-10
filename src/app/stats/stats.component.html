@@ -1,0 +1,50 @@
+<div class="modal-backdrop" (click)="close.emit()"></div>
+
+<div class="modal-panel" role="dialog" aria-modal="true" aria-label="Statistics">
+  <header class="modal-header">
+    <div class="title">Statistics</div>
+    <button class="close-btn" aria-label="Close" (click)="close.emit()">✕</button>
+  </header>
+
+  <main class="modal-body">
+    <div class="summary-row">
+      <div class="stat-cell">
+        <span class="stat-value">{{ stats.totalPlayed }}</span>
+        <span class="stat-label">Played</span>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-value">{{ stats.winPct }}</span>
+        <span class="stat-label">Win %</span>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-value">{{ stats.currentStreak }}</span>
+        <span class="stat-label">Current Streak</span>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-value">{{ stats.maxStreak }}</span>
+        <span class="stat-label">Max Streak</span>
+      </div>
+    </div>
+
+    <div class="distribution-section">
+      <h2>Guess Distribution</h2>
+      <div class="distribution-bars" *ngIf="stats.totalPlayed > 0; else noData">
+        <div class="bar-row" *ngFor="let key of distributionKeys">
+          <span class="bar-label">{{ key }}</span>
+          <div class="bar-track">
+            <div class="bar-fill" [style.width]="barWidth(key)">
+              <span class="bar-count">{{ stats.distribution[key] }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <ng-template #noData>
+        <p class="no-data">No games played yet. Come back after solving a puzzle!</p>
+      </ng-template>
+    </div>
+  </main>
+
+  <footer class="modal-footer">
+    <button class="close-btn-footer" (click)="close.emit()">Done</button>
+  </footer>
+</div>

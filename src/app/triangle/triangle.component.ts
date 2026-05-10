@@ -28,6 +28,7 @@ export class TriangleComponent implements OnInit, AfterViewInit {
   @Input() aggregatedValidation?: Record<number, ValidationState>;
   @Input() allWrong = false;
   @Input() size: 4 | 5 = 5;
+  @Input() initialValues?: Record<number, string>;
 
   letterValues = ["A","V","P","A","P","U","L","G","R","A","P","E"];
   inputValues: Record<number, string> = {};
@@ -104,6 +105,7 @@ export class TriangleComponent implements OnInit, AfterViewInit {
     // Normal mode: load today's game if no override
     if (Array.isArray(this.letters) && this.letters.length === this.totalCircles) {
       this.letterValues = this.letters.map(l => (l ?? '').toString().toUpperCase());
+      this.applyInitialValues();
       return;
     }
 
@@ -113,7 +115,18 @@ export class TriangleComponent implements OnInit, AfterViewInit {
         this.letterValues = game.letters;
         if (!this.category) this.category = game.category;
       }
+      this.applyInitialValues();
     });
+  }
+
+  private applyInitialValues(): void {
+    if (!this.initialValues) return;
+    for (const k of Object.keys(this.initialValues)) {
+      const pos = Number(k);
+      if (!this.aggregatedCorrect?.[pos]) {
+        this.inputValues[pos] = (this.initialValues[pos] ?? '').toUpperCase();
+      }
+    }
   }
 
   ngAfterViewInit(): void {
@@ -174,6 +187,8 @@ export class TriangleComponent implements OnInit, AfterViewInit {
           }
         }
       }
+      // Restore saved in-progress values for non-correct positions
+      this.applyInitialValues();
       // Emit the cleared/updated values so parent stays in sync
       this.valuesChanged.emit({ ...this.inputValues });
     }
@@ -200,6 +215,11 @@ export class TriangleComponent implements OnInit, AfterViewInit {
           this.inputValues[circle] = this.letterValues[i];
         }
       }
+    }
+
+    // Apply restored inputs when initialValues arrive asynchronously
+    if (changes['initialValues'] && !this.displayOnly) {
+      this.applyInitialValues();
     }
   }
 

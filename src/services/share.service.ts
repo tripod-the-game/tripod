@@ -1,11 +1,36 @@
 import { Injectable } from '@angular/core';
 import { Share } from '@capacitor/share';
 import { Capacitor } from '@capacitor/core';
+import { ValidationState } from './game.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ShareService {
+
+  private buildEmojiGrid(validation: Record<number, ValidationState>, size: 4 | 5): string {
+    const e = (pos: number): string => {
+      const v = validation[pos];
+      return v === 'correct' ? '🟩' : v === 'wrong-position' ? '🟨' : '⬜';
+    };
+
+    if (size === 5) {
+      return [
+        `    ${e(1)}`,
+        `   ${e(2)} ${e(3)}`,
+        `  ${e(4)}   ${e(5)}`,
+        ` ${e(6)}     ${e(7)}`,
+        `${e(8)}${e(9)}${e(10)}${e(11)}${e(12)}`,
+      ].join('\n');
+    } else {
+      return [
+        `   ${e(1)}`,
+        `  ${e(2)} ${e(3)}`,
+        ` ${e(4)}   ${e(5)}`,
+        `${e(6)}${e(7)}${e(8)}${e(9)}`,
+      ].join('\n');
+    }
+  }
 
   /**
    * Generate a shareable result string for a completed puzzle
@@ -14,8 +39,10 @@ export class ShareService {
   generateResultText(
     dateKey: string,
     attempts: number,
+    size: 4 | 5,
     wasRevealed: boolean,
-    hintsUsed: number
+    hintsUsed: number,
+    validation?: Record<number, ValidationState>
   ): string {
     // Format date from MMDDYY to readable format
     const month = dateKey.slice(0, 2);
@@ -40,6 +67,10 @@ export class ShareService {
       }
     }
 
+    if (validation) {
+      result += '\n\n' + this.buildEmojiGrid(validation, size);
+    }
+
     if (hintsUsed > 0) {
       result += `\n💡 ${hintsUsed} hint${hintsUsed === 1 ? '' : 's'} used`;
     }
@@ -57,9 +88,10 @@ export class ShareService {
     attempts: number,
     size: 4 | 5,
     wasRevealed: boolean,
-    hintsUsed: number
+    hintsUsed: number,
+    validation?: Record<number, ValidationState>
   ): Promise<boolean> {
-    const text = this.generateResultText(dateKey, attempts, wasRevealed, hintsUsed);
+    const text = this.generateResultText(dateKey, attempts, size, wasRevealed, hintsUsed, validation);
 
     if (Capacitor.isNativePlatform()) {
       try {

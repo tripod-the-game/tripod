@@ -5,6 +5,13 @@
       <span class="header-title">Tripod</span>
       <div class="header-actions">
         <app-past-date-selector [iconOnly]="true" (dateSelected)="onDateChosen($event)"></app-past-date-selector>
+        <button class="icon-btn" (click)="showStats = true" aria-label="View statistics">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+        </button>
         <button class="icon-btn" (click)="showPast = true" aria-label="Show past submissions">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="10"></circle>
@@ -28,6 +35,7 @@
       [aggregatedCorrect]="aggregatedCorrectLetters"
       [aggregatedValidation]="aggregatedValidation"
       [allWrong]="allWrong"
+      [initialValues]="triangleInputValues"
       (valuesChanged)="onValuesChanged($event)"
       (valuesSubmitted)="onValuesSubmitted($event)"
       [resetCounter]="resetCounter"
@@ -108,6 +116,16 @@
     </div>
   </div>
 </div>
+
+<app-stats
+  *ngIf="showStats"
+  (close)="showStats = false"
+></app-stats>
+
+<app-how-to-play
+  *ngIf="showHowToPlay"
+  (close)="showHowToPlay = false"
+></app-how-to-play>
 
 <div
   class="congrats-modal"

@@ -11,6 +11,10 @@ import { GameService, ValidationState } from "../../services/game.service";
 import { LoaderService } from "../../services/loader.service";
 import { HapticService } from "../../services/haptic.service";
 import { ShareService } from "../../services/share.service";
+import { StateService, Submission, DateState } from "../../services/state.service";
+import { StatsService } from "../../services/stats.service";
+import { StatsComponent } from "../stats/stats.component";
+import { HowToPlayComponent } from "../how-to-play/how-to-play.component";
 
 @Component({
   selector: "app-game",
@@ -23,6 +27,8 @@ import { ShareService } from "../../services/share.service";
     ResetButtonComponent,
     PastSubmissionsComponent,
     PastDateSelectorComponent,
+    StatsComponent,
+    HowToPlayComponent,
   ],
   templateUrl: "./game.component.html",
   styleUrls: ["./game.component.scss"],
@@ -53,12 +59,7 @@ export class GameComponent implements OnInit {
   }
 
   submitted = false;
-  // now store submissions with a date so we can filter per-game
-  submissions: Array<{
-    date?: string;
-    values: Record<number, string>;
-    validation: Record<number, ValidationState>;
-  }> = [];
+  submissions: Submission[] = [];
   resetCounter = 0;
   showPast = false;
   congratsOpen = false;
@@ -68,15 +69,12 @@ export class GameComponent implements OnInit {
   revealShake = false;
   showRevealConfirm = false;
   showLastHintConfirm = false;
+  showStats = false;
+  showHowToPlay = false;
   lastHintPosition?: number;
   maxHints = 3;
 
-  // Store game state per date (hints and revealed status)
-  private gameStateByDate: Record<string, {
-    hintsUsed: number;
-    hintedPositions: number[];
-    revealed: boolean;
-  }> = {};
+  private gameStateByDate: Record<string, DateState> = {};
 
   // Current game state (computed from gameStateByDate)
   get hintsUsed(): number {
@@ -115,13 +113,28 @@ export class GameComponent implements OnInit {
     private loaderService: LoaderService,
     private hapticService: HapticService,
     private shareService: ShareService,
+    private stateService: StateService,
+    private statsService: StatsService,
     private ngZone: NgZone
   ) {}
 
+  private readonly TUTORIAL_SEEN_KEY = 'tripod_seen_tutorial';
+
   ngOnInit(): void {
-    // On initial load, fetch today's game and set all relevant state
+    // Show tutorial automatically on first visit
+    if (!localStorage.getItem(this.TUTORIAL_SEEN_KEY)) {
+      this.showHowToPlay = true;
+      localStorage.setItem(this.TUTORIAL_SEEN_KEY, '1');
+    }
+
+    // Load all persisted submissions on startup
+    this.submissions = this.stateService.loadSubmissions();
+
+    // On initial load, fetch today's game and restore saved state for this date
     const today = this.gameService.getTodayEST();
     this.currentGameDate = this.formatDateKey(today);
+    this.restoreDateState(this.currentGameDate);
+
     this.gameService.getGameForDate(today).subscribe((game) => {
       this.currentSize = game.size;
       this.currentLetters = game.letters;
@@ -131,7 +144,36 @@ export class GameComponent implements OnInit {
         wordTwo: game.wordTwo || '',
         wordThree: game.wordThree || ''
       };
+      // Restore in-progress inputs for today
+      this.triangleInputValues = this.stateService.loadInputValues(this.currentGameDate!);
+      // Keep submitted=true if the game was already solved or revealed
+      this.submitted = this.revealed || this.isAllCorrect;
       this.loaderService.markReady();
+    });
+  }
+
+  private restoreDateState(date: string): void {
+    const saved = this.stateService.loadDateState(date);
+    if (saved) {
+      this.gameStateByDate[date] = saved;
+    }
+  }
+
+  private persistState(): void {
+    if (!this.currentGameDate) return;
+    this.stateService.saveSubmissions(this.submissions);
+    const state = this.gameStateByDate[this.currentGameDate] ?? { hintsUsed: 0, hintedPositions: [], revealed: false };
+    this.stateService.saveDateState(this.currentGameDate, state);
+  }
+
+  private recordStats(solved: boolean): void {
+    if (!this.currentGameDate) return;
+    this.statsService.recordResult({
+      date: this.currentGameDate,
+      solved,
+      attempts: this.filteredSubmissions.length,
+      hintsUsed: this.hintsUsed,
+      revealed: this.revealed,
     });
   }
 
@@ -151,6 +193,9 @@ export class GameComponent implements OnInit {
 
   onValuesChanged(values: Record<number, string>): void {
     this.triangleInputValues = { ...values };
+    if (this.currentGameDate) {
+      this.stateService.saveInputValues(this.currentGameDate, this.triangleInputValues);
+    }
   }
 
   onValuesSubmitted(values: Record<number, string>): void {
@@ -186,6 +231,7 @@ export class GameComponent implements OnInit {
       values: { ...values },
       validation,
     });
+    this.persistState();
 
     // Check for all correct
     const isAllCorrect =
@@ -197,6 +243,7 @@ export class GameComponent implements OnInit {
       this.hapticService.celebrate();
       this.congratsOpen = true;
       this.launchConfetti();
+      this.recordStats(true);
     }
 
     // Check for all wrong (no correct and no wrong-position, including partial submissions)
@@ -279,8 +326,12 @@ export class GameComponent implements OnInit {
 
     this.hapticService.tap();
     this.submitted = false;
+    // Clear before incrementing resetCounter so triangle's applyInitialValues sees {}
+    this.triangleInputValues = {};
+    if (this.currentGameDate) {
+      this.stateService.saveInputValues(this.currentGameDate, {});
+    }
     this.resetCounter++;
-    // triangleInputValues will be synced by valuesChanged from triangle
     // Hints persist - triangle component preserves letters marked as correct
   }
 
@@ -310,6 +361,8 @@ export class GameComponent implements OnInit {
         this.triangleInputValues[i + 1] = this.currentLetters[i];
       }
     }
+    this.persistState();
+    this.recordStats(false);
   }
 
   onRevealHint(): void {
@@ -354,6 +407,7 @@ export class GameComponent implements OnInit {
     }
     this.gameStateByDate[this.currentGameDate].hintedPositions.push(positionToReveal);
     this.gameStateByDate[this.currentGameDate].hintsUsed++;
+    this.persistState();
 
     this.showRevealConfirm = false;
   }
@@ -376,6 +430,8 @@ export class GameComponent implements OnInit {
 
     // End the game (similar to reveal all)
     this.setRevealed(true);
+    this.persistState();
+    this.recordStats(false);
     this.submitted = true;
 
     this.showLastHintConfirm = false;
@@ -407,12 +463,12 @@ export class GameComponent implements OnInit {
         };
         // set currentGameDate to the chosen MMDDYY identifier
         this.currentGameDate = this.formatDateKey(date);
-        // Clear stale input values from previous game
-        this.triangleInputValues = {};
-        // reset UI so Triangle picks up new letters/category
+        // Restore persisted state for this date
+        this.restoreDateState(this.currentGameDate);
+        // Restore saved in-progress inputs (or empty for a fresh date)
+        this.triangleInputValues = this.stateService.loadInputValues(this.currentGameDate);
         // If the game was previously revealed or solved, keep it submitted (locked)
         this.submitted = this.revealed || this.isAllCorrect;
-        // revealed and hints are stored per-date in gameStateByDate, so they persist automatically
         this.resetCounter++;
       } else {
         // no letters -> clear override (falls back to today)
@@ -533,7 +589,8 @@ export class GameComponent implements OnInit {
       this.filteredSubmissions.length,
       this.currentSize,
       this.revealed,
-      this.hintsUsed
+      this.hintsUsed,
+      this.aggregatedValidation
     );
 
     if (success) {
