@@ -1,6 +1,13 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Tripod Game', () => {
+  test.beforeEach(async ({ page }) => {
+    // Suppress the first-visit tutorial modal so it doesn't block game interactions
+    await page.addInitScript(() => {
+      localStorage.setItem('tripod_seen_tutorial', '1');
+    });
+  });
+
 
   test('landing page loads', async ({ page }) => {
     await page.goto('/');
