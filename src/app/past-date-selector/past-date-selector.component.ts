@@ -25,7 +25,7 @@ export class PastDateSelectorComponent implements OnInit {
   selectedDate?: Date;
 
   private availableDates: Date[] = [];
-  private dateStatusMap: Record<string, 'completed' | 'started'> = {};
+  private dateStatusMap: Record<string, 'completed' | 'revealed' | 'started'> = {};
 
   constructor(
     private gameService: GameService,
@@ -49,7 +49,9 @@ export class PastDateSelectorComponent implements OnInit {
 
   private buildStatusMap(): void {
     this.dateStatusMap = {};
-    const completed = new Set(this.statsService.getResults().map(r => r.date));
+    const results = this.statsService.getResults();
+    const solvedDates = new Set(results.filter(r => r.solved && !r.revealed).map(r => r.date));
+    const revealedDates = new Set(results.filter(r => r.revealed).map(r => r.date));
     const submissions = this.stateService.loadSubmissions();
     const submitted = new Set(submissions.map(s => s.date).filter(Boolean) as string[]);
 
@@ -57,8 +59,10 @@ export class PastDateSelectorComponent implements OnInit {
       const ymd = this.toKey(d);
       const mmddyy = this.toMmddyy(d);
 
-      if (completed.has(mmddyy)) {
+      if (solvedDates.has(mmddyy)) {
         this.dateStatusMap[ymd] = 'completed';
+      } else if (revealedDates.has(mmddyy)) {
+        this.dateStatusMap[ymd] = 'revealed';
       } else if (
         submitted.has(mmddyy) ||
         this.stateService.loadDateState(mmddyy) !== null ||
@@ -73,6 +77,7 @@ export class PastDateSelectorComponent implements OnInit {
     if (view !== 'month') return '';
     const status = this.dateStatusMap[this.toKey(date)];
     if (status === 'completed') return 'date-completed';
+    if (status === 'revealed') return 'date-revealed';
     if (status === 'started') return 'date-started';
     return '';
   };

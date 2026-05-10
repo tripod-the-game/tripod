@@ -59,6 +59,7 @@ textarea:focus-visible,
 
 /* Calendar date-status dots (datepicker renders as overlay, must be global) */
 .mat-calendar-body-cell.date-completed .mat-calendar-body-cell-content::after,
+.mat-calendar-body-cell.date-revealed .mat-calendar-body-cell-content::after,
 .mat-calendar-body-cell.date-started .mat-calendar-body-cell-content::after {
   content: '';
   position: absolute;
@@ -73,6 +74,10 @@ textarea:focus-visible,
 
 .mat-calendar-body-cell.date-completed .mat-calendar-body-cell-content::after {
   background: #22c55e;
+}
+
+.mat-calendar-body-cell.date-revealed .mat-calendar-body-cell-content::after {
+  background: #ef4444;
 }
 
 .mat-calendar-body-cell.date-started .mat-calendar-body-cell-content::after {
