@@ -50,8 +50,8 @@ export class PastDateSelectorComponent implements OnInit {
   private buildStatusMap(): void {
     this.dateStatusMap = {};
     const results = this.statsService.getResults();
-    const solvedDates = new Set(results.filter(r => r.solved && !r.revealed).map(r => r.date));
-    const revealedDates = new Set(results.filter(r => r.revealed).map(r => r.date));
+    const solvedDates = new Set(results.filter(r => r.solved).map(r => r.date));
+    const revealedDates = new Set(results.filter(r => r.revealed && !r.solved).map(r => r.date));
     const submissions = this.stateService.loadSubmissions();
     const submitted = new Set(submissions.map(s => s.date).filter(Boolean) as string[]);
 
