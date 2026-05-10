@@ -8,6 +8,8 @@ import { GameService, GameData, ValidationState } from '../../services/game.serv
 import { LoaderService } from '../../services/loader.service';
 import { HapticService } from '../../services/haptic.service';
 import { ShareService } from '../../services/share.service';
+import { StateService } from '../../services/state.service';
+import { StatsService } from '../../services/stats.service';
 
 // GRAPE / EARTH / GRAPH — a valid 5-letter Tripod puzzle
 // letters = ['E','P','A','A','R','R','T','G','R','A','P','H']
@@ -39,6 +41,8 @@ describe('GameComponent', () => {
   let loaderServiceSpy: jasmine.SpyObj<LoaderService>;
   let hapticServiceSpy: jasmine.SpyObj<HapticService>;
   let shareServiceSpy: jasmine.SpyObj<ShareService>;
+  let stateServiceSpy: jasmine.SpyObj<StateService>;
+  let statsServiceSpy: jasmine.SpyObj<StatsService>;
 
   beforeEach(async () => {
     gameServiceSpy = jasmine.createSpyObj('GameService', ['getGameForDate', 'getTodayGame', 'getAvailableDates', 'getTodayEST']);
@@ -59,6 +63,18 @@ describe('GameComponent', () => {
     shareServiceSpy = jasmine.createSpyObj('ShareService', ['shareResult', 'generateResultText']);
     shareServiceSpy.shareResult.and.returnValue(Promise.resolve(true));
 
+    stateServiceSpy = jasmine.createSpyObj('StateService', [
+      'loadSubmissions', 'saveSubmissions',
+      'loadDateState', 'saveDateState',
+      'loadInputValues', 'saveInputValues',
+    ]);
+    stateServiceSpy.loadSubmissions.and.returnValue([]);
+    stateServiceSpy.loadDateState.and.returnValue(null);
+    stateServiceSpy.loadInputValues.and.returnValue({});
+
+    statsServiceSpy = jasmine.createSpyObj('StatsService', ['recordResult', 'getResults', 'getComputedStats']);
+    statsServiceSpy.getResults.and.returnValue([]);
+
     await TestBed.configureTestingModule({
       imports: [GameComponent],
       providers: [
@@ -66,6 +82,8 @@ describe('GameComponent', () => {
         { provide: LoaderService, useValue: loaderServiceSpy },
         { provide: HapticService, useValue: hapticServiceSpy },
         { provide: ShareService, useValue: shareServiceSpy },
+        { provide: StateService, useValue: stateServiceSpy },
+        { provide: StatsService, useValue: statsServiceSpy },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     })
