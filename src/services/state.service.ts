@@ -45,7 +45,7 @@ export class StateService {
     try {
       localStorage.setItem(this.SUBMISSIONS_KEY, JSON.stringify(submissions));
     } catch { /* storage full or unavailable */ }
-    this.pushSubmissions(submissions);
+    this.pushLatestSubmission(submissions);
   }
 
   loadDateState(date: string): DateState | null {
@@ -136,16 +136,16 @@ export class StateService {
     return merged;
   }
 
-  private pushSubmissions(submissions: Submission[]): void {
+  private pushLatestSubmission(submissions: Submission[]): void {
     const userId = this.auth.currentUser?.id;
-    if (!userId) return;
-    const rows = submissions.map(s => ({
+    if (!userId || submissions.length === 0) return;
+    const s = submissions[submissions.length - 1];
+    this.supabase.client.from('submissions').insert({
       user_id: userId,
       date: s.date ?? '',
       values: s.values,
       validation: s.validation,
-    }));
-    this.supabase.client.from('submissions').upsert(rows).then();
+    }).then();
   }
 
   private pushDateState(date: string, state: DateState): void {
@@ -158,7 +158,7 @@ export class StateService {
       hinted_positions: state.hintedPositions,
       revealed: state.revealed,
       updated_at: new Date().toISOString(),
-    }).then();
+    }, { onConflict: 'user_id,date' }).then();
   }
 
   private pushInputValues(date: string, values: Record<number, string>): void {
@@ -169,6 +169,6 @@ export class StateService {
       date,
       values,
       updated_at: new Date().toISOString(),
-    }).then();
+    }, { onConflict: 'user_id,date' }).then();
   }
 }

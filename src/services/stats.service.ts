@@ -148,7 +148,7 @@ export class StatsService {
       hints_used: result.hintsUsed,
       revealed: result.revealed,
       updated_at: new Date().toISOString(),
-    }).then();
+    }, { onConflict: 'user_id,date' }).then();
   }
 
   // Convert MMDDYY to a numeric day-index for consecutive-day arithmetic
