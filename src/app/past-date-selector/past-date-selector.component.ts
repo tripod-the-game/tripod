@@ -24,6 +24,7 @@ export class PastDateSelectorComponent implements OnInit {
   availableDatesSet = new Set<string>(); // keys as YYYY-MM-DD for quick lookup
   selectedDate?: Date;
 
+  private availableDates: Date[] = [];
   private dateStatusMap: Record<string, 'completed' | 'started'> = {};
 
   constructor(
@@ -34,19 +35,25 @@ export class PastDateSelectorComponent implements OnInit {
 
   ngOnInit(): void {
     this.gameService.getAvailableDates().subscribe(dates => {
+      this.availableDates = dates;
       dates.forEach(d => {
         this.availableDatesSet.add(this.toKey(d));
       });
-      this.buildStatusMap(dates);
+      this.buildStatusMap();
     });
   }
 
-  private buildStatusMap(dates: Date[]): void {
+  onPickerOpened(): void {
+    this.buildStatusMap();
+  }
+
+  private buildStatusMap(): void {
+    this.dateStatusMap = {};
     const completed = new Set(this.statsService.getResults().map(r => r.date));
     const submissions = this.stateService.loadSubmissions();
     const submitted = new Set(submissions.map(s => s.date).filter(Boolean) as string[]);
 
-    for (const d of dates) {
+    for (const d of this.availableDates) {
       const ymd = this.toKey(d);
       const mmddyy = this.toMmddyy(d);
 
