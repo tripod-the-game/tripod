@@ -9,26 +9,29 @@ import { ValidationState } from './game.service';
 export class ShareService {
 
   private buildEmojiGrid(validation: Record<number, ValidationState>, size: 4 | 5): string {
-    const e = (pos: number): string => {
+    const c = (pos: number): string => {
       const v = validation[pos];
-      return v === 'correct' ? '🟩' : v === 'wrong-position' ? '🟨' : '⬜';
+      return v === 'correct' ? '🟢' : v === 'wrong-position' ? '🟡' : '⚪';
     };
+    const _ = '⬜';
 
     if (size === 5) {
+      // 9-column grid; each row is a fixed-width emoji sequence (no spaces)
       return [
-        `    ${e(1)}`,
-        `   ${e(2)} ${e(3)}`,
-        `  ${e(4)}   ${e(5)}`,
-        ` ${e(6)}     ${e(7)}`,
-        `${e(8)}${e(9)}${e(10)}${e(11)}${e(12)}`,
-      ].join('\n');
+        [_, _, _, _, c(1),  _, _, _, _   ],
+        [_, _, _, c(2), _, c(3),  _, _, _],
+        [_, _, c(4), _, _, _, c(5),  _, _],
+        [_, c(6), _, _, _, _, _, c(7),  _],
+        [c(8), _, c(9), _, c(10), _, c(11), _, c(12)],
+      ].map(r => r.join('')).join('\n');
     } else {
+      // 7-column grid
       return [
-        `   ${e(1)}`,
-        `  ${e(2)} ${e(3)}`,
-        ` ${e(4)}   ${e(5)}`,
-        `${e(6)}${e(7)}${e(8)}${e(9)}`,
-      ].join('\n');
+        [_, _, _, c(1),  _, _, _],
+        [_, _, c(2), _, c(3),  _, _],
+        [_, c(4), _, _, _, c(5),  _],
+        [c(6), _, c(7), _, c(8), _, c(9)],
+      ].map(r => r.join('')).join('\n');
     }
   }
 
