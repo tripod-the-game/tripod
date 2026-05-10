@@ -94,8 +94,6 @@ export class HowToPlayComponent {
       setTimeout(() => { this.tutorialAllWrong = false; }, 600);
     }
 
-    // Reset flag so the next Check click fires ngOnChanges again
-    setTimeout(() => { this.tutorialSubmitted = false; }, 0);
   }
 
   get tutorialSolved(): boolean {
@@ -114,7 +112,13 @@ export class HowToPlayComponent {
   }
 
   onCheckTutorial(): void {
-    this.tutorialSubmitted = true;
+    if (this.tutorialSubmitted) {
+      // Cycle false→true to retrigger ngOnChanges without losing current colors
+      this.tutorialSubmitted = false;
+      setTimeout(() => { this.tutorialSubmitted = true; }, 0);
+    } else {
+      this.tutorialSubmitted = true;
+    }
   }
 
   nextStep(): void {
