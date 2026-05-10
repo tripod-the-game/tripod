@@ -8,6 +8,13 @@ import { ValidationState } from "../../services/game.service";
 // 5-letter layout positions: wordOne=[8,6,4,2,1], wordTwo=[1,3,5,7,12], wordThree=[8,9,10,11,12]
 const TUTORIAL_LETTERS = ['A', 'V', 'P', 'A', 'P', 'U', 'L', 'G', 'R', 'A', 'P', 'E'];
 
+const TUTORIAL_WORDS = { wordOne: 'GUAVA', wordTwo: 'APPLE', wordThree: 'GRAPE' };
+const TUTORIAL_POSITIONS = {
+  wordOne: [8, 6, 4, 2, 1],
+  wordTwo: [1, 3, 5, 7, 12],
+  wordThree: [8, 9, 10, 11, 12],
+};
+
 @Component({
   selector: "app-how-to-play",
   standalone: true,
@@ -39,6 +46,7 @@ export class HowToPlayComponent {
   tutorialValues: Record<number, string> = {};
   tutorialValidation: Record<number, ValidationState> = {};
   tutorialCorrect: Record<number, boolean> = {};
+  tutorialAllWrong = false;
   tutorialSubmitted = false;
   tutorialChecked = false;
   tutorialReset = 0;
@@ -50,17 +58,44 @@ export class HowToPlayComponent {
   onTutorialValuesSubmitted(values: Record<number, string>): void {
     this.tutorialValues = { ...values };
     const validation: Record<number, ValidationState> = {};
+
+    // First pass: exact position matches (green)
     for (let i = 1; i <= 12; i++) {
       const entered = (values[i] ?? '').toUpperCase();
-      const correct = TUTORIAL_LETTERS[i - 1].toUpperCase();
-      validation[i] = entered === correct ? 'correct' : 'none';
+      validation[i] = entered === TUTORIAL_LETTERS[i - 1] ? 'correct' : 'none';
     }
-    this.tutorialValidation = validation;
-    this.tutorialCorrect = {};
+
+    // Second pass: word in wrong slot (yellow)
+    for (const wordKey of ['wordOne', 'wordTwo', 'wordThree'] as const) {
+      const positions = TUTORIAL_POSITIONS[wordKey];
+      const enteredWord = positions.map(p => (values[p] ?? '').trim().toUpperCase()).join('');
+      if (enteredWord.length === positions.length) {
+        const validWords = [TUTORIAL_WORDS.wordOne, TUTORIAL_WORDS.wordTwo, TUTORIAL_WORDS.wordThree];
+        if (validWords.includes(enteredWord) && enteredWord !== TUTORIAL_WORDS[wordKey]) {
+          positions.forEach(p => { if (validation[p] !== 'correct') validation[p] = 'wrong-position'; });
+        }
+      }
+    }
+
+    // Accumulate locked-in correct positions across submissions
+    const newCorrect = { ...this.tutorialCorrect };
     for (let i = 1; i <= 12; i++) {
-      this.tutorialCorrect[i] = validation[i] === 'correct';
+      if (validation[i] === 'correct') newCorrect[i] = true;
     }
+    this.tutorialCorrect = newCorrect;
+    this.tutorialValidation = validation;
     this.tutorialChecked = true;
+
+    // Red flash when nothing is right
+    const isAllWrong = Object.keys(validation).length > 0 &&
+      Object.values(validation).every(v => v === 'none');
+    if (isAllWrong) {
+      this.tutorialAllWrong = true;
+      setTimeout(() => { this.tutorialAllWrong = false; }, 600);
+    }
+
+    // Reset flag so the next Check click fires ngOnChanges again
+    setTimeout(() => { this.tutorialSubmitted = false; }, 0);
   }
 
   get tutorialSolved(): boolean {
@@ -72,6 +107,7 @@ export class HowToPlayComponent {
     this.tutorialValues = {};
     this.tutorialValidation = {};
     this.tutorialCorrect = {};
+    this.tutorialAllWrong = false;
     this.tutorialChecked = false;
     this.tutorialSubmitted = false;
     this.tutorialReset++;
@@ -79,7 +115,6 @@ export class HowToPlayComponent {
 
   onCheckTutorial(): void {
     this.tutorialSubmitted = true;
-    // valuesSubmitted will fire from triangle change, triggering onTutorialValuesSubmitted
   }
 
   nextStep(): void {
