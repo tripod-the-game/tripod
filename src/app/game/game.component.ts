@@ -589,8 +589,7 @@ export class GameComponent implements OnInit {
       this.filteredSubmissions.length,
       this.currentSize,
       this.revealed,
-      this.hintsUsed,
-      this.aggregatedValidation
+      this.hintsUsed
     );
 
     if (success) {
