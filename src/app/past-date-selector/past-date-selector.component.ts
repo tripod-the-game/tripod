@@ -3,9 +3,11 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatDatepickerModule, MatDatepicker } from '@angular/material/datepicker';
+import { MatDatepickerModule, MatDatepicker, MatCalendarCellClassFunction } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { GameService } from '../../services/game.service';
+import { StateService } from '../../services/state.service';
+import { StatsService } from '../../services/stats.service';
 
 @Component({
   selector: 'app-past-date-selector',
@@ -22,16 +24,63 @@ export class PastDateSelectorComponent implements OnInit {
   availableDatesSet = new Set<string>(); // keys as YYYY-MM-DD for quick lookup
   selectedDate?: Date;
 
-  constructor(private gameService: GameService) {}
+  private availableDates: Date[] = [];
+  private dateStatusMap: Record<string, 'completed' | 'revealed' | 'started'> = {};
+
+  constructor(
+    private gameService: GameService,
+    private stateService: StateService,
+    private statsService: StatsService,
+  ) {}
 
   ngOnInit(): void {
     this.gameService.getAvailableDates().subscribe(dates => {
+      this.availableDates = dates;
       dates.forEach(d => {
-        const key = this.toKey(d);
-        this.availableDatesSet.add(key);
+        this.availableDatesSet.add(this.toKey(d));
       });
+      this.buildStatusMap();
     });
   }
+
+  onPickerOpened(): void {
+    this.buildStatusMap();
+  }
+
+  private buildStatusMap(): void {
+    this.dateStatusMap = {};
+    const results = this.statsService.getResults();
+    const solvedDates = new Set(results.filter(r => r.solved).map(r => r.date));
+    const revealedDates = new Set(results.filter(r => r.revealed && !r.solved).map(r => r.date));
+    const submissions = this.stateService.loadSubmissions();
+    const submitted = new Set(submissions.map(s => s.date).filter(Boolean) as string[]);
+
+    for (const d of this.availableDates) {
+      const ymd = this.toKey(d);
+      const mmddyy = this.toMmddyy(d);
+
+      if (solvedDates.has(mmddyy)) {
+        this.dateStatusMap[ymd] = 'completed';
+      } else if (revealedDates.has(mmddyy)) {
+        this.dateStatusMap[ymd] = 'revealed';
+      } else if (
+        submitted.has(mmddyy) ||
+        this.stateService.loadDateState(mmddyy) !== null ||
+        Object.keys(this.stateService.loadInputValues(mmddyy)).length > 0
+      ) {
+        this.dateStatusMap[ymd] = 'started';
+      }
+    }
+  }
+
+  dateClassFn: MatCalendarCellClassFunction<Date> = (date: Date, view: string): string => {
+    if (view !== 'month') return '';
+    const status = this.dateStatusMap[this.toKey(date)];
+    if (status === 'completed') return 'date-completed';
+    if (status === 'revealed') return 'date-revealed';
+    if (status === 'started') return 'date-started';
+    return '';
+  };
 
   // used by matDatepicker to enable only available dates (and past)
   dateFilter = (d: Date | null): boolean => {
@@ -62,6 +111,13 @@ export class PastDateSelectorComponent implements OnInit {
     const m = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
     return `${y}-${m}-${dd}`;
+  }
+
+  private toMmddyy(d: Date): string {
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const yy = String(d.getFullYear()).slice(-2);
+    return `${mm}${dd}${yy}`;
   }
 
   openPicker(): void {

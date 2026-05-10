@@ -57,6 +57,38 @@ textarea:focus-visible,
   outline-offset: 2px;
 }
 
+/* Remove Material's default black border box around today's date */
+.mat-calendar-body-today:not(.mat-calendar-body-selected) .mat-calendar-body-cell-content {
+  border-color: transparent !important;
+}
+
+/* Calendar date-status dots (datepicker renders as overlay, must be global) */
+.mat-calendar-body-cell.date-completed .mat-calendar-body-cell-content::after,
+.mat-calendar-body-cell.date-revealed .mat-calendar-body-cell-content::after,
+.mat-calendar-body-cell.date-started .mat-calendar-body-cell-content::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.mat-calendar-body-cell.date-completed .mat-calendar-body-cell-content::after {
+  background: #22c55e;
+}
+
+.mat-calendar-body-cell.date-revealed .mat-calendar-body-cell-content::after {
+  background: #ef4444;
+}
+
+.mat-calendar-body-cell.date-started .mat-calendar-body-cell-content::after {
+  background: #eab308;
+}
+
 /* Respect user's motion preferences */
 @media (prefers-reduced-motion: reduce) {
   *,

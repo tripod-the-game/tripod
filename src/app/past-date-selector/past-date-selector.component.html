@@ -34,4 +34,4 @@
 >
 
 <!-- Single picker shared by both modes -->
-<mat-datepicker #picker [touchUi]="true"></mat-datepicker>
+<mat-datepicker #picker [touchUi]="true" [dateClass]="dateClassFn" (opened)="onPickerOpened()"></mat-datepicker>
