@@ -13,8 +13,10 @@ import { HapticService } from "../../services/haptic.service";
 import { ShareService } from "../../services/share.service";
 import { StateService, Submission, DateState } from "../../services/state.service";
 import { StatsService } from "../../services/stats.service";
+import { AuthService } from "../../services/auth.service";
 import { StatsComponent } from "../stats/stats.component";
 import { HowToPlayComponent } from "../how-to-play/how-to-play.component";
+import { AuthComponent } from "../auth/auth.component";
 
 @Component({
   selector: "app-game",
@@ -29,6 +31,7 @@ import { HowToPlayComponent } from "../how-to-play/how-to-play.component";
     PastDateSelectorComponent,
     StatsComponent,
     HowToPlayComponent,
+    AuthComponent,
   ],
   templateUrl: "./game.component.html",
   styleUrls: ["./game.component.scss"],
@@ -71,6 +74,7 @@ export class GameComponent implements OnInit {
   showLastHintConfirm = false;
   showStats = false;
   showHowToPlay = false;
+  showAuth = false;
   lastHintPosition?: number;
   maxHints = 3;
 
@@ -115,6 +119,7 @@ export class GameComponent implements OnInit {
     private shareService: ShareService,
     private stateService: StateService,
     private statsService: StatsService,
+    readonly authService: AuthService,
     private ngZone: NgZone
   ) {}
 
@@ -127,6 +132,18 @@ export class GameComponent implements OnInit {
       localStorage.setItem(this.TUTORIAL_SEEN_KEY, '1');
     }
 
+    // If a session already exists, sync remote data before restoring local state
+    if (this.authService.currentUser) {
+      Promise.all([
+        this.stateService.syncFromRemote(),
+        this.statsService.syncFromRemote(),
+      ]).then(() => this.loadLocalState());
+    } else {
+      this.loadLocalState();
+    }
+  }
+
+  private loadLocalState(): void {
     // Load all persisted submissions on startup
     this.submissions = this.stateService.loadSubmissions();
 

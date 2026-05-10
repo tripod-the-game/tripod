@@ -10,6 +10,7 @@ import { HapticService } from '../../services/haptic.service';
 import { ShareService } from '../../services/share.service';
 import { StateService } from '../../services/state.service';
 import { StatsService } from '../../services/stats.service';
+import { AuthService } from '../../services/auth.service';
 
 // GRAPE / EARTH / GRAPH — a valid 5-letter Tripod puzzle
 // letters = ['E','P','A','A','R','R','T','G','R','A','P','H']
@@ -43,6 +44,7 @@ describe('GameComponent', () => {
   let shareServiceSpy: jasmine.SpyObj<ShareService>;
   let stateServiceSpy: jasmine.SpyObj<StateService>;
   let statsServiceSpy: jasmine.SpyObj<StatsService>;
+  let authServiceSpy: jasmine.SpyObj<AuthService>;
 
   beforeEach(async () => {
     gameServiceSpy = jasmine.createSpyObj('GameService', ['getGameForDate', 'getTodayGame', 'getAvailableDates', 'getTodayEST']);
@@ -72,8 +74,18 @@ describe('GameComponent', () => {
     stateServiceSpy.loadDateState.and.returnValue(null);
     stateServiceSpy.loadInputValues.and.returnValue({});
 
-    statsServiceSpy = jasmine.createSpyObj('StatsService', ['recordResult', 'getResults', 'getComputedStats']);
+    statsServiceSpy = jasmine.createSpyObj('StatsService', ['recordResult', 'getResults', 'getComputedStats', 'syncFromRemote']);
     statsServiceSpy.getResults.and.returnValue([]);
+    statsServiceSpy.syncFromRemote.and.returnValue(Promise.resolve());
+
+    authServiceSpy = jasmine.createSpyObj('AuthService', ['signInAnonymously', 'signOut'], {
+      currentUser: null,
+      isAnonymous: false,
+      session$: { value: null },
+      user$: of(null),
+    });
+
+    stateServiceSpy.syncFromRemote = jasmine.createSpy('syncFromRemote').and.returnValue(Promise.resolve());
 
     await TestBed.configureTestingModule({
       imports: [GameComponent],
@@ -84,6 +96,7 @@ describe('GameComponent', () => {
         { provide: ShareService, useValue: shareServiceSpy },
         { provide: StateService, useValue: stateServiceSpy },
         { provide: StatsService, useValue: statsServiceSpy },
+        { provide: AuthService, useValue: authServiceSpy },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     })

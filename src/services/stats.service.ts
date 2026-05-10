@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { SupabaseService } from './supabase.service';
+import { AuthService } from './auth.service';
 
 export interface GameResult {
   date: string;     // MMDDYY
@@ -19,6 +21,11 @@ export interface ComputedStats {
 @Injectable({ providedIn: 'root' })
 export class StatsService {
   private readonly KEY = 'tripod_stats';
+
+  constructor(
+    private supabase: SupabaseService,
+    private auth: AuthService,
+  ) {}
 
   private load(): GameResult[] {
     try {
@@ -48,6 +55,7 @@ export class StatsService {
       results.push(result);
     }
     this.save(results);
+    this.pushResult(result);
   }
 
   getComputedStats(): ComputedStats {
@@ -100,6 +108,47 @@ export class StatsService {
     }
 
     return { totalPlayed, winPct, currentStreak, maxStreak, distribution };
+  }
+
+  async syncFromRemote(): Promise<void> {
+    const userId = this.auth.currentUser?.id;
+    if (!userId) return;
+
+    const { data } = await this.supabase.client
+      .from('game_results')
+      .select('*')
+      .eq('user_id', userId);
+
+    if (!data) return;
+
+    const local = this.load();
+    const localByDate = new Map(local.map(r => [r.date, r]));
+
+    for (const row of data as any[]) {
+      localByDate.set(row.date, {
+        date: row.date,
+        solved: row.solved,
+        attempts: row.attempts,
+        hintsUsed: row.hints_used,
+        revealed: row.revealed,
+      });
+    }
+
+    this.save(Array.from(localByDate.values()));
+  }
+
+  private pushResult(result: GameResult): void {
+    const userId = this.auth.currentUser?.id;
+    if (!userId) return;
+    this.supabase.client.from('game_results').upsert({
+      user_id: userId,
+      date: result.date,
+      solved: result.solved,
+      attempts: result.attempts,
+      hints_used: result.hintsUsed,
+      revealed: result.revealed,
+      updated_at: new Date().toISOString(),
+    }).then();
   }
 
   // Convert MMDDYY to a numeric day-index for consecutive-day arithmetic
