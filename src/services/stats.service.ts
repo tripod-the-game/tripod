@@ -35,6 +35,10 @@ export class StatsService {
     } catch { /* storage full or unavailable */ }
   }
 
+  getResults(): GameResult[] {
+    return this.load();
+  }
+
   recordResult(result: GameResult): void {
     const results = this.load();
     const existing = results.findIndex(r => r.date === result.date);
