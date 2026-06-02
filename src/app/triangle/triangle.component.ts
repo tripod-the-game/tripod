@@ -315,10 +315,18 @@ export class TriangleComponent implements OnInit, AfterViewInit {
   }
 
   isWrongPosition(circle: number): boolean {
-    // Only show wrong-position when submitted or in displayOnly mode
     if (this.displayOnly || this.submitted) {
       if (this.aggregatedValidation) {
         return this.aggregatedValidation[circle] === 'wrong-position';
+      }
+    }
+    return false;
+  }
+
+  isPresent(circle: number): boolean {
+    if (this.displayOnly || this.submitted) {
+      if (this.aggregatedValidation) {
+        return this.aggregatedValidation[circle] === 'present';
       }
     }
     return false;

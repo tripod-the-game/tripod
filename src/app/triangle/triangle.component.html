@@ -12,6 +12,7 @@
       [attr.data-index]="i"
       [class.correct]="isCorrect(circle, i)"
       [class.wrong-position]="!isCorrect(circle, i) && isWrongPosition(circle)"
+      [class.present]="!isCorrect(circle, i) && !isWrongPosition(circle) && isPresent(circle)"
     >
       <input
         #triangleInput
