@@ -52,11 +52,11 @@
   opacity: 1;
 }
 
-/* show whole circle as wrong position (yellow background) */
+/* show whole circle as wrong position (purple background) */
 .circle-input.wrong-position {
-  background-color: #f9a825;
-  border-color: #c17900;
-  box-shadow: 0 4px 14px rgba(249, 168, 37, 0.55), 0 2px 4px rgba(249, 168, 37, 0.30);
+  background-color: #9c27b0;
+  border-color: #6a0080;
+  box-shadow: 0 4px 14px rgba(156, 39, 176, 0.55), 0 2px 4px rgba(156, 39, 176, 0.30);
 }
 
 .circle-input.wrong-position input,
@@ -69,11 +69,11 @@
   opacity: 1;
 }
 
-/* letter is in the puzzle but not yet correctly placed (blue) */
+/* letter is in the puzzle but not yet correctly placed (yellow) */
 .circle-input.present {
-  background-color: #42a5f5;
-  border-color: #1976d2;
-  box-shadow: 0 4px 14px rgba(66, 165, 245, 0.55), 0 2px 4px rgba(66, 165, 245, 0.30);
+  background-color: #f9a825;
+  border-color: #c17900;
+  box-shadow: 0 4px 14px rgba(249, 168, 37, 0.55), 0 2px 4px rgba(249, 168, 37, 0.30);
 }
 
 .circle-input.present input,
