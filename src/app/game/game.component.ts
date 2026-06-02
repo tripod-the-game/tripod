@@ -224,6 +224,23 @@ export class GameComponent implements OnInit {
         this.checkWordWrongPosition(values, validation, 'wordTwo');
         this.checkWordWrongPosition(values, validation, 'wordThree');
       }
+
+      // Third pass: mark letters that exist in remaining unsolved positions (orange)
+      const correctSoFar = this.aggregatedCorrectLetters;
+      const remainingLetters: string[] = [];
+      for (let i = 1; i <= this.totalCircles; i++) {
+        if (!correctSoFar[i]) {
+          remainingLetters.push((this.currentLetters[i - 1] ?? '').toUpperCase());
+        }
+      }
+      Object.entries(values).forEach(([key, value]) => {
+        const pos = Number(key);
+        if (validation[pos] === 'none' && value?.trim()) {
+          if (remainingLetters.includes(value.trim().toUpperCase())) {
+            validation[pos] = 'present';
+          }
+        }
+      });
     }
 
     this.submissions.push({
@@ -499,13 +516,16 @@ export class GameComponent implements OnInit {
     for (let i = 1; i <= this.totalCircles; i++) {
       // 'correct' persists across all submissions (once correct, always correct)
       const hasCorrect = relevant.some((sub) => sub.validation[i] === 'correct');
-      // 'wrong-position' only applies to the latest submission (not aggregated)
+      // 'wrong-position' and 'present' only apply to the latest submission
       const hasWrongPosition = latestSubmission?.validation[i] === 'wrong-position';
+      const hasPresent = latestSubmission?.validation[i] === 'present';
 
       if (hasCorrect) {
         result[i] = 'correct';
       } else if (hasWrongPosition) {
         result[i] = 'wrong-position';
+      } else if (hasPresent) {
+        result[i] = 'present';
       } else {
         result[i] = 'none';
       }

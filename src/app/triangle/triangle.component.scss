@@ -69,6 +69,23 @@
   opacity: 1;
 }
 
+/* letter is in the puzzle but not yet correctly placed (orange) */
+.circle-input.present {
+  background-color: #ff7043;
+  border-color: #e64a19;
+  box-shadow: 0 4px 14px rgba(255, 112, 67, 0.55), 0 2px 4px rgba(255, 112, 67, 0.30);
+}
+
+.circle-input.present input,
+.circle-input.present input:disabled,
+.circle-input.present input[readonly] {
+  color: #fff;
+  -webkit-text-fill-color: #fff;
+  font-weight: 700;
+  background: transparent;
+  opacity: 1;
+}
+
 /* always render entered letter as UPPERCASE visually */
 .circle-input input {
   border: none;

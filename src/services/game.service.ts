@@ -12,7 +12,7 @@ export interface GameData {
   size: 4 | 5; // word length (4 or 5 letters)
 }
 
-export type ValidationState = 'none' | 'correct' | 'wrong-position';
+export type ValidationState = 'none' | 'correct' | 'wrong-position' | 'present';
 
 // Remote URL for game data (GitHub raw content from public tripod-games repo)
 const GAMES_BASE_URL = 'https://raw.githubusercontent.com/tripod-the-game/tripod-games/main';
