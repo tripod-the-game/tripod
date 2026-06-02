@@ -229,7 +229,7 @@ export class GameComponent implements OnInit {
       const correctSoFar = this.aggregatedCorrectLetters;
       const remainingLetters: string[] = [];
       for (let i = 1; i <= this.totalCircles; i++) {
-        if (!correctSoFar[i]) {
+        if (!correctSoFar[i] && validation[i] !== 'correct') {
           remainingLetters.push((this.currentLetters[i - 1] ?? '').toUpperCase());
         }
       }
