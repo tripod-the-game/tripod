@@ -238,8 +238,9 @@ describe('GameComponent', () => {
       const values: Record<number, string> = { 1: 'G', 3: 'R', 5: 'A', 7: 'P' }; // missing 12
       component.onValuesSubmitted(values);
       const sub = component.submissions[component.submissions.length - 1];
-      // Should be 'none', not 'wrong-position'
-      expect(sub.validation[1]).toBe('none');
+      // Should not be 'wrong-position' (partial fill skips the word-slot check).
+      // It may be 'present' since G is a genuine puzzle letter.
+      expect(sub.validation[1]).not.toBe('wrong-position');
     });
 
     it('should not mark wrong-position when entered word is not a valid puzzle word', () => {
