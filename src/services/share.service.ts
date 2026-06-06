@@ -121,17 +121,17 @@ export class ShareService {
       ctx.fillStyle = '#111111';
       ctx.font = `bold 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
       ctx.textBaseline = 'middle';
-      ctx.fillText('TRIPOD', canvas.width / 2, headerH * 0.32);
+      ctx.fillText('TRIPOD', logicalW / 2, headerH * 0.32);
 
       ctx.fillStyle = '#666666';
       ctx.font = `15px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
-      ctx.fillText(this.formatDateStr(dateKey), canvas.width / 2, headerH * 0.68);
+      ctx.fillText(this.formatDateStr(dateKey), logicalW / 2, headerH * 0.68);
 
       // --- Footer: URL ---
       ctx.fillStyle = '#aaaaaa';
       ctx.font = `12px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
       ctx.textBaseline = 'middle';
-      ctx.fillText('playtripod.com', canvas.width / 2, oy + pad * 0.5 + footerH * 0.4);
+      ctx.fillText('playtripod.com', logicalW / 2, oy + pad * 0.5 + footerH * 0.4);
 
       return new Promise(resolve => {
         canvas.toBlob(blob => {
