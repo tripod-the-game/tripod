@@ -60,6 +60,7 @@ export class ShareService {
       const ctx = canvas.getContext('2d');
       if (!ctx) return null;
 
+      const dpr = Math.max(window.devicePixelRatio ?? 1, 2); // at least 2x for crisp output
       const s = 60;                          // spacing between circle centres
       const r = 21;                          // circle radius
       const pad = 38;                        // outer horizontal/vertical padding
@@ -71,12 +72,17 @@ export class ShareService {
       const triW = baseGaps * s;
       const triH = baseGaps * sin60 * s;
 
-      canvas.width = Math.round(triW + pad * 2);
-      canvas.height = Math.round(triH + pad * 2 + headerH + footerH);
+      const logicalW = Math.round(triW + pad * 2);
+      const logicalH = Math.round(triH + pad * 2 + headerH + footerH);
+
+      // Scale canvas backing store by dpr so strokes/text stay sharp on retina
+      canvas.width = logicalW * dpr;
+      canvas.height = logicalH * dpr;
+      ctx.scale(dpr, dpr);
 
       // White background
       ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, logicalW, logicalH);
 
       // Triangle origin: bottom-left corner in canvas space
       const ox = pad;
