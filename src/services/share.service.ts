@@ -214,7 +214,7 @@ export class ShareService {
     const imageFile = await this.generateShareImage(size, dateKey, attempts, wasRevealed);
     if (imageFile && typeof navigator.canShare === 'function' && navigator.canShare({ files: [imageFile] })) {
       try {
-        await navigator.share({ files: [imageFile], text: this.SHARE_URL });
+        await navigator.share({ files: [imageFile], url: this.SHARE_URL });
         return true;
       } catch {
         // User cancelled or browser rejected — fall through to text
