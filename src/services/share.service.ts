@@ -116,7 +116,7 @@ export class ShareService {
         ctx.font = `13px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
         ctx.fillText('revealed', centX, centY + 20);
       } else {
-        ctx.fillStyle = '#4caf50';
+        ctx.fillStyle = '#111111';
         ctx.font = `bold 40px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
         ctx.textBaseline = 'middle';
         ctx.fillText(String(attempts), centX, centY - 10);
