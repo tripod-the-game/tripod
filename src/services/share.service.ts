@@ -116,11 +116,10 @@ export class ShareService {
         ctx.font = `13px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
         ctx.fillText('revealed', centX, centY + 20);
       } else {
-        ctx.fillStyle = '#1b5e20';
+        ctx.fillStyle = '#4caf50';
         ctx.font = `bold 40px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
         ctx.textBaseline = 'middle';
         ctx.fillText(String(attempts), centX, centY - 10);
-        ctx.fillStyle = '#555555';
         ctx.font = `13px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
         ctx.fillText(attempts === 1 ? 'attempt' : 'attempts', centX, centY + 20);
       }
