@@ -80,8 +80,8 @@ export class ShareService {
       canvas.height = logicalH * dpr;
       ctx.scale(dpr, dpr);
 
-      // White background
-      ctx.fillStyle = '#ffffff';
+      // Dark background
+      ctx.fillStyle = '#0f172a';
       ctx.fillRect(0, 0, logicalW, logicalH);
 
       // Triangle origin: bottom-left corner in canvas space
@@ -90,8 +90,8 @@ export class ShareService {
 
       // --- Draw circles ---
       const positions = this.getCanvasCirclePositions(size, s, ox, oy, sin60);
-      const circleColor = wasRevealed ? '#9e9e9e' : '#4caf50';
-      const borderColor = wasRevealed ? '#616161' : '#357a38';
+      const circleColor = wasRevealed ? '#64748b' : '#4caf50';
+      const borderColor = wasRevealed ? '#94a3b8' : '#357a38';
 
       for (const { x, y } of positions) {
         ctx.beginPath();
@@ -103,34 +103,43 @@ export class ShareService {
         ctx.stroke();
       }
 
-      // --- Draw centroid label (attempt count or reveal indicator) ---
-      // Centroid of triangle = average of the three corner vertices
+      // --- Draw centroid label: large number + "attempts" below ---
       const centX = ox + (baseGaps / 2) * s;
       const centY = oy - (triH / 3);
 
-      const label = wasRevealed ? '?' : String(attempts);
-      ctx.fillStyle = wasRevealed ? '#424242' : '#1b5e20';
-      ctx.font = `bold 46px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
       ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(label, centX, centY);
+      if (wasRevealed) {
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = `bold 38px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
+        ctx.textBaseline = 'middle';
+        ctx.fillText('👀', centX, centY - 8);
+        ctx.font = `13px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
+        ctx.fillText('revealed', centX, centY + 20);
+      } else {
+        ctx.fillStyle = '#ffffff';
+        ctx.font = `bold 40px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
+        ctx.textBaseline = 'middle';
+        ctx.fillText(String(attempts), centX, centY - 10);
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = `13px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
+        ctx.fillText(attempts === 1 ? 'attempt' : 'attempts', centX, centY + 20);
+      }
 
       // --- Header: title + date ---
       ctx.textAlign = 'center';
-
-      ctx.fillStyle = '#111111';
-      ctx.font = `bold 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
       ctx.textBaseline = 'middle';
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `bold 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
       ctx.fillText('TRIPOD', logicalW / 2, headerH * 0.32);
 
-      ctx.fillStyle = '#666666';
+      ctx.fillStyle = '#94a3b8';
       ctx.font = `15px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
       ctx.fillText(this.formatDateStr(dateKey), logicalW / 2, headerH * 0.68);
 
       // --- Footer: URL ---
-      ctx.fillStyle = '#aaaaaa';
+      ctx.fillStyle = '#475569';
       ctx.font = `12px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
-      ctx.textBaseline = 'middle';
       ctx.fillText('playtripod.com', logicalW / 2, oy + pad * 0.5 + footerH * 0.4);
 
       return new Promise(resolve => {
