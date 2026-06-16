@@ -80,8 +80,8 @@ export class ShareService {
       canvas.height = logicalH * dpr;
       ctx.scale(dpr, dpr);
 
-      // Dark background
-      ctx.fillStyle = '#0f172a';
+      // White background
+      ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, logicalW, logicalH);
 
       // Triangle origin: bottom-left corner in canvas space
@@ -90,8 +90,8 @@ export class ShareService {
 
       // --- Draw circles ---
       const positions = this.getCanvasCirclePositions(size, s, ox, oy, sin60);
-      const circleColor = wasRevealed ? '#64748b' : '#4caf50';
-      const borderColor = wasRevealed ? '#94a3b8' : '#357a38';
+      const circleColor = wasRevealed ? '#9e9e9e' : '#4caf50';
+      const borderColor = wasRevealed ? '#616161' : '#357a38';
 
       for (const { x, y } of positions) {
         ctx.beginPath();
@@ -109,18 +109,18 @@ export class ShareService {
 
       ctx.textAlign = 'center';
       if (wasRevealed) {
-        ctx.fillStyle = '#94a3b8';
+        ctx.fillStyle = '#616161';
         ctx.font = `bold 38px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
         ctx.textBaseline = 'middle';
         ctx.fillText('👀', centX, centY - 8);
         ctx.font = `13px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
         ctx.fillText('revealed', centX, centY + 20);
       } else {
-        ctx.fillStyle = '#ffffff';
+        ctx.fillStyle = '#1b5e20';
         ctx.font = `bold 40px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
         ctx.textBaseline = 'middle';
         ctx.fillText(String(attempts), centX, centY - 10);
-        ctx.fillStyle = '#94a3b8';
+        ctx.fillStyle = '#555555';
         ctx.font = `13px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
         ctx.fillText(attempts === 1 ? 'attempt' : 'attempts', centX, centY + 20);
       }
@@ -129,16 +129,16 @@ export class ShareService {
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = '#111111';
       ctx.font = `bold 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
       ctx.fillText('TRIPOD', logicalW / 2, headerH * 0.32);
 
-      ctx.fillStyle = '#94a3b8';
+      ctx.fillStyle = '#666666';
       ctx.font = `15px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
       ctx.fillText(this.formatDateStr(dateKey), logicalW / 2, headerH * 0.68);
 
       // --- Footer: URL ---
-      ctx.fillStyle = '#475569';
+      ctx.fillStyle = '#aaaaaa';
       ctx.font = `12px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
       ctx.fillText('playtripod.com', logicalW / 2, oy + pad * 0.5 + footerH * 0.4);
 
