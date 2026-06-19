@@ -41,6 +41,12 @@
       [resetCounter]="resetCounter"
     ></app-triangle>
 
+    <app-keyboard
+      *ngIf="!submitted"
+      [allowedLetters]="allowedLetters"
+      (keyPressed)="onKeyboardPress($event)"
+    ></app-keyboard>
+
     <div class="action-row">
       <app-submit-button [shake]="submitShake" (submit)="onSubmit()"></app-submit-button>
       <app-reset-button [shake]="resetShake" (reset)="onReset()"></app-reset-button>

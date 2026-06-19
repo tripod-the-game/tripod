@@ -32,6 +32,7 @@ export class TriangleComponent implements OnInit, AfterViewInit {
 
   letterValues = ["A","V","P","A","P","U","L","G","R","A","P","E"];
   inputValues: Record<number, string> = {};
+  focusedCircle: number | null = null;
 
   @ViewChildren('triangleInput') inputs!: QueryList<ElementRef<HTMLInputElement>>;
 
@@ -338,6 +339,26 @@ export class TriangleComponent implements OnInit, AfterViewInit {
       return (this.displayValues[circle] ?? '').toString();
     }
     return (this.inputValues[circle] ?? '').toString();
+  }
+
+  typeKey(key: string): void {
+    const circle = this.focusedCircle;
+    if (!circle) return;
+    if (this.aggregatedCorrect?.[circle] || this.submitted || this.displayOnly) return;
+
+    if (key === 'BACKSPACE') {
+      const currentValue = this.inputValues[circle] ?? '';
+      if (currentValue === '') {
+        this.focusPrevCircle(circle);
+      } else {
+        this.inputValues[circle] = '';
+        this.valuesChanged.emit({ ...this.inputValues });
+      }
+    } else {
+      this.inputValues[circle] = key.toUpperCase();
+      this.valuesChanged.emit({ ...this.inputValues });
+      this.focusNextCircle(circle);
+    }
   }
 
   // Move focus based on arrow key using neighbor map

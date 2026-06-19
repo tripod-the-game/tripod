@@ -1,0 +1,57 @@
+.keyboard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 12px;
+  padding: 0 2px;
+  box-sizing: border-box;
+}
+
+.keyboard-row {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+}
+
+.key {
+  flex: 1;
+  max-width: 36px;
+  min-width: 0;
+  height: 42px;
+  border-radius: 7px;
+  border: 1.5px solid #ccc;
+  background: #fff;
+  color: #111;
+  font-family: 'Baloo 2', 'Fredoka', cursive, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.12s, transform 0.1s, opacity 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.key:active:not(:disabled) {
+  background: #e5e7eb;
+  transform: scale(0.92);
+}
+
+.key.disabled {
+  background: #f3f4f6;
+  color: #c9cdd4;
+  border-color: #e5e7eb;
+  cursor: default;
+}
+
+.key-backspace {
+  max-width: 46px;
+  font-size: 1.1rem;
+  flex: 1.3;
+}

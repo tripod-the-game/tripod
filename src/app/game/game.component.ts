@@ -1,4 +1,4 @@
-import { Component, OnInit, NgZone } from "@angular/core";
+import { Component, OnInit, NgZone, ViewChild } from "@angular/core";
 import confetti from 'canvas-confetti';
 import { CommonModule } from "@angular/common";
 import { RouterModule } from "@angular/router";
@@ -15,6 +15,7 @@ import { StateService, Submission, DateState } from "../../services/state.servic
 import { StatsService } from "../../services/stats.service";
 import { StatsComponent } from "../stats/stats.component";
 import { HowToPlayComponent } from "../how-to-play/how-to-play.component";
+import { KeyboardComponent } from "../keyboard/keyboard.component";
 
 @Component({
   selector: "app-game",
@@ -29,11 +30,13 @@ import { HowToPlayComponent } from "../how-to-play/how-to-play.component";
     PastDateSelectorComponent,
     StatsComponent,
     HowToPlayComponent,
+    KeyboardComponent,
   ],
   templateUrl: "./game.component.html",
   styleUrls: ["./game.component.scss"],
 })
 export class GameComponent implements OnInit {
+  @ViewChild(TriangleComponent) private triangle!: TriangleComponent;
   // Word position mapping based on puzzle size
   private readonly WORD_POSITIONS_5 = {
     wordOne: [8, 6, 4, 2, 1],      // left edge (5-letter)
@@ -570,6 +573,16 @@ export class GameComponent implements OnInit {
     const correctLetters = this.aggregatedCorrectLetters;
     return Object.values(correctLetters).length === this.totalCircles &&
            Object.values(correctLetters).every(v => v === true);
+  }
+
+  get allowedLetters(): Set<string> {
+    if (!this.currentWords) return new Set();
+    const all = (this.currentWords.wordOne + this.currentWords.wordTwo + this.currentWords.wordThree).toUpperCase();
+    return new Set(all.split(''));
+  }
+
+  onKeyboardPress(key: string): void {
+    this.triangle?.typeKey(key);
   }
 
   private launchConfetti(): void {
