@@ -5,12 +5,14 @@
       class="key"
       [class.disabled]="isDisabled(letter)"
       [disabled]="isDisabled(letter)"
+      (mousedown)="$event.preventDefault()"
       (click)="onKey(letter)"
       type="button"
     >{{ letter }}</button>
     <button
       *ngIf="last"
       class="key key-backspace"
+      (mousedown)="$event.preventDefault()"
       (click)="onBackspace()"
       type="button"
       aria-label="Backspace"
