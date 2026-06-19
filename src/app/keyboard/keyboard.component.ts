@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './keyboard.component.scss'
 })
 export class KeyboardComponent {
-  @Input() allowedLetters: Set<string> = new Set();
+  @Input() eliminatedLetters: Set<string> = new Set();
   @Output() keyPressed = new EventEmitter<string>();
 
   readonly rows = [
@@ -19,8 +19,7 @@ export class KeyboardComponent {
   ];
 
   isDisabled(letter: string): boolean {
-    if (this.allowedLetters.size === 0) return false;
-    return !this.allowedLetters.has(letter);
+    return this.eliminatedLetters.has(letter);
   }
 
   onKey(letter: string): void {

@@ -43,7 +43,7 @@
 
     <app-keyboard
       *ngIf="!submitted"
-      [allowedLetters]="allowedLetters"
+      [eliminatedLetters]="eliminatedLetters"
       (keyPressed)="onKeyboardPress($event)"
     ></app-keyboard>
 

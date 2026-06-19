@@ -575,10 +575,30 @@ export class GameComponent implements OnInit {
            Object.values(correctLetters).every(v => v === true);
   }
 
-  get allowedLetters(): Set<string> {
-    if (!this.currentWords) return new Set();
-    const all = (this.currentWords.wordOne + this.currentWords.wordTwo + this.currentWords.wordThree).toUpperCase();
-    return new Set(all.split(''));
+  get eliminatedLetters(): Set<string> {
+    const relevant = this.submissions.filter(s => s.date === this.currentGameDate);
+    const knownPresent = new Set<string>();
+    const guessedNone = new Set<string>();
+
+    for (const sub of relevant) {
+      for (const [posStr, state] of Object.entries(sub.validation)) {
+        const pos = Number(posStr);
+        const letter = (sub.values[pos] ?? '').toUpperCase();
+        if (!letter) continue;
+        if (state === 'correct' || state === 'present' || state === 'wrong-position') {
+          knownPresent.add(letter);
+        }
+        if (state === 'none') {
+          guessedNone.add(letter);
+        }
+      }
+    }
+
+    const eliminated = new Set<string>();
+    for (const letter of guessedNone) {
+      if (!knownPresent.has(letter)) eliminated.add(letter);
+    }
+    return eliminated;
   }
 
   onKeyboardPress(key: string): void {
