@@ -13,7 +13,7 @@ export class StatsComponent implements OnInit {
   @Output() close = new EventEmitter<void>();
 
   stats!: ComputedStats;
-  distributionKeys = ['1', '2', '3', '4', '5+'];
+  distributionKeys = ['1', '2', '3', '4', '5', '6', '7+'];
 
   constructor(private statsService: StatsService) {}
 
