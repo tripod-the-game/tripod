@@ -13,7 +13,7 @@ export interface ComputedStats {
   winPct: number;
   currentStreak: number;
   maxStreak: number;
-  distribution: Record<string, number>; // '1','2','3','4','5+' → count
+  distribution: Record<string, number>; // '1'–'6','7+' → count
 }
 
 @Injectable({ providedIn: 'root' })
@@ -92,10 +92,10 @@ export class StatsService {
       currentStreak++;
     }
 
-    const distribution: Record<string, number> = { '1': 0, '2': 0, '3': 0, '4': 0, '5+': 0 };
+    const distribution: Record<string, number> = { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0, '7+': 0 };
     for (const r of results) {
       if (!r.solved) continue;
-      const bucket = r.attempts <= 4 ? String(r.attempts) : '5+';
+      const bucket = r.attempts <= 6 ? String(r.attempts) : '7+';
       distribution[bucket] = (distribution[bucket] ?? 0) + 1;
     }
 
