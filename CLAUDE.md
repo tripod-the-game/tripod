@@ -33,9 +33,10 @@ Tripod is a word puzzle game. Players fill letters into circles arranged in a tr
 - **Bottom-right** (position 12 or 9): last letter of Word 2 = last letter of Word 3
 
 ### Validation colors
-- **Green (correct):** letter is in the correct position
-- **Yellow (wrong-position):** letters at a word's positions form a valid puzzle word, but in the wrong word slot
-- **Red flash:** all submitted letters are wrong
+- **Green (correct):** letter is in the exact correct position (`#4caf50`)
+- **Purple (wrong-position):** the letters at a word's positions spell a valid puzzle word, but placed in the wrong word slot — this is a word-level signal, not letter-level (`#9c27b0`)
+- **Yellow (present):** letter exists somewhere in the remaining unsolved positions, but isn't correct here — letter-level signal (`#f9a825`)
+- **Red flash:** all submitted letters were completely wrong — temporary shake animation
 
 ## Game JSON format
 
