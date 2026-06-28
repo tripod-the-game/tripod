@@ -63,7 +63,7 @@ export class ShareService {
       const r = 21;
       const pad = 38;
       const headerH = 68;
-      const footerH = 34;
+      const footerH = 44;
       const sin60 = Math.sin(Math.PI / 3);
       const baseGaps = size - 1;
 
@@ -132,7 +132,7 @@ export class ShareService {
 
       // --- Footer: URL ---
       ctx.font = `12px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
-      ctx.fillText('playtripod.com', logicalW / 2, oy + pad * 0.5 + footerH * 0.4);
+      ctx.fillText('playtripod.com', logicalW / 2, oy + pad + footerH / 2);
 
       return new Promise(resolve => {
         canvas.toBlob(blob => {
