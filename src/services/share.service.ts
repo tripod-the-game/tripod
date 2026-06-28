@@ -63,6 +63,7 @@ export class ShareService {
       const r = 21;
       const pad = 38;
       const headerH = 68;
+      const footerH = 34;
       const sin60 = Math.sin(Math.PI / 3);
       const baseGaps = size - 1;
 
@@ -70,7 +71,7 @@ export class ShareService {
       const triH = baseGaps * sin60 * s;
 
       const logicalW = Math.round(triW + pad * 2);
-      const logicalH = Math.round(triH + pad * 2 + headerH);
+      const logicalH = Math.round(triH + pad * 2 + headerH + footerH);
 
       canvas.width = logicalW * dpr;
       canvas.height = logicalH * dpr;
@@ -128,6 +129,10 @@ export class ShareService {
 
       ctx.font = `15px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
       ctx.fillText(this.formatDateStr(dateKey), logicalW / 2, headerH * 0.68);
+
+      // --- Footer: URL ---
+      ctx.font = `12px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
+      ctx.fillText('playtripod.com', logicalW / 2, oy + pad * 0.5 + footerH * 0.4);
 
       return new Promise(resolve => {
         canvas.toBlob(blob => {
