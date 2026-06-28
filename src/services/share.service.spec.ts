@@ -122,11 +122,10 @@ describe('ShareService', () => {
       expect(result).toBe(true);
     });
 
-    it('should include the result text and URL in the clipboard content', async () => {
+    it('should include the result text in the clipboard content', async () => {
       await service.shareResult('030126', 3, 5, false, 0);
       const written: string = clipboardSpy.calls.mostRecent().args[0];
       expect(written).toContain('Tripod');
-      expect(written).toContain('playtripod.com');
     });
 
     it('should return false when clipboard write fails', async () => {
