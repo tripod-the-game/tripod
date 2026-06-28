@@ -7,8 +7,6 @@ import { Capacitor } from '@capacitor/core';
 })
 export class ShareService {
 
-  private readonly SHARE_URL = 'https://playtripod.com';
-
   generateResultText(
     dateKey: string,
     attempts: number,
@@ -60,22 +58,20 @@ export class ShareService {
       const ctx = canvas.getContext('2d');
       if (!ctx) return null;
 
-      const dpr = Math.max(window.devicePixelRatio ?? 1, 2); // at least 2x for crisp output
-      const s = 60;                          // spacing between circle centres
-      const r = 21;                          // circle radius
-      const pad = 38;                        // outer horizontal/vertical padding
-      const headerH = 68;                    // height reserved for title + date
-      const footerH = 34;                    // height reserved for URL
-      const sin60 = Math.sin(Math.PI / 3);  // ≈ 0.866
-      const baseGaps = size - 1;            // 4 for size-5, 3 for size-4
+      const dpr = Math.max(window.devicePixelRatio ?? 1, 2);
+      const s = 60;
+      const r = 21;
+      const pad = 38;
+      const headerH = 68;
+      const sin60 = Math.sin(Math.PI / 3);
+      const baseGaps = size - 1;
 
       const triW = baseGaps * s;
       const triH = baseGaps * sin60 * s;
 
       const logicalW = Math.round(triW + pad * 2);
-      const logicalH = Math.round(triH + pad * 2 + headerH + footerH);
+      const logicalH = Math.round(triH + pad * 2 + headerH);
 
-      // Scale canvas backing store by dpr so strokes/text stay sharp on retina
       canvas.width = logicalW * dpr;
       canvas.height = logicalH * dpr;
       ctx.scale(dpr, dpr);
@@ -107,16 +103,15 @@ export class ShareService {
       const centX = ox + (baseGaps / 2) * s;
       const centY = oy - (triH / 3);
 
+      ctx.fillStyle = '#111111';
       ctx.textAlign = 'center';
       if (wasRevealed) {
-        ctx.fillStyle = '#616161';
         ctx.font = `bold 38px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
         ctx.textBaseline = 'middle';
         ctx.fillText('👀', centX, centY - 8);
         ctx.font = `13px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
         ctx.fillText('revealed', centX, centY + 20);
       } else {
-        ctx.fillStyle = '#111111';
         ctx.font = `bold 40px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
         ctx.textBaseline = 'middle';
         ctx.fillText(String(attempts), centX, centY - 10);
@@ -128,18 +123,11 @@ export class ShareService {
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      ctx.fillStyle = '#111111';
       ctx.font = `bold 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
       ctx.fillText('TRIPOD', logicalW / 2, headerH * 0.32);
 
-      ctx.fillStyle = '#666666';
       ctx.font = `15px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
       ctx.fillText(this.formatDateStr(dateKey), logicalW / 2, headerH * 0.68);
-
-      // --- Footer: URL ---
-      ctx.fillStyle = '#aaaaaa';
-      ctx.font = `12px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
-      ctx.fillText('playtripod.com', logicalW / 2, oy + pad * 0.5 + footerH * 0.4);
 
       return new Promise(resolve => {
         canvas.toBlob(blob => {
@@ -151,15 +139,6 @@ export class ShareService {
     }
   }
 
-  /**
-   * Returns canvas (x, y) coordinates for every circle in the triangle,
-   * ordered circle 1 … 12 (or 1 … 9 for size-4).
-   *
-   * The triangle sits on an equilateral grid:
-   *   - horizontal step: s
-   *   - vertical step:   s * sin(60°)
-   * with (ox, oy) as the bottom-left corner in canvas space.
-   */
   private getCanvasCirclePositions(
     size: 4 | 5,
     s: number,
@@ -186,7 +165,6 @@ export class ShareService {
       ];
     }
 
-    // size === 4
     return [
       { x: ox + 1.5 * s, y: oy - 3 * h },  // 1  apex
       { x: ox + 1 * s,   y: oy - 2 * h },  // 2
@@ -211,7 +189,7 @@ export class ShareService {
 
     if (Capacitor.isNativePlatform()) {
       try {
-        await Share.share({ text, url: this.SHARE_URL });
+        await Share.share({ text });
         return true;
       } catch {
         return false;
@@ -222,7 +200,7 @@ export class ShareService {
     const imageFile = await this.generateShareImage(size, dateKey, attempts, wasRevealed);
     if (imageFile && typeof navigator.canShare === 'function' && navigator.canShare({ files: [imageFile] })) {
       try {
-        await navigator.share({ files: [imageFile], url: this.SHARE_URL });
+        await navigator.share({ files: [imageFile] });
         return true;
       } catch {
         // User cancelled or browser rejected — fall through to text
@@ -232,7 +210,7 @@ export class ShareService {
     // Web text share
     if (navigator.share) {
       try {
-        await navigator.share({ text, url: this.SHARE_URL });
+        await navigator.share({ text });
         return true;
       } catch {
         // Fall through to clipboard
@@ -241,7 +219,7 @@ export class ShareService {
 
     // Clipboard fallback
     try {
-      await navigator.clipboard.writeText(text + '\n\n' + this.SHARE_URL);
+      await navigator.clipboard.writeText(text);
       return true;
     } catch {
       return false;
