@@ -73,6 +73,8 @@ export class GameComponent implements OnInit {
   showHowToPlay = false;
   lastHintPosition?: number;
   maxHints = 3;
+  puzzleUnavailable = false;
+  private lastRequestedDate?: Date;
 
   private gameStateByDate: Record<string, DateState> = {};
 
@@ -132,24 +134,47 @@ export class GameComponent implements OnInit {
 
     // On initial load, fetch today's game and restore saved state for this date
     const today = this.gameService.getTodayEST();
-    this.currentGameDate = this.formatDateKey(today);
+    this.loadGame(today);
+  }
+
+  // Fetches the puzzle for the given date and applies it, or shows the
+  // "puzzle unavailable" empty state if neither the network nor the
+  // localStorage cache had a usable copy (e.g. first launch while offline).
+  private loadGame(date: Date): void {
+    this.lastRequestedDate = date;
+    this.currentGameDate = this.formatDateKey(date);
     this.restoreDateState(this.currentGameDate);
 
-    this.gameService.getGameForDate(today).subscribe((game) => {
-      this.currentSize = game.size;
-      this.currentLetters = game.letters;
-      this.currentCategory = game.category;
-      this.currentWords = {
-        wordOne: game.wordOne || '',
-        wordTwo: game.wordTwo || '',
-        wordThree: game.wordThree || ''
-      };
-      // Restore in-progress inputs for today
-      this.triangleInputValues = this.stateService.loadInputValues(this.currentGameDate!);
-      // Keep submitted=true if the game was already solved or revealed
-      this.submitted = this.revealed || this.isAllCorrect;
+    this.gameService.getGameForDate(date).subscribe((game) => {
+      if (game.available) {
+        this.currentSize = game.size;
+        this.currentLetters = game.letters;
+        this.currentCategory = game.category;
+        this.currentWords = {
+          wordOne: game.wordOne || '',
+          wordTwo: game.wordTwo || '',
+          wordThree: game.wordThree || ''
+        };
+        // Restore in-progress inputs for this date
+        this.triangleInputValues = this.stateService.loadInputValues(this.currentGameDate!);
+        // Keep submitted=true if the game was already solved or revealed
+        this.submitted = this.revealed || this.isAllCorrect;
+        this.puzzleUnavailable = false;
+        this.resetCounter++;
+      } else {
+        this.currentLetters = undefined;
+        this.currentCategory = undefined;
+        this.currentWords = undefined;
+        this.puzzleUnavailable = true;
+      }
       this.loaderService.markReady();
     });
+  }
+
+  retryLoad(): void {
+    if (!this.lastRequestedDate) return;
+    this.loaderService.showUntilReady(500);
+    this.loadGame(this.lastRequestedDate);
   }
 
   private restoreDateState(date: string): void {
@@ -467,36 +492,7 @@ export class GameComponent implements OnInit {
   // called by the PastDateSelectorComponent (immediate load)
   onDateChosen(date: Date): void {
     this.loaderService.showUntilReady(500);
-    this.gameService.getGameForDate(date).subscribe((game) => {
-      const expectedLength = game.size === 4 ? 9 : 12;
-      if (Array.isArray(game.letters) && game.letters.length === expectedLength) {
-        this.currentSize = game.size;
-        this.currentLetters = game.letters;
-        this.currentCategory = game.category;
-        this.currentWords = {
-          wordOne: game.wordOne || '',
-          wordTwo: game.wordTwo || '',
-          wordThree: game.wordThree || ''
-        };
-        // set currentGameDate to the chosen MMDDYY identifier
-        this.currentGameDate = this.formatDateKey(date);
-        // Restore persisted state for this date
-        this.restoreDateState(this.currentGameDate);
-        // Restore saved in-progress inputs (or empty for a fresh date)
-        this.triangleInputValues = this.stateService.loadInputValues(this.currentGameDate);
-        // If the game was previously revealed or solved, keep it submitted (locked)
-        this.submitted = this.revealed || this.isAllCorrect;
-        this.resetCounter++;
-      } else {
-        // no letters -> clear override (falls back to today)
-        this.currentLetters = undefined;
-        this.currentCategory = undefined;
-        this.currentWords = undefined;
-        this.currentGameDate = this.formatDateKey(new Date());
-        this.currentSize = 5;
-      }
-      this.loaderService.markReady();
-    });
+    this.loadGame(date);
   }
 
   // helper: return only submissions for the currently loaded game
