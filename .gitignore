@@ -15,3 +15,6 @@ xcuserdata/
 # Playwright
 test-results/
 playwright-report/
+
+# Generated App Store screenshots
+store-screenshots/
