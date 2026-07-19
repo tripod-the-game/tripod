@@ -143,6 +143,27 @@ button.secondary:active {
   letter-spacing: 0.02em;
 }
 
+.footer-links {
+  margin: 6px 0 0 0;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+
+  a {
+    color: #9ca3af;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  span {
+    color: #d1d5db;
+    margin: 0 6px;
+  }
+}
+
 /* Action row */
 .action-row {
   display: flex;
