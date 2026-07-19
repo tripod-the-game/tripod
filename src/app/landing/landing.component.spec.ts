@@ -15,6 +15,7 @@ const MOCK_GAME: GameData = {
   wordTwo: 'EARTH',
   wordThree: 'GRAPH',
   size: 5,
+  available: true,
 };
 
 describe('LandingComponent', () => {
@@ -62,6 +63,7 @@ describe('LandingComponent', () => {
       wordOne: '',
       wordTwo: '',
       wordThree: '',
+      available: false,
     }));
     fixture.detectChanges();
     expect(loaderServiceSpy.markReady).toHaveBeenCalled();
@@ -81,6 +83,7 @@ describe('LandingComponent', () => {
       wordOne: '',
       wordTwo: '',
       wordThree: '',
+      available: false,
     }));
     fixture.detectChanges();
     expect(component.previewDisplayValues[1]).toBe('A');

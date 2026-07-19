@@ -20,6 +20,7 @@ const MOCK_GAME_5: GameData = {
   wordTwo: 'EARTH',
   wordThree: 'GRAPH',
   size: 5,
+  available: true,
 };
 
 // All-correct values for the 5-letter puzzle (position → letter, 1-indexed)
@@ -651,6 +652,7 @@ describe('GameComponent', () => {
         wordTwo: 'ECHO',
         wordThree: 'CAVE',
         size: 4,
+        available: true,
       };
       gameServiceSpy.getGameForDate.and.returnValue(of(game4));
       component.onDateChosen(new Date(2026, 0, 27));
@@ -666,6 +668,61 @@ describe('GameComponent', () => {
       component.triangleInputValues = { 1: 'A', 2: 'B' };
       component.onDateChosen(new Date(2026, 0, 27));
       expect(component.triangleInputValues).toEqual({});
+    });
+  });
+
+  // ── puzzle unavailable (offline / no cache) ──────────────────────────────────
+
+  describe('when the game data is unavailable', () => {
+    const UNAVAILABLE_GAME: GameData = {
+      letters: [],
+      size: 5,
+      category: undefined,
+      wordOne: '',
+      wordTwo: '',
+      wordThree: '',
+      available: false,
+    };
+
+    it('should set puzzleUnavailable and clear the current puzzle on initial load', () => {
+      gameServiceSpy.getGameForDate.and.returnValue(of(UNAVAILABLE_GAME));
+      component.ngOnInit();
+      expect(component.puzzleUnavailable).toBeTrue();
+      expect(component.currentLetters).toBeUndefined();
+    });
+
+    it('should set puzzleUnavailable when a chosen date has no data', () => {
+      gameServiceSpy.getGameForDate.and.returnValue(of(UNAVAILABLE_GAME));
+      component.onDateChosen(new Date(2026, 0, 27));
+      expect(component.puzzleUnavailable).toBeTrue();
+    });
+
+    it('should still call loaderService.markReady() when unavailable', () => {
+      gameServiceSpy.getGameForDate.and.returnValue(of(UNAVAILABLE_GAME));
+      component.onDateChosen(new Date(2026, 0, 27));
+      expect(loaderServiceSpy.markReady).toHaveBeenCalled();
+    });
+  });
+
+  describe('retryLoad', () => {
+    it('should re-fetch the last requested date and clear puzzleUnavailable on success', () => {
+      const date = new Date(2026, 0, 27);
+      gameServiceSpy.getGameForDate.and.returnValue(of({ ...MOCK_GAME_5, available: false }));
+      component.onDateChosen(date);
+      expect(component.puzzleUnavailable).toBeTrue();
+
+      gameServiceSpy.getGameForDate.and.returnValue(of(MOCK_GAME_5));
+      component.retryLoad();
+      expect(gameServiceSpy.getGameForDate).toHaveBeenCalledWith(date);
+      expect(component.puzzleUnavailable).toBeFalse();
+      expect(component.currentLetters).toEqual(MOCK_GAME_5.letters);
+    });
+
+    it('should do nothing if no date has been requested yet', () => {
+      gameServiceSpy.getGameForDate.calls.reset();
+      (component as any).lastRequestedDate = undefined;
+      component.retryLoad();
+      expect(gameServiceSpy.getGameForDate).not.toHaveBeenCalled();
     });
   });
 

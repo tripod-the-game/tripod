@@ -9,7 +9,9 @@
     "test": "ng test",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
-    "e2e:headed": "playwright test --headed"
+    "e2e:headed": "playwright test --headed",
+    "predeploy": "ng build --base-href /tripod/ && cp dist/tripod/index.html dist/tripod/404.html && touch dist/tripod/.nojekyll",
+    "deploy": "gh-pages -d dist/tripod --dotfiles"
   },
   "private": true,
   "dependencies": {
@@ -41,6 +43,7 @@
     "@playwright/test": "^1.58.2",
     "@types/canvas-confetti": "^1.9.0",
     "@types/jasmine": "~5.1.0",
+    "gh-pages": "^6.3.0",
     "jasmine-core": "~5.2.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",

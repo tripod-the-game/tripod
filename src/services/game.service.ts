@@ -10,6 +10,7 @@ export interface GameData {
   wordTwo?: string;
   wordThree?: string;
   size: 4 | 5; // word length (4 or 5 letters)
+  available: boolean; // false when neither a network fetch nor a cached copy produced a usable puzzle
 }
 
 export type ValidationState = 'none' | 'correct' | 'wrong-position' | 'present';
@@ -139,7 +140,7 @@ export class GameService {
             // Invalid cache
           }
         }
-        return of({ letters: [], category: undefined, size: 5 as const });
+        return of({ letters: [], category: undefined, size: 5 as const, available: false });
       })
     );
   }
@@ -176,7 +177,7 @@ export class GameService {
       letters = [];
     }
 
-    return { letters, category, wordOne, wordTwo, wordThree, size };
+    return { letters, category, wordOne, wordTwo, wordThree, size, available: letters.length === expectedLength };
   }
 
   getTodayGame(): Observable<GameData> {

@@ -14,6 +14,7 @@ const MOCK_GAME_5: GameData = {
   wordTwo: 'EARTH',
   wordThree: 'GRAPH',
   size: 5,
+  available: true,
 };
 
 describe('TriangleComponent', () => {
