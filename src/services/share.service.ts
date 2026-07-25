@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Share } from '@capacitor/share';
 import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory } from '@capacitor/filesystem';
 
 @Injectable({
   providedIn: 'root'
@@ -144,6 +145,18 @@ export class ShareService {
     }
   }
 
+  private fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+        resolve(result.slice(result.indexOf(',') + 1));
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
   private getCanvasCirclePositions(
     size: 4 | 5,
     s: number,
@@ -193,6 +206,26 @@ export class ShareService {
     const text = this.generateResultText(dateKey, attempts, wasRevealed, hintsUsed);
 
     if (Capacitor.isNativePlatform()) {
+      try {
+        const imageFile = await this.generateShareImage(size, dateKey, attempts, wasRevealed);
+        if (imageFile) {
+          const base64 = await this.fileToBase64(imageFile);
+          await Filesystem.writeFile({
+            path: 'tripod-result.png',
+            data: base64,
+            directory: Directory.Cache
+          });
+          const { uri } = await Filesystem.getUri({
+            path: 'tripod-result.png',
+            directory: Directory.Cache
+          });
+          await Share.share({ files: [uri] });
+          return true;
+        }
+      } catch {
+        // Image generation/write failed — fall through to text-only share
+      }
+
       try {
         await Share.share({ text });
         return true;
