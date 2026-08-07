@@ -1,0 +1,21 @@
+Tripod is a daily word puzzle where three words share a triangle's corners — solve all three from a single category clue.
+
+HOW IT WORKS
+Two words run down the left and right edges of a triangle, and a third runs along the bottom. Wherever two words meet at a corner, they share a letter. Fill in every circle to complete all three words at once.
+
+Get instant, color-coded feedback on every guess:
+• Green — that letter is in the exact right spot
+• Purple — you spelled one of the puzzle's words, just in the wrong slot
+• Yellow — that letter belongs somewhere in the puzzle, just not there
+Guess as many times as you want — there's no limit, and no penalty for trying.
+
+STUCK? YOU'VE GOT HELP
+Three hints per puzzle reveal a random letter when you need a nudge. Can't crack it? Reveal the full answer and jump into tomorrow's puzzle with a clean slate.
+
+BUILD A STREAK
+A new puzzle unlocks every day at midnight. Track your win percentage, current streak, and guess distribution in your stats, and share your results with friends when you solve it.
+
+CATCH UP ANYTIME
+Missed a day? Browse past puzzles and play any date you haven't finished yet.
+
+No ads interrupting your puzzle. No pressure — just three words, one triangle, and a category to crack.
