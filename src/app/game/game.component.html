@@ -1,11 +1,12 @@
 <div class="game-hero">
   <div class="game-card">
     <header class="game-header">
-      <a routerLink="/" class="back-btn" aria-label="Back to home">←</a>
-      <span class="header-title">Tripod</span>
+      <a *ngIf="!isPack" routerLink="/" class="back-btn" aria-label="Back to home">←</a>
+      <a *ngIf="isPack" [routerLink]="['/pack', packId]" queryParamsHandling="preserve" class="back-btn" aria-label="Back to pack">←</a>
+      <span class="header-title">{{ isPack ? (pack?.title ?? 'Puzzle Pack') : 'Tripod' }}</span>
       <div class="header-actions">
-        <app-past-date-selector [iconOnly]="true" (dateSelected)="onDateChosen($event)"></app-past-date-selector>
-        <button class="icon-btn" (click)="showStats = true" aria-label="View statistics">
+        <app-past-date-selector *ngIf="!isPack" [iconOnly]="true" (dateSelected)="onDateChosen($event)"></app-past-date-selector>
+        <button *ngIf="!isPack" class="icon-btn" (click)="showStats = true" aria-label="View statistics">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <line x1="18" y1="20" x2="18" y2="10"></line>
             <line x1="12" y1="20" x2="12" y2="4"></line>
@@ -26,6 +27,14 @@
         </button>
       </div>
     </header>
+
+    <nav class="pack-nav" *ngIf="isPack" aria-label="Pack puzzles">
+      <button class="pack-nav-btn" [disabled]="!hasPrevPuzzle" (click)="goToPuzzle(packNumber! - 1)" aria-label="Previous puzzle">‹</button>
+      <span class="pack-nav-label">
+        Puzzle {{ packNumber }}<ng-container *ngIf="pack"> of {{ pack.count }}</ng-container>
+      </span>
+      <button class="pack-nav-btn" [disabled]="!hasNextPuzzle" (click)="goToPuzzle(packNumber! + 1)" aria-label="Next puzzle">›</button>
+    </nav>
 
     <ng-container *ngIf="!puzzleUnavailable; else puzzleUnavailableState">
       <app-triangle
@@ -175,7 +184,8 @@
         </svg>
         {{ shareButtonText }}
       </button>
-      <button (click)="congratsOpen = false" class="primary">Close</button>
+      <button *ngIf="hasNextPuzzle" (click)="goToPuzzle(packNumber! + 1)" class="primary">Next Puzzle</button>
+      <button *ngIf="!hasNextPuzzle" (click)="congratsOpen = false" class="primary">Close</button>
     </div>
   </div>
 </div>

@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { NO_ERRORS_SCHEMA, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { of } from 'rxjs';
+import { of, BehaviorSubject } from 'rxjs';
+import { provideRouter, ActivatedRoute, Router, ParamMap, convertToParamMap } from '@angular/router';
 
 import { GameComponent } from './game.component';
 import { GameService, GameData, ValidationState } from '../../services/game.service';
@@ -85,6 +86,7 @@ describe('GameComponent', () => {
         { provide: ShareService, useValue: shareServiceSpy },
         { provide: StateService, useValue: stateServiceSpy },
         { provide: StatsService, useValue: statsServiceSpy },
+        provideRouter([]),
       ],
       schemas: [NO_ERRORS_SCHEMA],
     })
@@ -718,9 +720,9 @@ describe('GameComponent', () => {
       expect(component.currentLetters).toEqual(MOCK_GAME_5.letters);
     });
 
-    it('should do nothing if no date has been requested yet', () => {
+    it('should do nothing if no game has been requested yet', () => {
       gameServiceSpy.getGameForDate.calls.reset();
-      (component as any).lastRequestedDate = undefined;
+      (component as any).retry = undefined;
       component.retryLoad();
       expect(gameServiceSpy.getGameForDate).not.toHaveBeenCalled();
     });
@@ -782,5 +784,126 @@ describe('GameComponent', () => {
       tick(0);
       expect(component.shareButtonText).toBe('Share');
     }));
+  });
+});
+
+describe('GameComponent (pack mode)', () => {
+  let component: GameComponent;
+  let fixture: ComponentFixture<GameComponent>;
+  let gameServiceSpy: jasmine.SpyObj<GameService>;
+  let shareServiceSpy: jasmine.SpyObj<ShareService>;
+  let stateServiceSpy: jasmine.SpyObj<StateService>;
+  let statsServiceSpy: jasmine.SpyObj<StatsService>;
+  let routerSpy: jasmine.SpyObj<Router>;
+  let paramMap$: BehaviorSubject<ParamMap>;
+
+  const PACK = { id: 'cod', title: 'Call of Duty', count: 10 };
+
+  beforeEach(async () => {
+    paramMap$ = new BehaviorSubject(convertToParamMap({ packId: 'cod', n: '3' }));
+
+    gameServiceSpy = jasmine.createSpyObj('GameService', ['getGameForDate', 'getTodayEST', 'getPackPuzzle', 'getPack']);
+    gameServiceSpy.getGameForDate.and.returnValue(of(MOCK_GAME_5));
+    gameServiceSpy.getTodayEST.and.returnValue(new Date(2026, 0, 27));
+    gameServiceSpy.getPackPuzzle.and.returnValue(of(MOCK_GAME_5));
+    gameServiceSpy.getPack.and.returnValue(of(PACK));
+
+    const hapticServiceSpy = jasmine.createSpyObj('HapticService', ['tap', 'submit', 'success', 'warning', 'error', 'celebrate']);
+    shareServiceSpy = jasmine.createSpyObj('ShareService', ['shareResult']);
+    shareServiceSpy.shareResult.and.returnValue(Promise.resolve(true));
+
+    stateServiceSpy = jasmine.createSpyObj('StateService', [
+      'loadSubmissions', 'saveSubmissions',
+      'loadDateState', 'saveDateState',
+      'loadInputValues', 'saveInputValues',
+      'savePackResult',
+    ]);
+    stateServiceSpy.loadSubmissions.and.returnValue([]);
+    stateServiceSpy.loadDateState.and.returnValue(null);
+    stateServiceSpy.loadInputValues.and.returnValue({});
+
+    statsServiceSpy = jasmine.createSpyObj('StatsService', ['recordResult']);
+    routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+    localStorage.removeItem('tripod_seen_tutorial');
+
+    await TestBed.configureTestingModule({
+      imports: [GameComponent],
+      providers: [
+        { provide: GameService, useValue: gameServiceSpy },
+        { provide: LoaderService, useValue: jasmine.createSpyObj('LoaderService', ['showUntilReady', 'markReady']) },
+        { provide: HapticService, useValue: hapticServiceSpy },
+        { provide: ShareService, useValue: shareServiceSpy },
+        { provide: StateService, useValue: stateServiceSpy },
+        { provide: StatsService, useValue: statsServiceSpy },
+        { provide: Router, useValue: routerSpy },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            paramMap: paramMap$.asObservable(),
+            queryParamMap: of(convertToParamMap({ streamer: '1' })),
+          },
+        },
+      ],
+      schemas: [NO_ERRORS_SCHEMA],
+    })
+      .overrideComponent(GameComponent, { set: { imports: [CommonModule], schemas: [NO_ERRORS_SCHEMA] } })
+      .compileComponents();
+
+    fixture = TestBed.createComponent(GameComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('loads the pack puzzle from the route instead of the daily game', () => {
+    expect(gameServiceSpy.getPackPuzzle).toHaveBeenCalledWith('cod', 3);
+    expect(gameServiceSpy.getGameForDate).not.toHaveBeenCalled();
+    expect(component.currentGameDate).toBe('pack-cod-003');
+    expect(component.isPack).toBeTrue();
+    expect(component.pack).toEqual(PACK);
+  });
+
+  it('enables streamer mode from the query param', () => {
+    expect(component.streamerMode).toBeTrue();
+  });
+
+  it('does not auto-show the tutorial in streamer mode', () => {
+    expect(component.showHowToPlay).toBeFalse();
+  });
+
+  it('records a solve as a pack result, not in daily stats', () => {
+    component.onValuesSubmitted(ALL_CORRECT_VALUES);
+    expect(statsServiceSpy.recordResult).not.toHaveBeenCalled();
+    expect(stateServiceSpy.savePackResult).toHaveBeenCalledWith('pack-cod-003', jasmine.objectContaining({ solved: true, revealed: false }));
+  });
+
+  it('records a reveal as an unsolved pack result', () => {
+    component.onRevealAnswer();
+    expect(statsServiceSpy.recordResult).not.toHaveBeenCalled();
+    expect(stateServiceSpy.savePackResult).toHaveBeenCalledWith('pack-cod-003', jasmine.objectContaining({ solved: false, revealed: true }));
+  });
+
+  it('shares with the pack label instead of a date', async () => {
+    await component.onShare();
+    expect(shareServiceSpy.shareResult.calls.mostRecent().args[0]).toBe('Call of Duty #3');
+  });
+
+  it('knows whether there are previous and next puzzles', () => {
+    expect(component.hasPrevPuzzle).toBeTrue();
+    expect(component.hasNextPuzzle).toBeTrue();
+    paramMap$.next(convertToParamMap({ packId: 'cod', n: '10' }));
+    expect(component.hasNextPuzzle).toBeFalse();
+  });
+
+  it('navigates between puzzles keeping query params', () => {
+    component.goToPuzzle(4);
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/pack', 'cod', 4], { queryParamsHandling: 'preserve' });
+  });
+
+  it('loads the next puzzle when the route param changes', () => {
+    component.congratsOpen = true;
+    paramMap$.next(convertToParamMap({ packId: 'cod', n: '4' }));
+    expect(gameServiceSpy.getPackPuzzle).toHaveBeenCalledWith('cod', 4);
+    expect(component.currentGameDate).toBe('pack-cod-004');
+    expect(component.congratsOpen).toBeFalse();
   });
 });

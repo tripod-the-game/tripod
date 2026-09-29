@@ -25,6 +25,11 @@ describe('ShareService', () => {
   // ── generateResultText ───────────────────────────────────────────────────────
 
   describe('generateResultText', () => {
+    it('should use a pack label as-is instead of formatting it as a date', () => {
+      const text = service.generateResultText('Call of Duty #3', 2, false, 0);
+      expect(text.split('\n')[0]).toBe('Tripod Call of Duty #3');
+    });
+
     it('should include "Tripod" in the output', () => {
       expect(service.generateResultText('030126', 3, false, 0)).toContain('Tripod');
     });

@@ -37,7 +37,10 @@ export class ShareService {
     return result;
   }
 
+  // Daily games pass an MMDDYY key; pack puzzles pass a ready-made label
+  // (e.g. "Call of Duty #3") which is used as-is.
   private formatDateStr(dateKey: string): string {
+    if (!/^\d{6}$/.test(dateKey)) return dateKey;
     const month = dateKey.slice(0, 2);
     const day = dateKey.slice(2, 4);
     const year = '20' + dateKey.slice(4, 6);

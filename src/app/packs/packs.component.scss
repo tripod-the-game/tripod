@@ -1,0 +1,89 @@
+:host {
+  display: block;
+  background: #fff;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  color: #0f172a;
+}
+
+.packs-page {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 32px 18px;
+  padding-top: calc(32px + env(safe-area-inset-top));
+  padding-bottom: calc(32px + env(safe-area-inset-bottom));
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+h1 {
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 1.75rem;
+  margin: 0;
+  color: #111;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1.5px solid #111;
+  color: #111;
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.intro {
+  color: #555;
+  line-height: 1.5;
+  margin: 0 0 20px 0;
+}
+
+.pack-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+  border: 1.5px solid #111;
+  border-radius: 14px;
+  color: #111;
+  text-decoration: none;
+  transition: background 0.18s, transform 0.12s;
+
+  &:active {
+    background: #f3f4f6;
+    transform: translateY(1px) scale(0.99);
+  }
+}
+
+.pack-title {
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.pack-description {
+  color: #444;
+  line-height: 1.4;
+}
+
+.pack-count {
+  color: #777;
+  font-size: 0.9rem;
+}
+
+.empty {
+  color: #555;
+  text-align: center;
+  margin-top: 32px;
+}

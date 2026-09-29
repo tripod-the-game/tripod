@@ -346,4 +346,96 @@ describe('GameService', () => {
       expect(localStorage.getItem('tripod_games_index')).toBeTruthy();
     });
   });
+
+  // ── Puzzle packs ────────────────────────────────────────────────────────────
+
+  describe('getPackPuzzle', () => {
+    it('should fetch the zero-padded puzzle file for the pack', () => {
+      service.getPackPuzzle('cod', 3).subscribe();
+      const req = httpMock.expectOne(`${BASE_URL}/packs/cod/003.json`);
+      expect(req.request.method).toBe('GET');
+      req.flush({});
+    });
+
+    it('should decode base64 words when the puzzle is marked encoded', () => {
+      let game: GameData | undefined;
+      service.getPackPuzzle('cod', 1).subscribe(g => (game = g));
+      httpMock.expectOne(`${BASE_URL}/packs/cod/001.json`).flush({
+        category: 'Multiplayer Slang',
+        size: 4,
+        encoded: true,
+        wordOne: btoa('camp'),
+        wordTwo: btoa('perk'),
+        wordThree: btoa('cook'),
+      });
+
+      expect(game?.available).toBeTrue();
+      expect(game?.wordOne).toBe('CAMP');
+      expect(game?.wordTwo).toBe('PERK');
+      expect(game?.wordThree).toBe('COOK');
+      expect(game?.letters).toEqual(['P', 'M', 'E', 'A', 'R', 'C', 'O', 'O', 'K']);
+    });
+
+    it('should mark the puzzle unavailable when encoded words are not valid base64', () => {
+      let game: GameData | undefined;
+      service.getPackPuzzle('cod', 1).subscribe(g => (game = g));
+      httpMock.expectOne(`${BASE_URL}/packs/cod/001.json`).flush({
+        size: 4, encoded: true, wordOne: '%%%', wordTwo: '%%%', wordThree: '%%%',
+      });
+      expect(game?.available).toBeFalse();
+    });
+
+    it('should not make a request for an invalid pack id or number', () => {
+      let game: GameData | undefined;
+      service.getPackPuzzle('../games', 1).subscribe(g => (game = g));
+      expect(game?.available).toBeFalse();
+      service.getPackPuzzle('cod', 0).subscribe(g => (game = g));
+      expect(game?.available).toBeFalse();
+      httpMock.expectNone(() => true);
+    });
+
+    it('should cache pack puzzles separately from daily games', () => {
+      service.getPackPuzzle('cod', 2).subscribe();
+      httpMock.expectOne(`${BASE_URL}/packs/cod/002.json`).flush({ wordOne: 'a' });
+      expect(localStorage.getItem('tripod_game_packs_cod_002')).toBeTruthy();
+    });
+  });
+
+  describe('packGameKey', () => {
+    it('should build a storage key that cannot collide with MMDDYY dates', () => {
+      expect(GameService.packGameKey('cod', 7)).toBe('pack-cod-007');
+    });
+  });
+
+  describe('getPacks', () => {
+    const packsUrl = `${BASE_URL}/packs/index.json`;
+
+    it('should return valid packs and drop malformed entries', () => {
+      let packs: any[] = [];
+      service.getPacks().subscribe(p => (packs = p));
+      httpMock.expectOne(packsUrl).flush([
+        { id: 'cod', title: 'Call of Duty', description: 'For streams', count: 10 },
+        { id: 'Bad Id', title: 'Nope', count: 3 },
+        { id: 'empty', title: 'Empty', count: 0 },
+      ]);
+      expect(packs).toEqual([{ id: 'cod', title: 'Call of Duty', description: 'For streams', count: 10 }]);
+    });
+
+    it('should fall back to the cached index when offline', () => {
+      service.getPacks().subscribe();
+      httpMock.expectOne(packsUrl).flush([{ id: 'cod', title: 'Call of Duty', count: 10 }]);
+
+      let packs: any[] = [];
+      service.getPacks().subscribe(p => (packs = p));
+      httpMock.expectOne(packsUrl).error(new ErrorEvent('Network error'));
+      expect(packs.length).toBe(1);
+    });
+
+    it('getPack should find a pack by id', () => {
+      let pack: any;
+      service.getPack('cod').subscribe(p => (pack = p));
+      httpMock.expectOne(packsUrl).flush([{ id: 'cod', title: 'Call of Duty', count: 10 }]);
+      expect(pack?.title).toBe('Call of Duty');
+    });
+  });
 });

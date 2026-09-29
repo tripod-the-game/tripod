@@ -148,6 +148,64 @@ app-past-submissions {
   font-weight: 700;
   color: #111;
   letter-spacing: 0.04em;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Puzzle pack navigation (Puzzle 3 of 10) */
+.pack-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+
+.pack-nav-label {
+  font-family: 'Baloo 2', 'Fredoka', 'Luckiest Guy', cursive, sans-serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #111;
+  min-width: 130px;
+  text-align: center;
+}
+
+.pack-nav-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1.5px solid #111;
+  color: #111;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.pack-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* Streamer mode (?streamer=1): scale the board up so it reads well on a
+   broadcast. Only kicks in on wide screens so phones are unaffected. */
+@media (min-width: 900px) {
+  :host(.streamer-mode) .game-card {
+    max-width: 760px;
+  }
+
+  :host(.streamer-mode) app-triangle {
+    zoom: 1.35;
+  }
+
+  :host(.streamer-mode) .header-title,
+  :host(.streamer-mode) .pack-nav-label {
+    font-size: 2rem;
+  }
 }
 
 /* Congrats modal styles */

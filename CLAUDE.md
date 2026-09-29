@@ -73,6 +73,12 @@ Each game file:
 
 For 4-letter puzzles, add `"size": 4` (5-letter puzzles default and don't need the field).
 
+### Puzzle packs
+
+Themed puzzle sets outside the daily schedule live in the same repo under `packs/` (`packs/index.json` lists them; puzzles are `packs/<id>/001.json`…). Pack puzzles may set `"encoded": true` with base64 words (spoiler guard for streams); `GameService.parseGameResponse` decodes them. Packs never touch `tripod_stats`: results go to `tripod_pack_results`, and per-game state uses the key `pack-<id>-NNN` in place of the MMDDYY date.
+
+Routes: `/packs` (list), `/pack/:packId` (puzzle grid, streamer mode toggle, reset progress), `/pack/:packId/:n` (plays in `GameComponent`). `?streamer=1` enables streamer mode (bigger board on wide screens, no auto tutorial).
+
 All games are cached in localStorage (`tripod_game_<date>`) as a fallback for network failures. Games roll over at **midnight EST/EDT** regardless of the user's local timezone.
 
 ## Key architecture
@@ -80,12 +86,14 @@ All games are cached in localStorage (`tripod_game_<date>`) as a fallback for ne
 **Angular standalone components** with lazy routing.
 
 ### Components
-- `game.component.ts` — main game logic, submission validation, hints, reveal
+- `game.component.ts` — main game logic, submission validation, hints, reveal; also plays pack puzzles (`/pack/:packId/:n`)
 - `triangle.component.ts` — renders the triangle grid, handles input/navigation
 - `landing.component.ts` — home/landing page with display-only triangle preview
 - `how-to-play.component.ts` — tutorial modal (step 1: rules + color legend, step 2: interactive practice with GUAVA/APPLE/GRAPE)
 - `past-submissions.component.ts` — modal carousel to review previous submission attempts
 - `past-date-selector.component.ts` — Material Datepicker for loading past games (shows solved/revealed/started status per date)
+- `packs.component.ts` — list of puzzle packs (`/packs`)
+- `pack.component.ts` — one pack's puzzle grid with per-puzzle status, streamer mode toggle, reset progress (`/pack/:packId`)
 - `stats.component.ts` — statistics modal (win%, streaks, guess distribution 1–6 and 7+)
 - `submit-button.component.ts` — submit button with shake feedback
 - `reset-button.component.ts` — reset button (clears non-correct letters, preserves hints)
@@ -106,6 +114,8 @@ All games are cached in localStorage (`tripod_game_<date>`) as a fallback for ne
 - `tripod_game_<date>` — cached game JSON
 - `tripod_games_index` — cached list of available dates
 - `tripod_seen_tutorial` — whether the tutorial has been shown
+- `tripod_packs_index` — cached list of puzzle packs
+- `tripod_pack_results` — finished pack puzzles (keyed by `pack-<id>-NNN`), kept out of `tripod_stats`
 
 ## Build & run
 

@@ -135,6 +135,21 @@ button.secondary:active {
   color: #111;
 }
 
+.packs-link {
+  display: block;
+  margin: 14px auto 0 auto;
+  text-align: center;
+  color: #111;
+  font-family: 'Baloo 2', 'Fredoka', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
 .made-with-love {
   margin: 18px 0 0 0;
   text-align: center;

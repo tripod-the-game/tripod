@@ -1,0 +1,58 @@
+<div class="pack-page">
+  <header class="page-header">
+    <a routerLink="/packs" class="back-btn" aria-label="Back to puzzle packs">←</a>
+    <h1>{{ pack?.title ?? 'Puzzle Pack' }}</h1>
+  </header>
+
+  <ng-container *ngIf="pack; else missing">
+    <p class="description" *ngIf="pack.description">{{ pack.description }}</p>
+    <p class="progress">{{ solvedCount }} of {{ pack.count }} solved</p>
+
+    <button class="primary play-btn" [routerLink]="['/pack', packId, nextUp]" [queryParams]="queryParams">
+      {{ solvedCount === 0 && nextUp === 1 ? 'Start' : 'Continue' }} — Puzzle {{ nextUp }}
+    </button>
+
+    <div class="puzzle-grid">
+      <a
+        *ngFor="let tile of tiles"
+        class="puzzle-tile"
+        [class.solved]="tile.status === 'solved'"
+        [class.revealed]="tile.status === 'revealed'"
+        [class.started]="tile.status === 'started'"
+        [routerLink]="['/pack', packId, tile.n]"
+        [queryParams]="queryParams"
+        [attr.aria-label]="'Puzzle ' + tile.n + (tile.status === 'new' ? '' : ', ' + tile.status)"
+      >
+        <span class="tile-number">{{ tile.n }}</span>
+        <span class="tile-status" *ngIf="tile.status === 'solved'">✓</span>
+        <span class="tile-status" *ngIf="tile.status === 'revealed'">👀</span>
+        <span class="tile-status" *ngIf="tile.status === 'started'">•</span>
+      </a>
+    </div>
+
+    <label class="streamer-toggle">
+      <input type="checkbox" [checked]="streamerMode" (change)="toggleStreamerMode()" />
+      <span>
+        <strong>Streamer mode</strong>
+        <small>Bigger board for broadcasting, no tutorial popup</small>
+      </span>
+    </label>
+
+    <button class="secondary reset-btn" (click)="showResetConfirm = true">Reset pack progress</button>
+  </ng-container>
+
+  <ng-template #missing>
+    <p class="empty" *ngIf="loaded">Couldn't load this puzzle pack. Check your connection and try again.</p>
+  </ng-template>
+</div>
+
+<div class="confirm-modal" *ngIf="showResetConfirm" (click)="showResetConfirm = false">
+  <div class="confirm-content" (click)="$event.stopPropagation()">
+    <h2>Reset pack?</h2>
+    <p>This clears your guesses, hints and results for every puzzle in {{ pack?.title }} so you can play it again from scratch.</p>
+    <div class="confirm-buttons">
+      <button class="secondary" (click)="showResetConfirm = false">Cancel</button>
+      <button class="primary" (click)="confirmReset()">Reset</button>
+    </div>
+  </div>
+</div>

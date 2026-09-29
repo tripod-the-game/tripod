@@ -1,13 +1,14 @@
-import { Component, OnInit, NgZone } from "@angular/core";
+import { Component, OnInit, OnDestroy, NgZone, HostBinding } from "@angular/core";
 import confetti from 'canvas-confetti';
 import { CommonModule } from "@angular/common";
-import { RouterModule } from "@angular/router";
+import { RouterModule, ActivatedRoute, Router } from "@angular/router";
+import { Subscription, Observable } from "rxjs";
 import { TriangleComponent } from "../triangle/triangle.component";
 import { SubmitButtonComponent } from "../submit-button/submit-button.component";
 import { ResetButtonComponent } from "../reset-button/reset-button.component";
 import { PastSubmissionsComponent } from "../past-submissions/past-submissions.component";
 import { PastDateSelectorComponent } from "../past-date-selector/past-date-selector.component";
-import { GameService, ValidationState } from "../../services/game.service";
+import { GameService, GameData, PackInfo, ValidationState } from "../../services/game.service";
 import { LoaderService } from "../../services/loader.service";
 import { HapticService } from "../../services/haptic.service";
 import { ShareService } from "../../services/share.service";
@@ -33,7 +34,7 @@ import { HowToPlayComponent } from "../how-to-play/how-to-play.component";
   templateUrl: "./game.component.html",
   styleUrls: ["./game.component.scss"],
 })
-export class GameComponent implements OnInit {
+export class GameComponent implements OnInit, OnDestroy {
   // Word position mapping based on puzzle size
   private readonly WORD_POSITIONS_5 = {
     wordOne: [8, 6, 4, 2, 1],      // left edge (5-letter)
@@ -74,7 +75,29 @@ export class GameComponent implements OnInit {
   lastHintPosition?: number;
   maxHints = 3;
   puzzleUnavailable = false;
-  private lastRequestedDate?: Date;
+  private retry?: () => void;
+  private routeSub?: Subscription;
+  private querySub?: Subscription;
+
+  // Puzzle pack mode (/pack/:packId/:n). Undefined when playing the daily game.
+  packId?: string;
+  packNumber?: number;
+  pack?: PackInfo;
+
+  // Streamer mode (?streamer=1): larger layout for broadcasting
+  @HostBinding("class.streamer-mode") streamerMode = false;
+
+  get isPack(): boolean {
+    return !!this.packId;
+  }
+
+  get hasNextPuzzle(): boolean {
+    return this.isPack && !!this.pack && (this.packNumber ?? 0) < this.pack.count;
+  }
+
+  get hasPrevPuzzle(): boolean {
+    return this.isPack && (this.packNumber ?? 0) > 1;
+  }
 
   private gameStateByDate: Record<string, DateState> = {};
 
@@ -117,14 +140,20 @@ export class GameComponent implements OnInit {
     private shareService: ShareService,
     private stateService: StateService,
     private statsService: StatsService,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private route: ActivatedRoute,
+    private router: Router
   ) {}
 
   private readonly TUTORIAL_SEEN_KEY = 'tripod_seen_tutorial';
 
   ngOnInit(): void {
-    // Show tutorial automatically on first visit
-    if (!localStorage.getItem(this.TUTORIAL_SEEN_KEY)) {
+    this.querySub = this.route.queryParamMap.subscribe((params) => {
+      this.streamerMode = params.get("streamer") === "1";
+    });
+
+    // Show tutorial automatically on first visit (but not mid-broadcast)
+    if (!localStorage.getItem(this.TUTORIAL_SEEN_KEY) && !this.streamerMode) {
       this.showHowToPlay = true;
       localStorage.setItem(this.TUTORIAL_SEEN_KEY, '1');
     }
@@ -132,20 +161,58 @@ export class GameComponent implements OnInit {
     // Load all persisted submissions on startup
     this.submissions = this.stateService.loadSubmissions();
 
-    // On initial load, fetch today's game and restore saved state for this date
-    const today = this.gameService.getTodayEST();
-    this.loadGame(today);
+    // /play loads today's game; /pack/:packId/:n loads a pack puzzle. The
+    // component is reused when moving between pack puzzles, so react to
+    // every param change rather than reading the snapshot once.
+    this.routeSub = this.route.paramMap.subscribe((params) => {
+      const packId = params.get("packId");
+      if (packId) {
+        this.loadPackPuzzle(packId, Number(params.get("n")));
+      } else {
+        this.loadGame(this.gameService.getTodayEST());
+      }
+    });
   }
 
-  // Fetches the puzzle for the given date and applies it, or shows the
-  // "puzzle unavailable" empty state if neither the network nor the
-  // localStorage cache had a usable copy (e.g. first launch while offline).
+  ngOnDestroy(): void {
+    this.routeSub?.unsubscribe();
+    this.querySub?.unsubscribe();
+  }
+
   private loadGame(date: Date): void {
-    this.lastRequestedDate = date;
-    this.currentGameDate = this.formatDateKey(date);
+    this.packId = undefined;
+    this.packNumber = undefined;
+    this.pack = undefined;
+    this.retry = () => this.loadGame(date);
+    this.applyGame(this.formatDateKey(date), this.gameService.getGameForDate(date));
+  }
+
+  private loadPackPuzzle(packId: string, n: number): void {
+    const needsPackInfo = this.packId !== packId || !this.pack;
+    this.packId = packId;
+    this.packNumber = n;
+    if (needsPackInfo) {
+      this.pack = undefined;
+      this.gameService.getPack(packId).subscribe((pack) => {
+        if (this.packId === packId) this.pack = pack;
+      });
+    }
+    this.congratsOpen = false;
+    this.retry = () => this.loadPackPuzzle(packId, n);
+    this.applyGame(GameService.packGameKey(packId, n), this.gameService.getPackPuzzle(packId, n));
+  }
+
+  // Applies the fetched puzzle under the given storage key (MMDDYY for daily
+  // games, pack-<id>-NNN for pack puzzles), or shows the "puzzle unavailable"
+  // empty state if neither the network nor the localStorage cache had a
+  // usable copy (e.g. first launch while offline).
+  private applyGame(gameKey: string, game$: Observable<GameData>): void {
+    this.currentGameDate = gameKey;
     this.restoreDateState(this.currentGameDate);
 
-    this.gameService.getGameForDate(date).subscribe((game) => {
+    game$.subscribe((game) => {
+      // Ignore a slow response for a puzzle the player already navigated away from
+      if (this.currentGameDate !== gameKey) return;
       if (game.available) {
         this.currentSize = game.size;
         this.currentLetters = game.letters;
@@ -172,9 +239,19 @@ export class GameComponent implements OnInit {
   }
 
   retryLoad(): void {
-    if (!this.lastRequestedDate) return;
+    if (!this.retry) return;
     this.loaderService.showUntilReady(500);
-    this.loadGame(this.lastRequestedDate);
+    this.retry();
+  }
+
+  goToPuzzle(n: number): void {
+    if (!this.packId) return;
+    this.router.navigate(["/pack", this.packId, n], { queryParamsHandling: "preserve" });
+  }
+
+  get packLabel(): string {
+    const title = this.pack?.title ?? "Puzzle Pack";
+    return `${title} #${this.packNumber}`;
   }
 
   private restoreDateState(date: string): void {
@@ -193,6 +270,16 @@ export class GameComponent implements OnInit {
 
   private recordStats(solved: boolean): void {
     if (!this.currentGameDate) return;
+    // Pack puzzles are tracked separately so they never touch daily streaks
+    if (this.isPack) {
+      this.stateService.savePackResult(this.currentGameDate, {
+        solved,
+        attempts: this.filteredSubmissions.length,
+        hintsUsed: this.hintsUsed,
+        revealed: this.revealed,
+      });
+      return;
+    }
     this.statsService.recordResult({
       date: this.currentGameDate,
       solved,
@@ -601,7 +688,7 @@ export class GameComponent implements OnInit {
 
     this.hapticService.tap();
     const success = await this.shareService.shareResult(
-      this.currentGameDate,
+      this.isPack ? this.packLabel : this.currentGameDate,
       this.filteredSubmissions.length,
       this.currentSize,
       this.revealed,

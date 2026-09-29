@@ -1,0 +1,15 @@
+<div class="packs-page">
+  <header class="page-header">
+    <a routerLink="/" class="back-btn" aria-label="Back to home">←</a>
+    <h1>Puzzle Packs</h1>
+  </header>
+  <p class="intro">Themed puzzle sets outside the daily game. They don't count toward your daily stats or streak.</p>
+
+  <a *ngFor="let pack of packs" class="pack-card" [routerLink]="['/pack', pack.id]">
+    <span class="pack-title">{{ pack.title }}</span>
+    <span class="pack-description" *ngIf="pack.description">{{ pack.description }}</span>
+    <span class="pack-count">{{ pack.count }} puzzles</span>
+  </a>
+
+  <p class="empty" *ngIf="loaded && packs.length === 0">Couldn't load puzzle packs. Check your connection and try again.</p>
+</div>

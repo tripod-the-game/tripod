@@ -15,6 +15,15 @@ export interface GameData {
 
 export type ValidationState = 'none' | 'correct' | 'wrong-position' | 'present';
 
+// A themed collection of puzzles that lives outside the daily schedule
+// (e.g. a Call of Duty pack for streams). Stored at packs/<id>/NNN.json.
+export interface PackInfo {
+  id: string;
+  title: string;
+  description?: string;
+  count: number; // puzzles are numbered 1..count
+}
+
 // Remote URL for game data (GitHub raw content from public tripod-games repo)
 const GAMES_BASE_URL = 'https://raw.githubusercontent.com/tripod-the-game/tripod-games/main';
 
@@ -23,6 +32,7 @@ export class GameService {
   // Cache key prefix for localStorage
   private readonly CACHE_PREFIX = 'tripod_game_';
   private readonly INDEX_CACHE_KEY = 'tripod_games_index';
+  private readonly PACKS_CACHE_KEY = 'tripod_packs_index';
 
   constructor(private http: HttpClient) {}
 
@@ -145,13 +155,27 @@ export class GameService {
     );
   }
 
+  // Pack puzzles can set "encoded": true to store words as base64 so the
+  // answers aren't readable at a glance in the public repo (spoiler guard
+  // for stream chat, not real security).
+  private decodeWord(raw: any, encoded: boolean): string {
+    const value = (raw ?? '').toString();
+    if (!encoded || !value) return value.toUpperCase();
+    try {
+      return atob(value).toUpperCase();
+    } catch {
+      return '';
+    }
+  }
+
   private parseGameResponse(res: any): GameData {
     const category = res?.category ?? res?.game?.category ?? undefined;
+    const encoded = res?.encoded === true;
 
     // Extract word metadata
-    const wordOne = (res?.wordOne ?? res?.game?.wordOne ?? '').toString().toUpperCase();
-    const wordTwo = (res?.wordTwo ?? res?.game?.wordTwo ?? '').toString().toUpperCase();
-    const wordThree = (res?.wordThree ?? res?.game?.wordThree ?? '').toString().toUpperCase();
+    const wordOne = this.decodeWord(res?.wordOne ?? res?.game?.wordOne, encoded);
+    const wordTwo = this.decodeWord(res?.wordTwo ?? res?.game?.wordTwo, encoded);
+    const wordThree = this.decodeWord(res?.wordThree ?? res?.game?.wordThree, encoded);
 
     // Determine size from explicit field or word lengths
     let size: 4 | 5 = res?.size ?? 5;
@@ -188,6 +212,67 @@ export class GameService {
   getGameForDate(date: Date): Observable<GameData> {
     const path = this.formatPathForDate(date);
     return this.getByPath(path);
+  }
+
+  // ── Puzzle packs ────────────────────────────────────────────────────────────
+
+  static isValidPackId(packId: string | null | undefined): packId is string {
+    return !!packId && /^[a-z0-9-]+$/.test(packId);
+  }
+
+  // Storage key for a pack puzzle — used everywhere a daily game uses its
+  // MMDDYY date key (submissions, per-game state, in-progress inputs).
+  static packGameKey(packId: string, n: number): string {
+    return `pack-${packId}-${String(n).padStart(3, '0')}`;
+  }
+
+  getPackPuzzle(packId: string, n: number): Observable<GameData> {
+    if (!GameService.isValidPackId(packId) || !Number.isInteger(n) || n < 1) {
+      return of({ letters: [], category: undefined, size: 5 as const, available: false });
+    }
+    return this.getByPath(`packs/${packId}/${String(n).padStart(3, '0')}`);
+  }
+
+  // packs/index.json is an array of PackInfo objects
+  getPacks(): Observable<PackInfo[]> {
+    const remoteUrl = `${GAMES_BASE_URL}/packs/index.json`;
+
+    return this.http.get<any[]>(remoteUrl).pipe(
+      tap(list => {
+        try {
+          localStorage.setItem(this.PACKS_CACHE_KEY, JSON.stringify(list));
+        } catch (e) {
+          // localStorage might be full or unavailable
+        }
+      }),
+      map(list => this.parsePacksResponse(list)),
+      catchError(() => {
+        const cached = localStorage.getItem(this.PACKS_CACHE_KEY);
+        if (cached) {
+          try {
+            return of(this.parsePacksResponse(JSON.parse(cached)));
+          } catch (e) {
+            // Invalid cache
+          }
+        }
+        return of([]);
+      })
+    );
+  }
+
+  getPack(packId: string): Observable<PackInfo | undefined> {
+    return this.getPacks().pipe(map(packs => packs.find(p => p.id === packId)));
+  }
+
+  private parsePacksResponse(list: any[]): PackInfo[] {
+    return (Array.isArray(list) ? list : [])
+      .filter(p => GameService.isValidPackId(p?.id) && typeof p?.title === 'string' && Number(p?.count) > 0)
+      .map(p => ({
+        id: p.id,
+        title: p.title,
+        description: typeof p.description === 'string' ? p.description : undefined,
+        count: Math.floor(Number(p.count)),
+      }));
   }
 
   // index.json should be an array of MMDDYY strings, e.g. ["122625","122725"]
