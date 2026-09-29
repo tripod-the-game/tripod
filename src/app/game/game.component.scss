@@ -173,8 +173,8 @@ app-past-submissions {
 }
 
 .pack-nav-btn {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 10px;
   background: #fff;
   border: 1.5px solid #111;
@@ -191,6 +191,15 @@ app-past-submissions {
   cursor: default;
 }
 
+/* iOS native uses a fixed, non-scrolling layout. On short screens (iPhone
+   SE class, no notch) the pack nav row would push the Clear button off
+   screen, so reclaim that height from the top padding. */
+@media (max-height: 700px) {
+  :host-context(html.ios-native) .game-hero.pack-mode {
+    padding-top: 52px;
+  }
+}
+
 /* Streamer mode (?streamer=1): scale the board up so it reads well on a
    broadcast. Only kicks in on wide screens so phones are unaffected. */
 @media (min-width: 900px) {
@@ -200,6 +209,12 @@ app-past-submissions {
 
   :host(.streamer-mode) app-triangle {
     zoom: 1.35;
+  }
+
+  /* Zoom is meant for desktop browsers / OBS; the native app's fixed
+     layout has no room for it */
+  :host-context(html.ios-native) app-triangle {
+    zoom: 1;
   }
 
   :host(.streamer-mode) .header-title,

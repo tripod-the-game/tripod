@@ -1,4 +1,4 @@
-<div class="game-hero">
+<div class="game-hero" [class.pack-mode]="isPack">
   <div class="game-card">
     <header class="game-header">
       <a *ngIf="!isPack" routerLink="/" class="back-btn" aria-label="Back to home">←</a>
@@ -184,7 +184,7 @@
         </svg>
         {{ shareButtonText }}
       </button>
-      <button *ngIf="hasNextPuzzle" (click)="goToPuzzle(packNumber! + 1)" class="primary">Next Puzzle</button>
+      <button *ngIf="hasNextPuzzle" (click)="goToPuzzle(packNumber! + 1)" class="primary">Next</button>
       <button *ngIf="!hasNextPuzzle" (click)="congratsOpen = false" class="primary">Close</button>
     </div>
   </div>

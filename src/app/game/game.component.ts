@@ -246,6 +246,7 @@ export class GameComponent implements OnInit, OnDestroy {
 
   goToPuzzle(n: number): void {
     if (!this.packId) return;
+    this.hapticService.tap();
     this.router.navigate(["/pack", this.packId, n], { queryParamsHandling: "preserve" });
   }
 
