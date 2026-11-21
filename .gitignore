@@ -18,3 +18,7 @@ playwright-report/
 
 # Generated App Store screenshots
 store-screenshots/
+
+# Claude Code local settings and delivery run state
+.claude/settings.local.json
+.delivery/
