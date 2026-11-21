@@ -58,10 +58,11 @@ Run one implementer per task in dependency order. Run tasks in parallel only if 
 
 ### 5. Verify (`feature-verifier`)
 
-Have it write `.delivery/verify.md`, with evidence for every acceptance criterion.
+Have it follow `references/browser-verification.md` and write `.delivery/verify.md`, with evidence for every acceptance criterion. Screenshots go in `.delivery/evidence/`.
 
 - Pass: go to Review.
 - Fail: send the failures to an implementer, then verify again.
+- Blocked: stop and ask the user, because a missing tool or environment can't be fixed with code changes.
 
 ### 6. Review (`feature-reviewer`)
 
@@ -73,7 +74,7 @@ Use a fresh reviewer that did not write the code. Have it write `.delivery/revie
 
 ### 7. PR
 
-**Gate:** show the user the diff summary, verification evidence, review result, and any iOS or data-release steps. Wait for approval.
+**Gate:** show the user the diff summary, verification evidence including browser results and screenshot paths, review result, any `MANUAL` checks, and any iOS or data-release steps. Wait for approval.
 
 After approval, commit on `feature/<slug>`, push it, and open a PR into `main` with `gh pr create`. The PR body covers the summary, acceptance evidence, risks, and rollout steps, and follows the repository's attribution instructions. Report the PR URL and CI status, then stop.
 

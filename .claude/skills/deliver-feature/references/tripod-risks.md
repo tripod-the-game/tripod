@@ -41,6 +41,9 @@ Run from the worktree:
 npm run build
 npm test -- --watch=false --browsers=ChromeHeadless
 CI=1 npm run e2e -- --project=chromium
+CI=1 npm run e2e -- --project="Mobile Safari"
 ```
 
-`CI=1` matches GitHub Actions and stops Playwright from reusing a dev server on port 4200 that may belong to another checkout. If the port is busy, the run fails, so free it or report that E2E did not run. CI retries can hide flakiness, so report any test that passed only on retry.
+`CI=1` stops Playwright from reusing a dev server on port 4200 that may belong to another checkout. GitHub Actions currently runs only Chromium, so the Mobile Safari run is a local gate. CI retries can hide flakiness, so report any test that passed only on retry.
+
+Follow `browser-verification.md` for browser setup, busy ports, and the required interactive pass.
