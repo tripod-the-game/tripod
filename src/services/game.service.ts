@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, from } from 'rxjs';
-import { map, catchError, tap, switchMap } from 'rxjs/operators';
+import { map, catchError, tap, switchMap, timeout } from 'rxjs/operators';
 
 export interface GameData {
   letters: string[]; // length 12 for 5-letter words, 9 for 4-letter words
@@ -17,6 +17,8 @@ export type ValidationState = 'none' | 'correct' | 'wrong-position' | 'present';
 
 // Remote URL for game data (GitHub raw content from public tripod-games repo)
 const GAMES_BASE_URL = 'https://raw.githubusercontent.com/tripod-the-game/tripod-games/main';
+// A stalled puzzle request falls back to the cache, then the Retry state.
+const GAME_REQUEST_TIMEOUT_MS = 10_000;
 
 @Injectable({ providedIn: 'root' })
 export class GameService {
@@ -121,6 +123,7 @@ export class GameService {
     const cacheKey = this.CACHE_PREFIX + path.replace(/\//g, '_');
 
     return this.http.get<any>(remoteUrl).pipe(
+      timeout(GAME_REQUEST_TIMEOUT_MS),
       tap(res => {
         // Cache the raw response
         try {

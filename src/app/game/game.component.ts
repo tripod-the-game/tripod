@@ -1,4 +1,4 @@
-import { Component, OnInit, NgZone } from "@angular/core";
+import { AfterViewChecked, Component, ElementRef, OnInit, NgZone, ViewChild } from "@angular/core";
 import confetti from 'canvas-confetti';
 import { CommonModule } from "@angular/common";
 import { RouterModule } from "@angular/router";
@@ -15,6 +15,45 @@ import { StateService, Submission, DateState } from "../../services/state.servic
 import { StatsService } from "../../services/stats.service";
 import { StatsComponent } from "../stats/stats.component";
 import { HowToPlayComponent } from "../how-to-play/how-to-play.component";
+import {
+  DIFFICULTY_LABELS,
+  Difficulty,
+  EasierDifficulty,
+  isEasierMove,
+  lockedPositionsFor,
+  normalizeDifficulty,
+} from "../../services/difficulty";
+
+const NO_LOCKED_LETTERS: Readonly<Record<number, string>> = Object.freeze({});
+
+interface DiagramDot {
+  x: number;
+  y: number;
+  corner?: 'top' | 'bottom-left';
+}
+
+// Evenly spaced dots on a symmetric triangle, `perSide` dots along each edge.
+function buildDiagramDots(perSide: number): readonly DiagramDot[] {
+  const [apexX, apexY, halfBase, height] = [28, 5, 23, 40];
+  const steps = perSide - 1;
+  const dots: DiagramDot[] = [{ x: apexX, y: apexY, corner: 'top' }];
+  for (let i = 1; i < steps; i++) {
+    const offset = (halfBase * i) / steps;
+    const y = apexY + (height * i) / steps;
+    dots.push({ x: apexX - offset, y }, { x: apexX + offset, y });
+  }
+  for (let i = 0; i <= steps; i++) {
+    dots.push({
+      x: apexX - halfBase + (2 * halfBase * i) / steps,
+      y: apexY + height,
+      ...(i === 0 ? { corner: 'bottom-left' as const } : {}),
+    });
+  }
+  return dots;
+}
+
+const DIAGRAM_DOTS_4 = buildDiagramDots(4);
+const DIAGRAM_DOTS_5 = buildDiagramDots(5);
 
 @Component({
   selector: "app-game",
@@ -33,7 +72,7 @@ import { HowToPlayComponent } from "../how-to-play/how-to-play.component";
   templateUrl: "./game.component.html",
   styleUrls: ["./game.component.scss"],
 })
-export class GameComponent implements OnInit {
+export class GameComponent implements OnInit, AfterViewChecked {
   // Word position mapping based on puzzle size
   private readonly WORD_POSITIONS_5 = {
     wordOne: [8, 6, 4, 2, 1],      // left edge (5-letter)
@@ -74,7 +113,27 @@ export class GameComponent implements OnInit {
   lastHintPosition?: number;
   maxHints = 3;
   puzzleUnavailable = false;
+  difficultyDialogOpen = false;
+  @ViewChild('difficultyLink') private difficultyLink?: ElementRef<HTMLElement>;
+  @ViewChild('difficultyRow') private difficultyRow?: ElementRef<HTMLElement>;
+  @ViewChild('difficultyCancel') private difficultyCancel?: ElementRef<HTMLButtonElement>;
+  @ViewChild('difficultyDialog') private difficultyDialog?: ElementRef<HTMLElement>;
+  // Applied after render, once `inert` and the link reflect the new state.
+  private pendingFocus?: 'dialog' | 'link';
   private lastRequestedDate?: Date;
+  private loadRequestId = 0;
+  // True from a load's start until its response applies. Nothing may be played in this window.
+  private loadInFlight = false;
+  // Set only once this date's puzzle has applied, so locks never use the previous puzzle.
+  private loadedGameDate?: string;
+  private hasResultForDate = false;
+  // The previous puzzle's locked letters, which can linger in the triangle while loading.
+  private outgoingLockedLetters: Record<number, string> = {};
+  private lockedLettersCache?: {
+    letters: string[];
+    positionsKey: string;
+    value: Record<number, string>;
+  };
 
   private gameStateByDate: Record<string, DateState> = {};
 
@@ -90,6 +149,158 @@ export class GameComponent implements OnInit {
 
   get revealed(): boolean {
     return this.currentGameDate ? (this.gameStateByDate[this.currentGameDate]?.revealed ?? false) : false;
+  }
+
+  get difficulty(): Difficulty {
+    return this.currentGameDate
+      ? normalizeDifficulty(this.gameStateByDate[this.currentGameDate]?.difficulty)
+      : 'hard';
+  }
+
+  get lockedPositions(): number[] {
+    if (!this.currentGameDate || this.loadedGameDate !== this.currentGameDate) return [];
+    return lockedPositionsFor(this.difficulty, this.currentSize);
+  }
+
+  // Keeps one object per lock set so the triangle sees a change only when locks change.
+  get lockedLetters(): Record<number, string> {
+    const positions = this.lockedPositions;
+    const letters = this.currentLetters;
+    if (positions.length === 0 || !letters) return NO_LOCKED_LETTERS;
+
+    const positionsKey = positions.join(',');
+    const cache = this.lockedLettersCache;
+    if (cache && cache.letters === letters && cache.positionsKey === positionsKey) {
+      return cache.value;
+    }
+
+    const value: Record<number, string> = {};
+    for (const pos of positions) {
+      const letter = (letters[pos - 1] ?? '').toUpperCase();
+      if (letter) value[pos] = letter;
+    }
+    this.lockedLettersCache = { letters, positionsKey, value };
+    return value;
+  }
+
+  get canChangeDifficulty(): boolean {
+    const date = this.currentGameDate;
+    return !!date &&
+      this.loadedGameDate === date &&
+      !this.puzzleUnavailable &&
+      !this.submitted &&
+      !this.hasResultForDate &&
+      !this.revealed &&
+      !this.isAllCorrect &&
+      !this.submissions.some((s) => s.date === date);
+  }
+
+  canMoveTo(target: Difficulty): boolean {
+    return this.canChangeDifficulty && isEasierMove(this.difficulty, target);
+  }
+
+  get difficultyLoading(): boolean {
+    return this.loadInFlight;
+  }
+
+  get difficultyMoves(): EasierDifficulty[] {
+    return (['medium', 'easy'] as const).filter((mode) => this.canMoveTo(mode));
+  }
+
+  get difficultyLabel(): string {
+    return DIFFICULTY_LABELS[this.difficulty];
+  }
+
+  get difficultyActionable(): boolean {
+    return !this.difficultyLoading && this.difficultyMoves.length > 0;
+  }
+
+  // Empty means the row shows nothing: loading, or locked Hard.
+  get difficultyLinkText(): string {
+    if (this.difficultyLoading) return '';
+    if (this.difficultyMoves.length > 0) {
+      return this.difficulty === 'hard' ? 'Need a head start?' : `${this.difficultyLabel} · Make easier`;
+    }
+    return this.difficulty === 'hard' ? '' : `${this.difficultyLabel} mode`;
+  }
+
+  get difficultyDiagramDots(): readonly DiagramDot[] {
+    return this.currentSize === 4 ? DIAGRAM_DOTS_4 : DIAGRAM_DOTS_5;
+  }
+
+  isDotRevealed(mode: EasierDifficulty, dot: DiagramDot): boolean {
+    return dot.corner === 'bottom-left' || (dot.corner === 'top' && mode === 'easy');
+  }
+
+  difficultyMoveLabel(target: EasierDifficulty): string {
+    return DIFFICULTY_LABELS[target];
+  }
+
+  // Names only the corners this move newly reveals.
+  difficultyRevealText(target: EasierDifficulty): string {
+    if (target === 'medium') return 'Reveals bottom-left';
+    return this.difficulty === 'medium' ? 'Reveals top corner' : 'Reveals bottom-left and top corners';
+  }
+
+  openDifficultyDialog(): void {
+    if (this.difficultyMoves.length > 0) {
+      this.difficultyDialogOpen = true;
+      this.pendingFocus = 'dialog';
+    }
+  }
+
+  selectDifficulty(target: Difficulty): void {
+    if (!this.difficultyDialogOpen) return;
+    this.difficultyDialogOpen = false;
+    this.pendingFocus = 'link';
+    if (target === 'hard' || !this.currentGameDate || !this.canMoveTo(target)) return;
+
+    const date = this.currentGameDate;
+    const state: DateState = {
+      ...(this.gameStateByDate[date] ?? { hintsUsed: 0, hintedPositions: [], revealed: false }),
+      difficulty: target,
+    };
+    this.gameStateByDate[date] = state;
+    this.triangleInputValues = { ...this.triangleInputValues, ...this.lockedLetters };
+
+    // Not persistState: a move must never rewrite tripod_submissions.
+    try {
+      this.stateService.saveDateState(date, state);
+    } catch { /* the mode still applies for this session */ }
+    try {
+      this.stateService.saveInputValues(date, this.triangleInputValues);
+    } catch { /* locked letters are derived, so nothing is lost */ }
+  }
+
+  cancelDifficulty(): void {
+    if (this.difficultyDialogOpen) this.pendingFocus = 'link';
+    this.difficultyDialogOpen = false;
+  }
+
+  // Cycles the dialog's enabled buttons. Focus anywhere else goes to Cancel.
+  trapDifficultyFocus(event: Event): void {
+    event.preventDefault();
+    const buttons = Array.from(
+      this.difficultyDialog?.nativeElement.querySelectorAll<HTMLButtonElement>('button:not(:disabled)') ?? []
+    );
+    const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
+    if (index < 0) {
+      this.difficultyCancel?.nativeElement.focus();
+      return;
+    }
+    const step = (event as KeyboardEvent).shiftKey ? -1 : 1;
+    buttons[(index + step + buttons.length) % buttons.length].focus();
+  }
+
+  ngAfterViewChecked(): void {
+    const target = this.pendingFocus;
+    if (!target) return;
+    this.pendingFocus = undefined;
+
+    // Never falls through to the triangle, so the phone keyboard stays closed.
+    // The row is the fallback for states with no visible link (loading, locked Hard).
+    const element = target === 'dialog' ? this.difficultyCancel : this.difficultyLink ?? this.difficultyRow;
+    element?.nativeElement.focus();
   }
 
   private setRevealed(value: boolean): void {
@@ -141,11 +352,24 @@ export class GameComponent implements OnInit {
   // "puzzle unavailable" empty state if neither the network nor the
   // localStorage cache had a usable copy (e.g. first launch while offline).
   private loadGame(date: Date): void {
+    const requestId = ++this.loadRequestId;
+    // During a superseded load the triangle still holds the first puzzle's corners.
+    if (!this.loadInFlight) {
+      this.outgoingLockedLetters = this.lockedLetters;
+    }
+    this.loadInFlight = true;
+    this.loadedGameDate = undefined;
+    this.cancelDifficulty();
     this.lastRequestedDate = date;
     this.currentGameDate = this.formatDateKey(date);
     this.restoreDateState(this.currentGameDate);
 
     this.gameService.getGameForDate(date).subscribe((game) => {
+      // A newer request owns the screen and the loader.
+      if (requestId !== this.loadRequestId) return;
+
+      this.loadInFlight = false;
+      this.outgoingLockedLetters = {};
       if (game.available) {
         this.currentSize = game.size;
         this.currentLetters = game.letters;
@@ -155,6 +379,8 @@ export class GameComponent implements OnInit {
           wordTwo: game.wordTwo || '',
           wordThree: game.wordThree || ''
         };
+        this.loadedGameDate = this.currentGameDate;
+        this.hasResultForDate = this.lookUpResultForDate(this.currentGameDate!);
         // Restore in-progress inputs for this date
         this.triangleInputValues = this.stateService.loadInputValues(this.currentGameDate!);
         // Keep submitted=true if the game was already solved or revealed
@@ -180,8 +406,18 @@ export class GameComponent implements OnInit {
   private restoreDateState(date: string): void {
     const saved = this.stateService.loadDateState(date);
     if (saved) {
-      this.gameStateByDate[date] = saved;
+      // After a failed write, memory can hold an easier mode than storage. Moves only go easier.
+      const inMemory = normalizeDifficulty(this.gameStateByDate[date]?.difficulty);
+      this.gameStateByDate[date] = isEasierMove(normalizeDifficulty(saved.difficulty), inMemory)
+        ? { ...saved, difficulty: inMemory as EasierDifficulty }
+        : saved;
     }
+  }
+
+  // tripod_stats can hold valid JSON that is not an array.
+  private lookUpResultForDate(date: string): boolean {
+    const results: unknown = this.statsService.getResults();
+    return Array.isArray(results) && results.some((r) => r?.date === date);
   }
 
   private persistState(): void {
@@ -199,11 +435,13 @@ export class GameComponent implements OnInit {
       attempts: this.filteredSubmissions.length,
       hintsUsed: this.hintsUsed,
       revealed: this.revealed,
+      difficulty: this.difficulty,
     });
+    this.hasResultForDate = true;
   }
 
   onSubmit(): void {
-    if (this.hasNoNewInput || this.submitted) {
+    if (this.loadInFlight || this.hasNoNewInput || this.submitted) {
       this.hapticService.error();
       this.submitShake = true;
       setTimeout(() => {
@@ -218,17 +456,37 @@ export class GameComponent implements OnInit {
 
   onValuesChanged(values: Record<number, string>): void {
     this.triangleInputValues = { ...values };
+    // The previous puzzle's corner must not be saved as a typed letter on the next date.
+    if (this.loadInFlight) {
+      for (const pos of Object.keys(this.outgoingLockedLetters)) {
+        delete this.triangleInputValues[Number(pos)];
+      }
+      // The board still shows the previous puzzle, so it must not overwrite this date's letters.
+      return;
+    }
     if (this.currentGameDate) {
       this.stateService.saveInputValues(this.currentGameDate, this.triangleInputValues);
     }
   }
 
-  onValuesSubmitted(values: Record<number, string>): void {
+  onValuesSubmitted(rawValues: Record<number, string>): void {
     // Don't record submissions when answer was revealed or game is already solved
-    if (this.revealed || this.isAllCorrect) {
+    if (this.loadInFlight || this.revealed || this.isAllCorrect) {
       return;
     }
 
+    const locked = this.lockedLetters;
+    const isLockedPosition = (key: string) => !!locked[Number(key)];
+    // Locked letters alone are not a guess.
+    if (
+      Object.keys(locked).length > 0 &&
+      !Object.entries(rawValues).some(([key, value]) => !isLockedPosition(key) && value?.trim())
+    ) {
+      return;
+    }
+
+    // Locked corners always submit the current puzzle's letter.
+    const values: Record<number, string> = { ...rawValues, ...locked };
     this.triangleInputValues = { ...values };
 
     const validation: Record<number, ValidationState> = {};
@@ -288,10 +546,15 @@ export class GameComponent implements OnInit {
       this.recordStats(true);
     }
 
+    // Feedback reflects the player's letters, so locked corners don't count.
+    const playerValidation = Object.entries(validation)
+      .filter(([key]) => !isLockedPosition(key))
+      .map(([, v]) => v);
+
     // Check for all wrong (no correct and no wrong-position, including partial submissions)
     const isAllWrong =
-      Object.keys(validation).length > 0 &&
-      Object.values(validation).every((v) => v === 'none');
+      playerValidation.length > 0 &&
+      playerValidation.every((v) => v === 'none');
 
     if (isAllWrong) {
       this.hapticService.error();
@@ -301,8 +564,8 @@ export class GameComponent implements OnInit {
       }, 600);
     } else if (!isAllCorrect) {
       // Some correct or wrong-position - give success feedback
-      const hasCorrect = Object.values(validation).some((v) => v === 'correct');
-      const hasWrongPosition = Object.values(validation).some((v) => v === 'wrong-position');
+      const hasCorrect = playerValidation.some((v) => v === 'correct');
+      const hasWrongPosition = playerValidation.some((v) => v === 'wrong-position');
       if (hasCorrect) {
         this.hapticService.success();
       } else if (hasWrongPosition) {
@@ -356,8 +619,8 @@ export class GameComponent implements OnInit {
   }
 
   onReset(): void {
-    // Don't allow clear if puzzle is solved
-    if (this.isAllCorrect) {
+    // Don't allow clear if puzzle is solved, or erase saved letters while a date is loading
+    if (this.loadInFlight || this.isAllCorrect) {
       this.hapticService.error();
       this.resetShake = true;
       setTimeout(() => {
@@ -378,8 +641,8 @@ export class GameComponent implements OnInit {
   }
 
   onRevealClick(): void {
-    // If already revealed or all correct, shake instead of showing modal
-    if (this.revealed || this.isAllCorrect) {
+    // If loading, already revealed, or all correct, shake instead of showing modal
+    if (this.loadInFlight || this.revealed || this.isAllCorrect) {
       this.hapticService.error();
       this.revealShake = true;
       setTimeout(() => {
@@ -392,6 +655,8 @@ export class GameComponent implements OnInit {
   }
 
   onRevealAnswer(): void {
+    if (this.loadInFlight) return;
+
     this.hapticService.tap();
     this.showRevealConfirm = false;
     this.setRevealed(true);
@@ -408,7 +673,7 @@ export class GameComponent implements OnInit {
   }
 
   onRevealHint(): void {
-    if (this.hintsUsed >= this.maxHints || !this.currentLetters || !this.currentGameDate) {
+    if (this.loadInFlight || this.hintsUsed >= this.maxHints || !this.currentLetters || !this.currentGameDate) {
       return;
     }
 
@@ -455,7 +720,7 @@ export class GameComponent implements OnInit {
   }
 
   onConfirmLastHint(): void {
-    if (!this.currentLetters || !this.currentGameDate || this.lastHintPosition === undefined) {
+    if (this.loadInFlight || !this.currentLetters || !this.currentGameDate || this.lastHintPosition === undefined) {
       return;
     }
 
@@ -531,12 +796,13 @@ export class GameComponent implements OnInit {
 
   get aggregatedCorrectLetters(): Record<number, boolean> {
     const result: Record<number, boolean> = {};
+    const locked = this.lockedLetters;
     for (let i = 1; i <= this.totalCircles; i++) {
       // If revealed, all letters are correct
       if (this.revealed) {
         result[i] = true;
-      } else if (this.hintedPositions.has(i)) {
-        // Hinted positions are also marked as correct
+      } else if (this.hintedPositions.has(i) || locked[i]) {
+        // Hinted and locked positions are also marked as correct
         result[i] = true;
       } else {
         result[i] = this.aggregatedValidation[i] === 'correct';
@@ -605,7 +871,8 @@ export class GameComponent implements OnInit {
       this.filteredSubmissions.length,
       this.currentSize,
       this.revealed,
-      this.hintsUsed
+      this.hintsUsed,
+      this.difficulty
     );
 
     if (success) {

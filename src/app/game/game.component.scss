@@ -507,3 +507,90 @@ app-past-submissions {
     gap: 20px;
   }
 }
+
+/* Reserved row, so the layout holds still across link states */
+.difficulty-link-row { display: flex; justify-content: center; min-height: 44px; margin-top: -13px; outline: 0; }
+.difficulty-link {
+  padding: 0 10px; border: 0; outline: 0; background: none;
+  color: #6b7280; font: 700 14px/44px 'Baloo 2', Fredoka, sans-serif;
+}
+button.difficulty-link { color: #4b5563; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+/* Inset so the ring stays clear of Submit */
+button.difficulty-link:focus-visible { outline: 2px solid; outline-offset: -6px; }
+
+.mode-option { flex-direction: row; gap: 14px; padding: 10px 12px; border: 1.5px solid #d1d5db; background: #fff; color: #111; text-align: left; }
+.mode-diagram { flex: none; }
+.mode-copy { display: grid; }
+
+.difficulty-confirm {
+  max-width: min(300px, 90vw);
+  box-sizing: border-box;
+}
+
+/* Below 360px the header and 300px triangle need the card's side padding */
+@media (max-width: 359px) {
+  .game-hero {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .game-card {
+    box-sizing: border-box;
+    min-width: 0;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .game-header {
+    gap: 6px;
+  }
+
+  .header-actions {
+    gap: 4px;
+  }
+
+  .header-title {
+    font-size: 1.25rem;
+  }
+}
+
+/* Short phones: keep both action buttons on the first screen */
+@media (max-width: 520px) and (max-height: 700px) {
+  .action-row {
+    flex-direction: row;
+    gap: 12px;
+  }
+
+  .game-hero {
+    padding-top: 8px;
+  }
+
+  .game-card {
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  .game-header {
+    margin-bottom: 8px;
+  }
+
+  app-triangle {
+    margin: 0;
+  }
+}
+
+/* Short iOS screens clip instead of scrolling */
+@media (max-height: 800px) {
+  :host-context(html.ios-native) .game-hero {
+    padding-top: max(12px, env(safe-area-inset-top));
+  }
+
+  :host-context(html.ios-native) app-triangle {
+    margin: 0;
+  }
+
+  :host-context(html.ios-native) .action-row {
+    flex-direction: row;
+    gap: 12px;
+  }
+}

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Share } from '@capacitor/share';
 import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
+import { DIFFICULTY_LABELS, Difficulty, normalizeDifficulty } from './difficulty';
 
 @Injectable({
   providedIn: 'root'
@@ -12,9 +13,10 @@ export class ShareService {
     dateKey: string,
     attempts: number,
     wasRevealed: boolean,
-    hintsUsed: number
+    hintsUsed: number,
+    difficulty: Difficulty = 'hard'
   ): string {
-    const dateStr = this.formatDateStr(dateKey);
+    const dateStr = this.formatLabeledDate(dateKey, difficulty);
     let result = `Tripod ${dateStr}\n`;
 
     if (wasRevealed) {
@@ -44,6 +46,13 @@ export class ShareService {
     return `${month}/${day}/${year}`;
   }
 
+  // Shared by text and PNG so every share path carries the same label. Hard has none.
+  private formatLabeledDate(dateKey: string, difficulty: Difficulty): string {
+    const dateStr = this.formatDateStr(dateKey);
+    const normalized = normalizeDifficulty(difficulty);
+    return normalized === 'hard' ? dateStr : `${dateStr} (${DIFFICULTY_LABELS[normalized]})`;
+  }
+
   /**
    * Generates a PNG share card showing the solved triangle with the attempt
    * count (or 👀 for revealed) drawn at the centroid of the green triangle.
@@ -52,7 +61,8 @@ export class ShareService {
     size: 4 | 5,
     dateKey: string,
     attempts: number,
-    wasRevealed: boolean
+    wasRevealed: boolean,
+    difficulty: Difficulty = 'hard'
   ): Promise<File | null> {
     try {
       const canvas = document.createElement('canvas');
@@ -129,7 +139,7 @@ export class ShareService {
       ctx.fillText('TRIPOD', logicalW / 2, headerH * 0.32);
 
       ctx.font = `15px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
-      ctx.fillText(this.formatDateStr(dateKey), logicalW / 2, headerH * 0.68);
+      ctx.fillText(this.formatLabeledDate(dateKey, difficulty), logicalW / 2, headerH * 0.68);
 
       // --- Footer: URL ---
       ctx.font = `12px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
@@ -201,13 +211,14 @@ export class ShareService {
     attempts: number,
     size: 4 | 5,
     wasRevealed: boolean,
-    hintsUsed: number
+    hintsUsed: number,
+    difficulty: Difficulty = 'hard'
   ): Promise<boolean> {
-    const text = this.generateResultText(dateKey, attempts, wasRevealed, hintsUsed);
+    const text = this.generateResultText(dateKey, attempts, wasRevealed, hintsUsed, difficulty);
 
     if (Capacitor.isNativePlatform()) {
       try {
-        const imageFile = await this.generateShareImage(size, dateKey, attempts, wasRevealed);
+        const imageFile = await this.generateShareImage(size, dateKey, attempts, wasRevealed, difficulty);
         if (imageFile) {
           const base64 = await this.fileToBase64(imageFile);
           await Filesystem.writeFile({
@@ -235,7 +246,7 @@ export class ShareService {
     }
 
     // Web: try image share first
-    const imageFile = await this.generateShareImage(size, dateKey, attempts, wasRevealed);
+    const imageFile = await this.generateShareImage(size, dateKey, attempts, wasRevealed, difficulty);
     if (imageFile && typeof navigator.canShare === 'function' && navigator.canShare({ files: [imageFile] })) {
       try {
         await navigator.share({ files: [imageFile] });

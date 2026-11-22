@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ValidationState } from './game.service';
+import type { EasierDifficulty } from './difficulty';
 
 export interface Submission {
   date?: string;
@@ -11,6 +12,8 @@ export interface DateState {
   hintsUsed: number;
   hintedPositions: number[];
   revealed: boolean;
+  // Written only on an explicit move easier. Read through normalizeDifficulty.
+  difficulty?: EasierDifficulty;
 }
 
 @Injectable({ providedIn: 'root' })

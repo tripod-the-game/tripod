@@ -11,6 +11,7 @@
       class="circle-input"
       [attr.data-index]="i"
       [class.correct]="isCorrect(circle, i)"
+      [class.locked]="isLocked(circle)"
       [class.wrong-position]="!isCorrect(circle, i) && isWrongPosition(circle)"
       [class.present]="!isCorrect(circle, i) && !isWrongPosition(circle) && isPresent(circle)"
     >
@@ -22,10 +23,11 @@
         autocomplete="off"
         autocapitalize="characters"
         [(ngModel)]="inputValues[circle]"
-        [value]="aggregatedCorrect?.[circle] ? letterValues[i] : inputValues[circle]"
+        [value]="isLocked(circle) || aggregatedCorrect?.[circle] ? answerFor(circle, i) : inputValues[circle]"
         (ngModelChange)="onModelChange($event, circle)"
-        [readonly]="aggregatedCorrect?.[circle] || submitted || displayOnly"
-        [disabled]="aggregatedCorrect?.[circle] || submitted || displayOnly"
+        [readonly]="isLocked(circle) || aggregatedCorrect?.[circle] || submitted || displayOnly"
+        [disabled]="isLocked(circle) || aggregatedCorrect?.[circle] || submitted || displayOnly"
+        [attr.aria-label]="lockedLabel(circle)"
         [attr.tabindex]="0"
         (keydown)="onInputKeydown($event, circle)"
       />
