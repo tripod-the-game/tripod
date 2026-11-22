@@ -29,6 +29,8 @@ export class TriangleComponent implements OnInit, AfterViewInit {
   @Input() allWrong = false;
   @Input() size: 4 | 5 = 5;
   @Input() initialValues?: Record<number, string>;
+  // Position -> current puzzle's letter for corners revealed by difficulty.
+  @Input() lockedLetters: Record<number, string> = {};
 
   letterValues = ["A","V","P","A","P","U","L","G","R","A","P","E"];
   inputValues: Record<number, string> = {};
@@ -92,6 +94,20 @@ export class TriangleComponent implements OnInit, AfterViewInit {
     return this.size === 4 ? this.circleOrder4 : this.circleOrder5;
   }
 
+  // Where an arrow lands when its target is a locked corner: locked -> from -> new target
+  private readonly lockedArrowTargets5: Record<number, Record<number, number>> = {
+    8: { 6: 9, 9: 6 },
+    1: { 2: 3, 3: 2 }
+  };
+  private readonly lockedArrowTargets4: Record<number, Record<number, number>> = {
+    6: { 4: 7, 7: 4 },
+    1: { 2: 3, 3: 2 }
+  };
+
+  private get lockedArrowTargets(): Record<number, Record<number, number>> {
+    return this.size === 4 ? this.lockedArrowTargets4 : this.lockedArrowTargets5;
+  }
+
   constructor(private gameService: GameService) {}
 
   ngOnInit(): void {
@@ -110,6 +126,9 @@ export class TriangleComponent implements OnInit, AfterViewInit {
     }
 
     this.gameService.getTodayGame().subscribe(game => {
+      // The parent's puzzle wins: a late response must not overwrite a past date.
+      if (Array.isArray(this.letters) && this.letters.length === this.totalCircles) return;
+
       const expectedLength = game.size === 4 ? 9 : 12;
       if (Array.isArray(game.letters) && game.letters.length === expectedLength) {
         this.letterValues = game.letters;
@@ -123,7 +142,7 @@ export class TriangleComponent implements OnInit, AfterViewInit {
     if (!this.initialValues) return;
     for (const k of Object.keys(this.initialValues)) {
       const pos = Number(k);
-      if (!this.aggregatedCorrect?.[pos]) {
+      if (!this.aggregatedCorrect?.[pos] && !this.isLocked(pos)) {
         this.inputValues[pos] = (this.initialValues[pos] ?? '').toUpperCase();
       }
     }
@@ -175,6 +194,10 @@ export class TriangleComponent implements OnInit, AfterViewInit {
       // keep this.category as provided
     }
 
+    if (changes['lockedLetters'] && !this.displayOnly) {
+      this.applyLockedLetters();
+    }
+
     // clear inputs when parent triggers a reset, but preserve correct letters
     if (changes['resetCounter'] && !this.displayOnly) {
       this.inputValues = {};
@@ -183,12 +206,13 @@ export class TriangleComponent implements OnInit, AfterViewInit {
         for (let i = 0; i < this.letterValues.length; i++) {
           const circle = i + 1;
           if (this.aggregatedCorrect[circle]) {
-            this.inputValues[circle] = this.letterValues[i];
+            this.inputValues[circle] = this.answerFor(circle, i);
           }
         }
       }
       // Restore saved in-progress values for non-correct positions
       this.applyInitialValues();
+      this.applyLockedLetters();
       // Emit the cleared/updated values so parent stays in sync
       this.valuesChanged.emit({ ...this.inputValues });
     }
@@ -212,7 +236,7 @@ export class TriangleComponent implements OnInit, AfterViewInit {
       for (let i = 0; i < this.letterValues.length; i++) {
         const circle = i + 1;
         if (this.aggregatedCorrect[circle]) {
-          this.inputValues[circle] = this.letterValues[i];
+          this.inputValues[circle] = this.answerFor(circle, i);
         }
       }
     }
@@ -221,6 +245,32 @@ export class TriangleComponent implements OnInit, AfterViewInit {
     if (changes['initialValues'] && !this.displayOnly) {
       this.applyInitialValues();
     }
+  }
+
+  isLocked(circle: number): boolean {
+    return !!this.lockedLetters[circle];
+  }
+
+  // Locked letters come from the current puzzle, so they win over a stale letterValues.
+  answerFor(circle: number, index: number): string {
+    return this.lockedLetters[circle] || this.letterValues[index];
+  }
+
+  lockedLabel(circle: number): string | null {
+    if (!this.isLocked(circle)) return null;
+    const corner = circle === 1 ? 'top' : 'bottom-left';
+    return `Locked ${corner} corner, letter ${this.lockedLetters[circle]}`;
+  }
+
+  private applyLockedLetters(): void {
+    for (const k of Object.keys(this.lockedLetters)) {
+      const pos = Number(k);
+      this.inputValues[pos] = this.lockedLetters[pos];
+    }
+  }
+
+  private isCircleDisabled(circle: number): boolean {
+    return !!this.aggregatedCorrect?.[circle] || this.isLocked(circle) || this.submitted || this.displayOnly;
   }
 
   private syncDisplayValues() {
@@ -254,7 +304,7 @@ export class TriangleComponent implements OnInit, AfterViewInit {
   // Check if a circle is available for input (not correct and not already filled)
   private isCircleAvailable(circle: number): boolean {
     // Skip if already marked correct
-    if (this.aggregatedCorrect?.[circle]) {
+    if (this.aggregatedCorrect?.[circle] || this.isLocked(circle)) {
       return false;
     }
     // Skip if already has a value typed
@@ -292,7 +342,7 @@ export class TriangleComponent implements OnInit, AfterViewInit {
     // Look for previous circle that isn't already correct (allow filled circles for backspace)
     for (let i = currentIndex - 1; i >= 0; i--) {
       const prevCircle = this.circleOrder[i];
-      if (!this.aggregatedCorrect?.[prevCircle]) {
+      if (!this.aggregatedCorrect?.[prevCircle] && !this.isLocked(prevCircle)) {
         const idx = this.circles.indexOf(prevCircle);
         const input = this.inputs.get(idx);
         if (input) {
@@ -304,6 +354,7 @@ export class TriangleComponent implements OnInit, AfterViewInit {
   }
 
   isCorrect(circle: number, index: number): boolean {
+    if (this.isLocked(circle)) return true;
     // In displayOnly mode, always show correctness
     if (this.displayOnly || this.submitted) {
       return (
@@ -370,6 +421,15 @@ export class TriangleComponent implements OnInit, AfterViewInit {
       case 'ArrowRight':
         targetCircle = circleNeighbors.right;
         break;
+    }
+
+    if (targetCircle !== undefined && this.isLocked(targetCircle)) {
+      const nextTarget = this.lockedArrowTargets[targetCircle]?.[circle];
+      if (nextTarget === undefined || this.isCircleDisabled(nextTarget)) {
+        event.preventDefault();
+        return;
+      }
+      targetCircle = nextTarget;
     }
 
     if (targetCircle !== undefined) {

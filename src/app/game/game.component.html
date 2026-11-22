@@ -1,4 +1,4 @@
-<div class="game-hero">
+<div class="game-hero" [attr.inert]="difficultyDialogOpen ? '' : null">
   <div class="game-card">
     <header class="game-header">
       <a routerLink="/" class="back-btn" aria-label="Back to home">←</a>
@@ -35,12 +35,23 @@
         [size]="currentSize"
         [aggregatedCorrect]="aggregatedCorrectLetters"
         [aggregatedValidation]="aggregatedValidation"
+        [lockedLetters]="lockedLetters"
         [allWrong]="allWrong"
         [initialValues]="triangleInputValues"
         (valuesChanged)="onValuesChanged($event)"
         (valuesSubmitted)="onValuesSubmitted($event)"
         [resetCounter]="resetCounter"
       ></app-triangle>
+
+      <div #difficultyRow class="difficulty-link-row" tabindex="-1">
+        <button *ngIf="difficultyActionable; else difficultyStatus"
+                #difficultyLink type="button" class="difficulty-link" aria-haspopup="dialog"
+                (click)="openDifficultyDialog()">{{ difficultyLinkText }}</button>
+        <ng-template #difficultyStatus>
+          <span *ngIf="difficultyLinkText" #difficultyLink class="difficulty-link"
+                tabindex="-1">{{ difficultyLinkText }}</span>
+        </ng-template>
+      </div>
 
       <div class="action-row">
         <app-submit-button [shake]="submitShake" (submit)="onSubmit()"></app-submit-button>
@@ -131,6 +142,53 @@
       <button class="secondary" (click)="onCancelLastHint()">Cancel</button>
       <button class="primary warning" (click)="onConfirmLastHint()">Reveal & End Game</button>
     </div>
+  </div>
+</div>
+
+<div
+  class="confirm-modal"
+  *ngIf="difficultyDialogOpen"
+  (click)="cancelDifficulty()"
+  (document:keydown.escape)="cancelDifficulty()"
+  (document:keydown.tab)="trapDifficultyFocus($event)"
+  (document:keydown.shift.tab)="trapDifficultyFocus($event)"
+>
+  <div
+    #difficultyDialog
+    class="confirm-content difficulty-confirm"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="difficulty-confirm-title"
+    aria-describedby="difficulty-confirm-body"
+    (click)="$event.stopPropagation()"
+  >
+    <h2 id="difficulty-confirm-title">Make it easier?</h2>
+    <div class="reveal-buttons">
+      <button
+        *ngFor="let mode of difficultyMoves"
+        type="button"
+        class="reveal-option mode-option"
+        (click)="selectDifficulty(mode)"
+      >
+        <svg class="mode-diagram" viewBox="0 0 56 50" width="56" height="50" aria-hidden="true">
+          <circle
+            *ngFor="let dot of difficultyDiagramDots"
+            [attr.cx]="dot.x"
+            [attr.cy]="dot.y"
+            r="4"
+            stroke-width="1.5"
+            [attr.fill]="isDotRevealed(mode, dot) ? '#4caf50' : '#fff'"
+            [attr.stroke]="isDotRevealed(mode, dot) ? '#357a38' : '#9ca3af'"
+          />
+        </svg>
+        <span class="mode-copy">
+          <span class="option-label">{{ difficultyMoveLabel(mode) }}</span>
+          <span class="option-detail">{{ difficultyRevealText(mode) }}</span>
+        </span>
+      </button>
+    </div>
+    <p id="difficulty-confirm-body">You can't go back to a harder mode on this puzzle.</p>
+    <button #difficultyCancel type="button" class="cancel-btn" (click)="cancelDifficulty()">Cancel</button>
   </div>
 </div>
 

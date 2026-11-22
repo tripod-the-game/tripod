@@ -36,7 +36,9 @@
 }
 
 /* show whole circle as correct (green background) */
-.circle-input.correct {
+/* Locked corners stay green through the red flash */
+.circle-input.correct,
+.triangle-container.all-wrong .circle-input.locked {
   background-color: #4caf50;
   border-color: #357a38;
   box-shadow: 0 4px 14px rgba(76, 175, 80, 0.55), 0 2px 4px rgba(76, 175, 80, 0.30);
@@ -346,3 +348,8 @@
 .triangle-wrapper.ready:not(.display-only) .circle-input:nth-child(10) { transition-delay: 540ms; }
 .triangle-wrapper.ready:not(.display-only) .circle-input:nth-child(11) { transition-delay: 600ms; }
 .triangle-wrapper.ready:not(.display-only) .circle-input:nth-child(12) { transition-delay: 660ms; }
+
+/* Phones: the category alone fills the banner; the label stays for screen readers */
+@media (max-width: 520px) {
+  .triangle-wrapper:not(.display-only) .banner-label { position: absolute; clip-path: inset(50%); }
+}

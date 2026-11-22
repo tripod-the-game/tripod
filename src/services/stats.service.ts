@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import type { Difficulty } from './difficulty';
 
 export interface GameResult {
   date: string;     // MMDDYY
@@ -6,6 +7,8 @@ export interface GameResult {
   attempts: number;
   hintsUsed: number;
   revealed: boolean;
+  // Absent on older results. Read through normalizeDifficulty.
+  difficulty?: Difficulty;
 }
 
 export interface ComputedStats {
