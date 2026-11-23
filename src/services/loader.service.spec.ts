@@ -172,5 +172,51 @@ describe('LoaderService', () => {
       expect(falseCount).toBe(1);
       expect(values[values.length - 1]).toBe(false);
     }));
+
+    it('should keep a newer cycle visible when an older ready cycle is still in its minimum display', fakeAsync(() => {
+      let visible: boolean | undefined;
+      service.visible$.subscribe(v => (visible = v));
+      service.showUntilReady(500, 30000); // Retry 1
+      tick(100);
+      service.markReady(); // Retry 1 fails quickly
+      tick(200);
+      service.showUntilReady(500, 30000); // Retry 2 at 300ms
+      tick(300); // past Retry 1's 500ms minimum
+      expect(visible).withContext('loader during Retry 2').toBe(true);
+      tick(200); // Retry 2's own minimum has now passed
+      expect(visible).withContext('loader before Retry 2 is ready').toBe(true);
+      service.markReady();
+      expect(visible).withContext('loader after Retry 2 is ready').toBe(false);
+    }));
+
+    it('should not let a superseded cycle end a later load early', fakeAsync(() => {
+      let visible: boolean | undefined;
+      service.visible$.subscribe(v => (visible = v));
+      service.showUntilReady(500, 30000);
+      tick(100);
+      service.markReady();
+      tick(200);
+      service.showUntilReady(500, 30000); // its 30s limit would land at 30300ms
+      tick(500);
+      service.markReady();
+      tick(20200); // now at 21000ms
+      service.showUntilReady(500); // default 10s limit lands at 31000ms
+      tick(9999);
+      expect(visible).withContext('later load just before its own limit').toBe(true);
+      tick(1);
+      expect(visible).withContext('later load at its own limit').toBe(false);
+    }));
+
+    it('should not let a ready cycle hide a later show()', fakeAsync(() => {
+      let visible: boolean | undefined;
+      service.visible$.subscribe(v => (visible = v));
+      service.showUntilReady(500);
+      service.markReady();
+      service.show(2000);
+      tick(500);
+      expect(visible).withContext('show() after the old minimum').toBe(true);
+      tick(1500);
+      expect(visible).withContext('show() at its own duration').toBe(false);
+    }));
   });
 });

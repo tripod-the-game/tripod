@@ -74,6 +74,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   private isFirstLoad = true;
   private routerSub?: Subscription;
   private loaderSub?: Subscription;
+  private pendingTimers = new Set<ReturnType<typeof setTimeout>>();
 
   constructor(private router: Router, private loaderService: LoaderService) {}
 
@@ -95,16 +96,18 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         if (!visible) {
           this.isFirstLoad = false;
           this.isReady = true;
-          setTimeout(() => { this.showLoader = false; }, 200);
+          this.schedule(() => { this.showLoader = false; }, 200);
         }
         return;
       }
       if (visible) {
+        // A reveal or fade left from an earlier cycle must not hide this one.
+        this.clearPendingTimers();
         this.isReady = false;
         this.showLoader = true;
       } else {
         this.isReady = true;
-        setTimeout(() => {
+        this.schedule(() => {
           this.showLoader = false;
         }, 200);
       }
@@ -122,9 +125,9 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         this.showLoader = true;
       } else if (event instanceof NavigationEnd) {
         // After navigation completes, wait 500ms then reveal
-        setTimeout(() => {
+        this.schedule(() => {
           this.isReady = true;
-          setTimeout(() => {
+          this.schedule(() => {
             this.showLoader = false;
           }, 200);
         }, 500);
@@ -144,5 +147,19 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.routerSub?.unsubscribe();
     this.loaderSub?.unsubscribe();
+    this.clearPendingTimers();
+  }
+
+  private schedule(callback: () => void, delayMs: number): void {
+    const id = setTimeout(() => {
+      this.pendingTimers.delete(id);
+      callback();
+    }, delayMs);
+    this.pendingTimers.add(id);
+  }
+
+  private clearPendingTimers(): void {
+    this.pendingTimers.forEach(clearTimeout);
+    this.pendingTimers.clear();
   }
 }

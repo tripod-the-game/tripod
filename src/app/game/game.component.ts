@@ -7,7 +7,8 @@ import { SubmitButtonComponent } from "../submit-button/submit-button.component"
 import { ResetButtonComponent } from "../reset-button/reset-button.component";
 import { PastSubmissionsComponent } from "../past-submissions/past-submissions.component";
 import { PastDateSelectorComponent } from "../past-date-selector/past-date-selector.component";
-import { GameService, ValidationState } from "../../services/game.service";
+import { Observable } from "rxjs";
+import { GAME_RETRY_TIMEOUT_MS, GameData, GameService, ValidationState } from "../../services/game.service";
 import { LoaderService } from "../../services/loader.service";
 import { HapticService } from "../../services/haptic.service";
 import { ShareService } from "../../services/share.service";
@@ -351,7 +352,7 @@ export class GameComponent implements OnInit, AfterViewChecked {
   // Fetches the puzzle for the given date and applies it, or shows the
   // "puzzle unavailable" empty state if neither the network nor the
   // localStorage cache had a usable copy (e.g. first launch while offline).
-  private loadGame(date: Date): void {
+  private loadGame(date: Date, request$: Observable<GameData> = this.gameService.getGameForDate(date)): void {
     const requestId = ++this.loadRequestId;
     // During a superseded load the triangle still holds the first puzzle's corners.
     if (!this.loadInFlight) {
@@ -364,7 +365,7 @@ export class GameComponent implements OnInit, AfterViewChecked {
     this.currentGameDate = this.formatDateKey(date);
     this.restoreDateState(this.currentGameDate);
 
-    this.gameService.getGameForDate(date).subscribe((game) => {
+    request$.subscribe((game) => {
       // A newer request owns the screen and the loader.
       if (requestId !== this.loadRequestId) return;
 
@@ -398,9 +399,13 @@ export class GameComponent implements OnInit, AfterViewChecked {
   }
 
   retryLoad(): void {
-    if (!this.lastRequestedDate) return;
-    this.loaderService.showUntilReady(500);
-    this.loadGame(this.lastRequestedDate);
+    // The focused Retry button can still be activated by keyboard behind the loader.
+    if (!this.lastRequestedDate || this.loadInFlight) return;
+    this.loaderService.showUntilReady(500, GAME_RETRY_TIMEOUT_MS);
+    this.loadGame(
+      this.lastRequestedDate,
+      this.gameService.getGameForDate(this.lastRequestedDate, GAME_RETRY_TIMEOUT_MS)
+    );
   }
 
   private restoreDateState(date: string): void {
@@ -641,8 +646,8 @@ export class GameComponent implements OnInit, AfterViewChecked {
   }
 
   onRevealClick(): void {
-    // If loading, already revealed, or all correct, shake instead of showing modal
-    if (this.loadInFlight || this.revealed || this.isAllCorrect) {
+    // If loading, unavailable, already revealed, or all correct, shake instead of showing modal
+    if (this.loadInFlight || this.puzzleUnavailable || this.revealed || this.isAllCorrect) {
       this.hapticService.error();
       this.revealShake = true;
       setTimeout(() => {
@@ -655,7 +660,7 @@ export class GameComponent implements OnInit, AfterViewChecked {
   }
 
   onRevealAnswer(): void {
-    if (this.loadInFlight) return;
+    if (this.loadInFlight || this.puzzleUnavailable) return;
 
     this.hapticService.tap();
     this.showRevealConfirm = false;

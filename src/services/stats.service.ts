@@ -110,6 +110,6 @@ export class StatsService {
     const mm = parseInt(mmddyy.slice(0, 2), 10) - 1;
     const dd = parseInt(mmddyy.slice(2, 4), 10);
     const yy = 2000 + parseInt(mmddyy.slice(4, 6), 10);
-    return Math.floor(new Date(yy, mm, dd).getTime() / 86_400_000);
+    return Date.UTC(yy, mm, dd) / 86_400_000;
   }
 }

@@ -1,5 +1,5 @@
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
@@ -92,4 +92,74 @@ describe('AppComponent', () => {
     tick(200);
     expect(app.showLoader).toBe(false);
   }));
+
+  describe('a new loader cycle during a pending reveal or fade', () => {
+    const expectLoaderHeldThenReleased = (app: AppComponent): void => {
+      expect(app.showLoader).withContext('overlay during the new cycle').toBe(true);
+      expect(app.isReady).withContext('content during the new cycle').toBe(false);
+
+      visibleSubject.next(false);
+      expect(app.isReady).withContext('content after the new cycle').toBe(true);
+      tick(200);
+      expect(app.showLoader).withContext('overlay after the new cycle').toBe(false);
+    };
+
+    it('keeps the overlay when a show arrives during the fade', fakeAsync(() => {
+      const fixture = TestBed.createComponent(AppComponent);
+      const app = fixture.componentInstance;
+      fixture.detectChanges();
+      visibleSubject.next(false); // complete initial load
+      tick(200);
+
+      visibleSubject.next(true);
+      visibleSubject.next(false); // Retry 1 ends and the fade starts
+      tick(100);
+      visibleSubject.next(true); // Retry 2 starts inside the fade
+      tick(150);
+
+      expectLoaderHeldThenReleased(app);
+    }));
+
+    it('keeps the overlay when a show arrives during the first-load fade', fakeAsync(() => {
+      const fixture = TestBed.createComponent(AppComponent);
+      const app = fixture.componentInstance;
+      fixture.detectChanges();
+      visibleSubject.next(false); // first-load fade starts
+      tick(100);
+      visibleSubject.next(true);
+      tick(150);
+
+      expectLoaderHeldThenReleased(app);
+    }));
+
+    for (const [stage, delayMs] of [['reveal delay', 100], ['fade', 600]] as const) {
+      it(`keeps the overlay when a show arrives during the navigation ${stage}`, fakeAsync(() => {
+        const fixture = TestBed.createComponent(AppComponent);
+        const app = fixture.componentInstance;
+        fixture.detectChanges();
+        visibleSubject.next(false); // complete initial load
+        tick(200);
+
+        TestBed.inject(Router).navigateByUrl('/?retry=1');
+        tick(); // NavigationEnd schedules the 500ms reveal and 200ms fade
+        tick(delayMs);
+        visibleSubject.next(true);
+        tick(700);
+
+        expectLoaderHeldThenReleased(app);
+      }));
+    }
+
+    it('clears a pending fade on destroy', fakeAsync(() => {
+      const fixture = TestBed.createComponent(AppComponent);
+      const app = fixture.componentInstance;
+      fixture.detectChanges();
+      visibleSubject.next(false); // fade pending
+
+      fixture.destroy();
+      tick(200);
+
+      expect(app.showLoader).withContext('fade must not run after destroy').toBe(true);
+    }));
+  });
 });

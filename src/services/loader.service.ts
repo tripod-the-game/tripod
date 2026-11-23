@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Subject, forkJoin, timer, race } from 'rxjs';
+import { BehaviorSubject, Subject, Subscription, forkJoin, timer, race } from 'rxjs';
 import { take } from 'rxjs/operators';
 
 @Injectable({
@@ -8,6 +8,7 @@ import { take } from 'rxjs/operators';
 export class LoaderService {
   private showLoader$ = new BehaviorSubject<boolean>(false);
   private pendingDone$: Subject<void> | null = null;
+  private cycle: Subscription | null = null;
   private readonly SAFE_MAX_MS = 10000;
 
   get visible$() {
@@ -15,8 +16,7 @@ export class LoaderService {
   }
 
   show(durationMs: number = 500): void {
-    this.pendingDone$?.complete(); // cancel any pending showUntilReady cycle
-    this.pendingDone$ = null;
+    this.cancelCycle();
     this.showLoader$.next(true);
     setTimeout(() => {
       this.showLoader$.next(false);
@@ -27,18 +27,27 @@ export class LoaderService {
     this.showLoader$.next(false);
   }
 
-  showUntilReady(minMs: number): void {
-    this.pendingDone$?.complete(); // cancel any previous pending cycle
+  showUntilReady(minMs: number, maxMs: number = this.SAFE_MAX_MS): void {
+    this.cancelCycle();
     this.pendingDone$ = new Subject<void>();
     this.showLoader$.next(true);
 
-    forkJoin([
-      race(this.pendingDone$.pipe(take(1)), timer(this.SAFE_MAX_MS)),
+    this.cycle = forkJoin([
+      race(this.pendingDone$.pipe(take(1)), timer(maxMs)),
       timer(minMs)
     ]).subscribe(() => {
       this.showLoader$.next(false);
       this.pendingDone$ = null;
+      this.cycle = null;
     });
+  }
+
+  // Completing the subject alone cannot stop a cycle already waiting on its minimum timer.
+  private cancelCycle(): void {
+    this.cycle?.unsubscribe();
+    this.cycle = null;
+    this.pendingDone$?.complete();
+    this.pendingDone$ = null;
   }
 
   markReady(): void {
