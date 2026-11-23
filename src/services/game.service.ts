@@ -19,6 +19,8 @@ export type ValidationState = 'none' | 'correct' | 'wrong-position' | 'present';
 const GAMES_BASE_URL = 'https://raw.githubusercontent.com/tripod-the-game/tripod-games/main';
 // A stalled puzzle request falls back to the cache, then the Retry state.
 const GAME_REQUEST_TIMEOUT_MS = 10_000;
+// Retry allows a slow connection longer to finish, while a hung request still ends.
+export const GAME_RETRY_TIMEOUT_MS = 30_000;
 
 @Injectable({ providedIn: 'root' })
 export class GameService {
@@ -118,12 +120,12 @@ export class GameService {
     ].map(c => (c ?? '').toUpperCase());
   }
 
-  private getByPath(path: string): Observable<GameData> {
+  private getByPath(path: string, timeoutMs: number = GAME_REQUEST_TIMEOUT_MS): Observable<GameData> {
     const remoteUrl = `${GAMES_BASE_URL}/${path.replace('games/', '')}.json`;
     const cacheKey = this.CACHE_PREFIX + path.replace(/\//g, '_');
 
     return this.http.get<any>(remoteUrl).pipe(
-      timeout(GAME_REQUEST_TIMEOUT_MS),
+      timeout(timeoutMs),
       tap(res => {
         // Cache the raw response
         try {
@@ -188,9 +190,9 @@ export class GameService {
     return this.getByPath(path);
   }
 
-  getGameForDate(date: Date): Observable<GameData> {
+  getGameForDate(date: Date, timeoutMs?: number): Observable<GameData> {
     const path = this.formatPathForDate(date);
-    return this.getByPath(path);
+    return this.getByPath(path, timeoutMs);
   }
 
   // index.json should be an array of MMDDYY strings, e.g. ["122625","122725"]

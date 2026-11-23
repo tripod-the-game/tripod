@@ -4,7 +4,7 @@ import { NO_ERRORS_SCHEMA, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { of } from 'rxjs';
 
 import { GameComponent } from './game.component';
-import { GameService, GameData, ValidationState } from '../../services/game.service';
+import { GAME_RETRY_TIMEOUT_MS, GameService, GameData, ValidationState } from '../../services/game.service';
 import { LoaderService } from '../../services/loader.service';
 import { HapticService } from '../../services/haptic.service';
 import { ShareService } from '../../services/share.service';
@@ -712,8 +712,11 @@ describe('GameComponent', () => {
       expect(component.puzzleUnavailable).toBeTrue();
 
       gameServiceSpy.getGameForDate.and.returnValue(of(MOCK_GAME_5));
+      gameServiceSpy.getGameForDate.calls.reset();
       component.retryLoad();
-      expect(gameServiceSpy.getGameForDate).toHaveBeenCalledWith(date);
+      expect(gameServiceSpy.getGameForDate).toHaveBeenCalledOnceWith(date, GAME_RETRY_TIMEOUT_MS);
+      expect(GAME_RETRY_TIMEOUT_MS).toBe(30_000);
+      expect(loaderServiceSpy.showUntilReady).toHaveBeenCalledWith(500, GAME_RETRY_TIMEOUT_MS);
       expect(component.puzzleUnavailable).toBeFalse();
       expect(component.currentLetters).toEqual(MOCK_GAME_5.letters);
     });
