@@ -14,7 +14,7 @@ The orchestrator runs this at Setup and again before any run expected to take mo
 
 ## Stable server for verification
 
-A live-reloading dev server rebuilds mid-run and can show Vite's error overlay, which caused a false failure before. Use the dev server only while code is changing. For Verify, after the code is settled, serve a production build without watching:
+A live-reloading dev server rebuilds mid-run and can show Vite's error overlay, which caused a false failure before. Use the dev server only while code is changing. The production build hides development-only checks, so a separate development-server E2E run before the PR gate covers those. For Verify, after the code is settled, serve a production build without watching:
 
 ```bash
 npx ng serve --configuration production --port <port> --no-watch --no-live-reload
@@ -57,6 +57,28 @@ export default defineConfig({
   },
 });
 ```
+
+## Development-server E2E before the PR gate
+
+CI runs E2E against the development build (`npm start`), which includes Angular's development-only checks such as `NG0100 ExpressionChangedAfterItHasBeenCheckedError`. The production build skips those checks, so a run that passes on production can still fail CI, as happened on PR #70.
+
+The orchestrator runs this once after Review passes, when the code is final, and before showing the PR gate:
+
+1. Pick a second free port from 4210 to 4299 and start a development server without watching. Record its port and PID in `state.md`:
+
+   ```bash
+   npx ng serve --port <dev-port> --no-watch --no-live-reload
+   ```
+
+2. Create `.delivery/playwright.dev<dev-port>.config.ts` from the template above, with `<dev-port>` as the port and that command as `webServer.command`.
+3. Run full E2E on both projects with `--retries=0`, inside `caffeinate -i`.
+4. Stop the development server.
+
+Handle the results like this:
+
+- **Pass:** record the result in `verify.md` and show it at the PR gate.
+- **Fails only here:** check the same failure on `origin/main` with a development server. If it is `PRE-EXISTING`, add it to Known issues and ask the user how the tests should handle it. Otherwise it is a product failure: return to Fix, then Verify and a fresh Review, which counts toward the retry limits.
+- **Could not run:** report it as not run at the PR gate.
 
 ## Required interactive pass
 
