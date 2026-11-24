@@ -12,12 +12,11 @@ describe('HowToPlayComponent difficulty content', () => {
   let fixture: ComponentFixture<HowToPlayComponent>;
   let host: HTMLElement;
 
-  // The triangle updates state during its own lifecycle hooks (see MEMORY.md, NG0100),
-  // so these tests render without the dev-mode second pass.
+  // Includes the development-mode no-changes pass, which guards against NG0100 (#62).
   const render = async (): Promise<void> => {
-    fixture.detectChanges(false);
+    fixture.detectChanges();
     await fixture.whenStable();
-    fixture.detectChanges(false);
+    fixture.detectChanges();
   };
 
   const text = (el: Element | null): string =>

@@ -41,8 +41,8 @@ describe('PastSubmissionsComponent difficulty', () => {
     fixture.componentRef.setInput('letters', [...puzzle.letters]);
     fixture.componentRef.setInput('size', puzzle.size);
     fixture.componentRef.setInput('submissions', submissions);
-    // A displayOnly triangle sets isReady in ngAfterViewInit, which trips NG0100 in the no-changes pass.
-    fixture.detectChanges(false);
+    // Includes the development-mode no-changes pass, which guards against NG0100 (#62).
+    fixture.detectChanges();
   }
 
   function feedbackFor(position: number): string[] {
