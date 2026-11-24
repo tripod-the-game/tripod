@@ -82,7 +82,9 @@ Use a fresh reviewer that did not write the code, with `.delivery/bug.md` as the
 
 ### 7. PR
 
-**Gate:** show the root cause, diff summary, before-and-after evidence, review result, Known issues, and rollout notes. Wait for approval.
+Before the gate, run the development-server E2E check in `../deliver-feature/references/browser-verification.md`. CI uses the development build, which catches development-only Angular errors that the production build hides.
+
+**Gate:** show the root cause, diff summary, before-and-after evidence, the development-server E2E result, review result, Known issues, and rollout notes. Wait for approval.
 
 After approval, commit on `fix/<slug>`, push it, and open a PR into `main` with `gh pr create`. The PR body covers the symptom, root cause, fix, evidence, risks, and rollout steps, and follows the repository's attribution instructions. Report the PR URL and CI status, then stop.
 

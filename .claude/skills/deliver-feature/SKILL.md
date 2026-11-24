@@ -80,7 +80,9 @@ Use a fresh reviewer that did not write the code. Have it write `.delivery/revie
 
 ### 7. PR
 
-**Gate:** show the user the diff summary, verification evidence including browser results and screenshot paths, review result, any `MANUAL` checks, Known issues, and any iOS or data-release steps. Wait for approval.
+Before the gate, run the development-server E2E check in `references/browser-verification.md`. CI uses the development build, which catches development-only Angular errors that the production build hides.
+
+**Gate:** show the user the diff summary, verification evidence including browser results and screenshot paths, the development-server E2E result, review result, any `MANUAL` checks, Known issues, and any iOS or data-release steps. Wait for approval.
 
 After approval, commit on `feature/<slug>`, push it, and open a PR into `main` with `gh pr create`. The PR body covers the summary, acceptance evidence, risks, and rollout steps, and follows the repository's attribution instructions. Report the PR URL and CI status, then stop.
 
