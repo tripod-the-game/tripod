@@ -23,28 +23,49 @@ export interface ComputedStats {
 export class StatsService {
   private readonly KEY = 'tripod_stats';
 
-  private load(): GameResult[] {
+  private readonly BACKUP_KEY = 'tripod_stats_backup';
+
+  // Every stored entry, readable or not. Unparseable or non-array values read as
+  // empty and are flagged so save() backs up the raw value before overwriting it.
+  private read(): { items: unknown[]; raw: string | null; unreadable: boolean } {
+    let raw: string | null = null;
     try {
-      const raw = localStorage.getItem(this.KEY);
-      return raw ? JSON.parse(raw) : [];
-    } catch {
-      return [];
-    }
+      raw = localStorage.getItem(this.KEY);
+      if (!raw) return { items: [], raw, unreadable: false };
+      const parsed: unknown = JSON.parse(raw);
+      if (Array.isArray(parsed)) return { items: parsed, raw, unreadable: false };
+    } catch { /* unparseable or storage unavailable */ }
+    return { items: [], raw, unreadable: !!raw };
   }
 
-  private save(results: GameResult[]): void {
+  private isResult(entry: unknown): entry is GameResult {
+    if (typeof entry !== 'object' || entry === null) return false;
+    const date = (entry as { date?: unknown }).date;
+    return typeof date === 'string' && date.length === 6;
+  }
+
+  private save(results: unknown[]): void {
     try {
+      const { raw, unreadable } = this.read();
+      if (unreadable && localStorage.getItem(this.BACKUP_KEY) === null) {
+        try {
+          localStorage.setItem(this.BACKUP_KEY, raw!);
+        } catch {
+          return; // keep the original as the only copy rather than overwrite it
+        }
+      }
       localStorage.setItem(this.KEY, JSON.stringify(results));
     } catch { /* storage full or unavailable */ }
   }
 
   getResults(): GameResult[] {
-    return this.load();
+    return this.read().items.filter((r) => this.isResult(r));
   }
 
+  // Writes back every stored entry, including ones it cannot read, so a save never deletes data.
   recordResult(result: GameResult): void {
-    const results = this.load();
-    const existing = results.findIndex(r => r.date === result.date);
+    const results = this.read().items;
+    const existing = results.findIndex(r => this.isResult(r) && r.date === result.date);
     if (existing !== -1) {
       results[existing] = result;
     } else {
@@ -54,7 +75,7 @@ export class StatsService {
   }
 
   getComputedStats(): ComputedStats {
-    const results = this.load();
+    const results = this.getResults();
     const totalPlayed = results.length;
     const won = results.filter(r => r.solved).length;
     const winPct = totalPlayed > 0 ? Math.round((won / totalPlayed) * 100) : 0;

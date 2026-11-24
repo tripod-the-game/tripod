@@ -101,6 +101,7 @@ All games are cached in localStorage (`tripod_game_<date>`) as a fallback for ne
 ### localStorage keys
 - `tripod_stats` — all game results (date, solved, attempts, hintsUsed, revealed)
 - `tripod_submissions` — full submission history with per-circle validation states
+- `tripod_stats_backup` / `tripod_submissions_backup` — one-time copy of an unreadable `tripod_stats` / `tripod_submissions` value, written before it is first overwritten (never overwritten itself)
 - `tripod_state_<MMDDYY>` — per-date: hintsUsed, hintedPositions, revealed
 - `tripod_inputs_<MMDDYY>` — per-date in-progress letter inputs
 - `tripod_game_<date>` — cached game JSON
