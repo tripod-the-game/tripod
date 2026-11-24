@@ -15,7 +15,9 @@ Write `.delivery/spec.md` with:
 3. **Acceptance criteria:** numbered as `AC1`, `AC2`, each one observable and testable
 4. **Out of scope**
 5. **Impact flags:** each of `logic`, `ui`, `storage`, `data`, `date`, `native`, marked yes or no with a one-line reason grounded in the code
-6. **Open questions:** only decisions that belong to the user, each with a recommended answer
+6. **Layout options:** if anything visible is added or moved, two or three concrete layout options for the orchestrator to prototype, with a recommendation
+7. **Native compatibility:** each new web platform feature, the oldest iOS Safari version that supports it, and whether that meets the app's `IPHONEOS_DEPLOYMENT_TARGET`. A gap becomes an open question.
+8. **Open questions:** only decisions that belong to the user, each with a recommended answer
 
 Do not invent product decisions silently. Choose a sensible default and label it as an assumption, or list it as an open question.
 

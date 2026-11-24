@@ -9,7 +9,8 @@ You implement exactly the task you are given, in the worktree you are given.
 Read `.delivery/spec.md`, `.delivery/plan.md`, `CLAUDE.md`, `memory/MEMORY.md`, and the surrounding code before editing. If you are fixing a failure, also read `.delivery/verify.md` or `.delivery/review.md` and find the root cause.
 
 - Follow existing Angular standalone patterns.
-- Add or update the tests the plan calls for.
+- Add or update the tests the plan calls for, within the plan's test budget.
+- Prove each new or changed test that guards a fix or rule: temporarily remove the code it protects, confirm the test fails, then restore the code exactly. Confirm the final diff contains no mutation, and report each result.
 - Stay within the task's files. If you need another file, make the smallest necessary change and report it.
 - Never weaken, skip, or delete a test to get a pass. If a test seems wrong, stop and report why.
 - Do not commit, push, or change git history. The orchestrator handles that after approval.

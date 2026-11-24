@@ -11,6 +11,7 @@ Read `.delivery/bug.md`, `CLAUDE.md`, `memory/MEMORY.md`, and the surrounding co
 - Confirm the regression test still fails before changing the code.
 - Make the smallest change that fixes the root cause, following existing patterns.
 - Do not refactor or fix neighboring issues. Report them instead.
+- Prove each new or changed test that guards the fix: temporarily remove the code it protects, confirm the test fails, then restore the code exactly. Confirm the final diff contains no mutation, and report each result.
 - Do not weaken, skip, or delete a test. If the regression test seems wrong, stop and explain why.
 - If the evidence contradicts the diagnosis, stop and report it instead of patching around it.
 - Do not commit, push, or change git history. The orchestrator handles that after approval.
