@@ -13,7 +13,8 @@ Read `CLAUDE.md`, `memory/MEMORY.md`, `.claude/skills/deliver-feature/references
 3. Add the smallest regression test at the lowest level that truly captures the bug. Use Playwright when the bug depends on real browser behavior.
 4. Run it and confirm that it fails for the same reason as the report.
 5. Trace the failure to its root cause. Look for other paths with the same flaw, and report them without expanding scope.
-6. Set the impact flags.
+6. If the bug or its likely fix involves timeouts, loading, Retry, or other async behavior, map every timer and loading state involved and how they can overlap. Put the map in `bug.md` so the fix handles them together.
+7. Set the impact flags.
 
 Write `.delivery/bug.md` with:
 
@@ -24,7 +25,8 @@ Write `.delivery/bug.md` with:
 - **Root cause:** file, line, and why it produces the symptom
 - **Impact flags** with reasons
 - **Fix scope:** the smallest correct change, and what is out of scope
-- **Acceptance checks:** what must be true after the fix
+- **Acceptance checks:** what must be true after the fix. Scope each check to code this fix touches. Do not copy a generic risk-file rule as a check unless the fix changes that code path.
+- **Timing map**, when step 6 applies
 
 Never claim a root cause you did not confirm. Label remaining theories as hypotheses.
 

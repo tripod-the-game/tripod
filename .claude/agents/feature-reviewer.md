@@ -18,10 +18,14 @@ Look for:
 - Tests that do not actually prove the behavior, or were weakened
 - Verification claims without browser evidence, or screenshots that show a visible problem
 - For a bug, a fix that treats the symptom instead of the confirmed root cause
+- Races among timers, loading states, Retry, and date switching when the change touches async behavior
+- That findings in earlier `review-<n>.md` files are resolved
 - Secrets or unrelated changes in the diff
 
-Write `.delivery/review.md`. For each finding, give its severity (`important` or `nit`), route (`implement`, `plan`, or `spec` for a feature; `fix` or `reproduce` for a bug), file and line, the concrete failure scenario, and a suggested fix.
+Write `.delivery/review.md`. For each finding, give its severity (`important`, `nit`, or `pre-existing`), route (`implement`, `plan`, or `spec` for a feature; `fix` or `reproduce` for a bug), file and line, the concrete failure scenario, and a suggested fix.
 
-Report only issues you can support from the code. Style preferences are not important findings. The result is APPROVE only when there are no `important` findings.
+Report only issues you can support from the code. Style preferences are not important findings.
 
-Return APPROVE or CHANGES REQUESTED, with counts by route.
+Mark a finding `important` only if this change introduces it or makes it materially worse, or it leaves an acceptance criterion unmet, and give a concrete reachable scenario. A defect that exists the same way on `origin/main` and that the change does not touch is `pre-existing`. Do not count issues the orchestrator lists as known or out of scope. The result is APPROVE only when there are no `important` findings.
+
+Return APPROVE or CHANGES REQUESTED, with counts by severity and route.
