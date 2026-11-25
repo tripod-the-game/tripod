@@ -149,9 +149,12 @@ export class TriangleComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    // In displayOnly mode, show immediately (no layout calculations needed)
+    // In displayOnly mode, show on the next tick (no layout calculations needed).
+    // Setting it here, after the view was checked, throws NG0100 in development (#62).
     if (this.displayOnly) {
-      this.isReady = true;
+      setTimeout(() => {
+        this.isReady = true;
+      });
       return;
     }
     // Wait for letters data to be loaded before showing
@@ -217,9 +220,13 @@ export class TriangleComponent implements OnInit, AfterViewInit {
       this.valuesChanged.emit({ ...this.inputValues });
     }
 
-    // emit a snapshot only when submitted changes to true (live submissions)
+    // emit a snapshot only when submitted changes to true (live submissions).
+    // ngOnChanges runs during the parent's change detection, and the parent's handler
+    // changes its own template state (the win modal, the red flash), which throws NG0100
+    // in development (#71). Emit after this pass instead; zone.js re-renders afterward.
     if (changes['submitted'] && this.submitted && !this.displayOnly) {
-      this.valuesSubmitted.emit({ ...this.inputValues });
+      const snapshot = { ...this.inputValues };
+      queueMicrotask(() => this.valuesSubmitted.emit(snapshot));
     }
 
     // If letters change in normal mode, update answer key

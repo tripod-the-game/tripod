@@ -14,13 +14,12 @@ const RAW_GAME = JSON.stringify({ category: 'Test', wordOne: 'GRAPE', wordTwo: '
 const SOLUTION = 'EPAARRTGRAPH';
 
 // Angular's ErrorHandler reports through console.error, not as a page error.
-// NG0100 is ignored: a development-only check that every win already trips on main (#71).
 function collectAppErrors(page: Page): string[] {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => {
     const text = m.text();
-    if (m.type() === 'error' && /TypeError|^ERROR/.test(text) && !/NG0100/.test(text)) errors.push(text);
+    if (m.type() === 'error' && /TypeError|^ERROR/.test(text)) errors.push(text);
   });
   return errors;
 }

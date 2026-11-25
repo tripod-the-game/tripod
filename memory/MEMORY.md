@@ -8,7 +8,7 @@ Angular standalone app + Capacitor iOS wrapper. Word puzzle game with triangle g
 ## Test Setup Patterns
 - Angular standalone components need `overrideComponent` with `schemas: [NO_ERRORS_SCHEMA]` to avoid unknown element errors in unit tests
 - `SimpleChange` is from `@angular/core`, NOT `@angular/core/testing`
-- `LandingComponent` uses TriangleComponent with `displayOnly=true`, which sets `isReady=true` synchronously in `ngAfterViewInit` — triggers NG0100 ExpressionChangedAfterItHasBeenCheckedError if `fixture.detectChanges()` is called during test setup
+- TriangleComponent sets `isReady` on the next tick in `displayOnly` mode and emits `valuesSubmitted` in a microtask, so neither changes state mid-check (NG0100, #62 and #71). Unit tests need `tick()` or `flushMicrotasks()` (in `fakeAsync`) to observe them; use plain `fixture.detectChanges()`, not `detectChanges(false)`
 - `LandingComponent` tests need `provideRouter([])` for ActivatedRoute
 
 ## Key Files

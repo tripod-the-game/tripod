@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, flushMicrotasks, tick } from '@angular/core/testing';
 import { SimpleChange } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -177,15 +177,19 @@ describe('TriangleComponent', () => {
   // ── ngOnChanges ───────────────────────────────────────────────────────────────
 
   describe('ngOnChanges', () => {
-    it('should emit valuesSubmitted when submitted changes to true', () => {
+    it('should emit valuesSubmitted after change detection when submitted changes to true', fakeAsync(() => {
       const spy = spyOn(component.valuesSubmitted, 'emit');
       component['inputValues'] = { 1: 'E', 2: 'P' };
       component.submitted = true;
       component.ngOnChanges({
         submitted: new SimpleChange(false, true, false),
       });
-      expect(spy).toHaveBeenCalledWith(jasmine.objectContaining({ 1: 'E', 2: 'P' }));
-    });
+      // Emitting during ngOnChanges changes parent state mid-check (NG0100, #71).
+      expect(spy).not.toHaveBeenCalled();
+      component['inputValues'] = { 1: 'X' };
+      flushMicrotasks();
+      expect(spy).toHaveBeenCalledOnceWith({ 1: 'E', 2: 'P' });
+    }));
 
     it('should NOT emit valuesSubmitted when submitted changes to false', () => {
       const spy = spyOn(component.valuesSubmitted, 'emit');
@@ -258,11 +262,14 @@ describe('TriangleComponent', () => {
       expect(component.inputValues[3]).toBe('B');
     });
 
-    it('should set isReady immediately in displayOnly mode (via ngAfterViewInit)', () => {
+    it('should set isReady on the next tick in displayOnly mode, not during change detection', fakeAsync(() => {
       component.displayOnly = true;
       component.ngAfterViewInit();
+      // Setting it synchronously changes the view after it was checked (NG0100, #62).
+      expect(component.isReady).toBe(false);
+      tick();
       expect(component.isReady).toBe(true);
-    });
+    }));
   });
 
   // ── neighbors ─────────────────────────────────────────────────────────────────
